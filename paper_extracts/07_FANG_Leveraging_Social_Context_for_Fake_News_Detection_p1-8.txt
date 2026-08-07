@@ -1,0 +1,659 @@
+                                                 FANG: Leveraging Social Context for Fake News Detection
+                                                              Using Graph Representation
+                                                                      Van-Hoang Nguyen                                                                  Kazunari Sugiyama
+                                                                    vhnguyen@u.nus.edu                                                              kaz.sugiyama@i.kyoto-u.ac.jp
+                                                               National University of Singapore                                                           Kyoto University
+                                                                         Singapore                                                                          Kyoto, Japan
+
+                                                                           Preslav Nakov                                                                     Min-Yen Kan
+                                                                pnakov@hbku.edu.qa                                                                   kanmy@comp.nus.edu.sg
+                                                       Qatar Computing Research Institute, HBKU                                                   National University of Singapore
+
+
+
+
+arXiv:2008.07939v2 [cs.SI] 8 Oct 2020
+                                                                     Doha, Qatar                                                                            Singapore
+
+                                        ABSTRACT                                                                                      1   INTRODUCTION
+                                        We propose Factual News Graph (FANG), a novel graphical so-                                   Social media have emerged as an important source of information
+                                        cial context representation and learning framework for fake news                              for many worldwide. Unfortunately, not all information they pub-
+                                        detection. Unlike previous contextual models that have targeted                               lish is true. During critical events such as a political election or a
+                                        performance, our focus is on representation learning. Compared                                pandemic outbreak, disinformation with malicious intent [38], com-
+                                        to transductive models, FANG is scalable in training as it does not                           monly known as “fake news”, can disturb social behavior, public
+                                        have to maintain all nodes, and it is efficient at inference time,                            fairness, and rationality. As part of the fight against COVID-19, the
+                                        without the need to re-process the entire graph. Our experimental                             World Health Organization also addressed the infodemic caused by
+                                        results show that FANG is better at capturing the social context                              fatal disinformation related to infections and cures [41].
+                                        into a high fidelity representation, compared to recent graphical                                Many sites and social media have devoted efforts to identify
+                                        and non-graphical models. In particular, FANG yields significant                              disinformation. For example, Facebook encourages users to re-
+                                        improvements for the task of fake news detection, and it is robust                            port non-credible posts and employs professional fact-checkers
+                                        in the case of limited training data. We further demonstrate that                             to expose questionable news. Manual fact-checking is also used by
+                                        the representations learned by FANG generalize to related tasks,                              fact-checking websites such as Snopes, FactCheck, PolitiFact, and
+                                        such as predicting the factuality of reporting of a news medium.                              Full Fact. In order to scale with the increasing amount of informa-
+                                                                                                                                      tion, automated news verification systems consider external knowl-
+                                        CCS CONCEPTS                                                                                  edge databases as evidence [13, 34, 42]. Evidence-based approaches
+                                        • Information systems → Social networks; • Computer sys-                                      achieve high accuracy and offer potential explainability, but they
+                                        tems organization → Neural networks; • Theory of computa-                                     also take considerable human effort. Moreover, fact-checking ap-
+                                        tion → Semi-supervised learning; • Computing methodologies                                    proaches for textual claims based on textual evidence are not easily
+                                        → Natural language processing.                                                                applicable to claims about images or videos.
+                                                                                                                                         Some recent work has taken another turn and has explored con-
+                                        KEYWORDS                                                                                      textual features of the news dissemination process. They observed
+                                                                                                                                      distinctive engagement patterns when social users face fake ver-
+                                        Disinformation, Fake News, Social Networks, Graph Neural Net-
+                                                                                                                                      sus factual news [17, 25]. For example, the fake news shown in
+                                        works, Representation Learning
+                                                                                                                                      Table 1 had many engagements shortly after its publication. These
+                                        ACM Reference Format:                                                                         are mainly verbatim re-circulations with negative sentiment of the
+                                        Van-Hoang Nguyen, Kazunari Sugiyama, Preslav Nakov, and Min-Yen                               original post explained by the typically appalling content of fake
+                                        Kan. 2020. FANG: Leveraging Social Context for Fake News Detection                            news. After that short time window, we see denial posts question-
+                                        Using Graph Representation. In The 29th ACM International Conference                          ing the validity of the news, and the stance distribution stabilizes
+                                        on Information and Knowledge Management (CIKM ’20), October 19–23,                            afterwards with virtually no support. In contrast, the real news ex-
+                                        2020, Virtual Event, Ireland. ACM, New York, NY, USA, 10 pages. https:
+                                                                                                                                      ample in Table 1 invokes moderate engagement, mainly comprised
+                                        //doi.org/10.1145/3340531.3412046
+                                                                                                                                      of supportive posts with neutral sentiment that stabilize quickly.
+                                                                                                                                      Such temporal shifts in user perception serve as important signals
+                                        Permission to make digital or hard copies of all or part of this work for personal or
+                                        classroom use is granted without fee provided that copies are not made or distributed         for distinguishing fake from real news.
+                                        for profit or commercial advantage and that copies bear this notice and the full citation        Previous work proposed partial representations of social context
+                                        on the first page. Copyrights for components of this work owned by others than ACM
+                                        must be honored. Abstracting with credit is permitted. To copy otherwise, or republish,
+                                                                                                                                      with (i) news, sources and users as major entities, and (ii) stances,
+                                        to post on servers or to redistribute to lists, requires prior specific permission and/or a   friendship, and publication as major interactions [16, 32, 33, 39].
+                                        fee. Request permissions from permissions@acm.org.                                            However, they did not put much emphasis on the quality of repre-
+                                        CIKM ’20, October 19–23, 2020, Virtual Event, Ireland
+                                                                                                                                      sentation, modeling of entities and their interactions, and minimally
+                                        © 2020 Association for Computing Machinery.
+                                        ACM ISBN 978-1-4503-6859-9/20/10. . . $15.00                                                  supervised settings at all.
+                                        https://doi.org/10.1145/3340531.3412046
+Table 1: Engagement of social media users with respect to fake and real news articles. Column 2 shows the time since publica-
+tion, and columns 4–7 show the distribution of stances (S: Support, D: Deny, C: Comment, and R: Report).
+
+      News title (Label)                     Time      # Posts    S      D      C       R     Noticeable responses
+      Virginia Republican Wants Schools        3h        38      0.00   0.03   0.19    0.78   “DISGUSED SO TRASNPHOBIC”, “FOR GODS SAKE GET
+      To Check Children’s Genitals                                                            REAL GOP”, “You cant make this up folks”
+      Before Using Bathroom (Fake)           3h - 6h     21      0.00   0.10   0.10    0.80   “Ok This cant be real”, “WTF IS THIS BS”, “Rediculous RT”
+                                              6h+        31      0.00   0.10   0.14    0.76   “Cant make this shit up”, “how is this real”, “small govern-
+                                                                                              ment”, “GOP Cray Cray Occupy Democrats”
+      1,100,000 people have been killed by     3h        9       0.56   0.00   0.00    0.44   “#StopGunViolence”, “guns r the problem”
+      guns in the U.S.A. since John           3h+        36      0.50   0.00   0.11    0.39   “Some 1.15 million people have been killed by firearms
+      Lennon was shot and killed on De-                                                       in the United States since Lennon was gunned down”,
+      cember 8, 1980 (Real)                                                                   “#StopGunViolence”
+
+
+   Naturally, the social context of news dissemination can be repre-
+sented as a heterogeneous network where nodes and edges repre-
+sent the social entities and the interactions between them, respec-
+tively. Network representations have several advantages over some
+existing Euclidean-based methods [23, 35] in terms of structural
+modeling capability for several phenomena such as echo chambers
+of users or polarized networks of news media. Graphical models
+also allow entities to exchange information, via (i) homogeneous
+edges, i.e., user–user relationship, source–source citations, (ii) het-
+erogeneous edges, i.e., user–news stance expression, source–news
+publication, as well as (iii) high-order proximity (i.e., between users
+who consistently support or deny certain sources, as illustrated in
+Figure 1). This allows the representation of heterogeneous entities
+to be dependent, leveraging not only fake news detection but also                        Figure 1: Graph representation of social context.
+related social analysis tasks such as malicious user detection [7]
+and source factuality prediction [3].
+   Our work focuses on improving contextual fake news detection                  2.1        Contextual Fake News Detection
+by enhancing representations of social entities. Our main contribu-
+                                                                                 Previous work on contextual fake news detection can be categorized
+tions can be summarized as follows:
+                                                                                 based on the approach used to represent and learn the social context.
+    (1) We propose a novel graph representation that models all                      Euclidean approaches represent the social context as a flat vector
+        major social actors and their interactions (Figure 1).                   or a matrix of real numbers. They typically learn a Euclidean trans-
+    (2) We propose the Factual News Graph (FANG), an inductive                   formation of the social entity features that best approximates the
+        graph learning framework that effectively captures social                fake news prediction [32]. The complexity of such transformation
+        structure and engagement patterns, thus improving repre-                 varies from the traditional shallow (as opposed to “deep”) models,
+        sentation quality.                                                       i.e., Random Forest or Support Vector Machines (SVM) [6, 44] to
+    (3) We report significant improvement in fake news detection                 probabilistic graphical models [33] and deep neural networks such
+        when using FANG and further show that our model is robust                as Long Short-Term Memory (LSTM) [15] that model engagement
+        in the case of limited training data.                                    temporality [35]. However, given our formulation of social context
+    (4) We show that the representations learned by FANG gen-                    as a heterogeneous network, Euclidean representations are less
+        eralize to related tasks such as predicting the factuality of            expressive [5]. Although pioneering work used user attributes such
+        reporting of a news medium.                                              as demographics, news preferences, and social features, e.g., the
+    (5) We demonstrate FANG’s explainability thanks to the atten-                number of follower and friends [26, 38], they do not capture the user
+        tion mechanism of its recurrent aggregator.                              interaction landscape, i.e., what kind of social figures they follow,
+                                                                                 which news topics they favor or oppose, etc. Moreover, in graphical
+                                                                                 representation, node variables are no longer constrained by the
+                                                                                 independent and identically distributed assumption, and thus they
+2    RELATED WORK                                                                can reinforce each other’s representation via edge interactions.
+In this section, we first review the existing work on contextual                     Having acknowledged the above limitations, some researchers
+fake news detection and the way the social context of news is                    have started exploring non-Euclidean or geometric approaches. They
+represented in such work. We then detail recent advances in the                  generalized the idea of using social context by modeling an under-
+Graph Neural Network (GNN) formalism, forming the premise of                     lying user or the news source network and by developing represen-
+our proposed graph learning framework.                                           tations that capture structural features about the entity.
+Table 2: Comparison between representation learning frameworks for social entities (1. users, 2. news, 3. sources) and inter-
+actions (4. user-user friendship, 5. user–news engagement, 6. source–news publication, 7. source–source citation) on whether
+they consider engagement time, graph modelling of social context, deep learning, inductiveness, and representation learning.
+
+       Approach                              Social Entities & Interactions   Temporal     Graphical     Deep     Inductive     Representative
+       Feature engineering [6, 26, 32, 44]   1, 2                                                                     ✓
+       Popat [33]                            2, 3, 6                              ✓
+       CSI [35]                              1, 2, 4, 5                           ✓                        ✓          ✓
+       TriFN [39]                            1, 2, 3, 4, 5, 6                                  ✓                                       ✓
+       MVDAM [21]                            2, 3, 6, 7                                        ✓           ✓
+       Monti [29]                            1, 2, 4, 5                           ✓            ✓
+       GLAN [45]                             1, 2, 5                                           ✓           ✓
+       FANG (Our proposed approach)          1, 2, 3, 4, 5, 6, 7                  ✓            ✓           ✓          ✓                ✓
+
+
+   The Capture, Score, and Integrate (CSI) model [35] used linear             3       METHODOLOGY
+dimensionality reduction on the user co-sharing adjacency ma-                 We first introduce the notation, and then formally define the prob-
+trix, combining it with news engagement features obtained from a              lem of fake news detection. Afterwards, we discuss our methodol-
+recurrent neural network (RNN).                                               ogy, namely the process of construction of our social context graph
+   The Tri-Relationship Fake News (TriFN) detection framework [39]            – FANG – as well as its underlying rationale. Finally, we describe
+– although similar to our approach – neither differentiated user              the process of feature extraction from social entities as well as the
+engagements in terms of stance and temporal patterns, nor modeled             modeling of their interactions.
+source–source citations. Also, matrix decomposition approaches,
+including CSI [35], can be expensive in terms of graph node counts            3.1      Fake News Detection Using Social Context
+and ineffective for modeling high-order proximity.
+   Other work on citation source network [21], propagation net-               Let us first define the social context graph 𝐺 with its entities and
+work [29], and rumor detection [10, 45] used recent advances in               interactions shown in Figure 1:
+GNNs and multi-head attention to learn both local and global struc-               (1) 𝐴 = {𝑎 1, 𝑎 2, ...} is the list of questionable news articles,
+tural representations. These models optimized solely for the objec-                   where each 𝑎𝑖 (𝑖 = 1, 2, ...) is modeled as a feature vector 𝒙 𝑎 .
+tive of fake news detection, without accounting for representation                (2) 𝑆 = {𝑠 1, 𝑠 2, ...} is the list of news sources, where each source
+quality. As a result, they are not robust when presented with limited                 𝑠 𝑗 ( 𝑗 = 1, 2, ...) has published at least one article in 𝐴, and is
+training data and cannot be generalized to other downstream tasks,                    modeled as a feature vector 𝒙 𝑠 .
+as we show in Section 5. Table 2 compares these approaches.                       (3) 𝑈 = {𝑢 1, 𝑢 2, ...} is the list of social users, where each user
+                                                                                      𝑢𝑘 (𝑘 = 1, 2, ...) has engaged in spreading an article in 𝐴, or
+2.2    Graph Neural Networks (GNNs)                                                   is connected with another user; 𝑢𝑘 is a feature vector 𝒙𝑢 .
+GNNs have successfully generalized deep learning methods to                       (4) 𝐸 = {𝑒 1, 𝑒 2, ...} is the list of interactions, and each inter-
+model complex relationships and inter-dependencies on graphs                          action 𝑒 = {𝑣 1, 𝑣 2, 𝑡, 𝑥𝑒 } is modeled as a relation between
+and manifolds. Graph Convolutional Networks (GCNs) are among                          two entities 𝑣 1, 𝑣 2 ∈ 𝐴 ∩ 𝑆 ∩ 𝑈 at time 𝑡; 𝑡 is absent in time-
+the first methods that effectively approximate convolutional fil-                     insensitive interactions. The interaction type of 𝑒 is defined
+ters [19]. However, GCNs impose a substantial memory footprint                        as the label 𝑥𝑒 .
+in storing the entire adjacency matrix. They are also not easily                 Table 3 summarizes the characteristics of different types of inter-
+adaptable to our heterogeneous graph, where nodes and edges with              actions, both homogeneous and heterogeneous. Stances are special
+different labels exhibit different information propagation patterns.          types of interaction, as they are not only characterized by edge
+Furthermore, GCNs do not guarantee generalizable representations,             labels and source/destination nodes, but also by temporality as
+and are transductive, requiring the inferred nodes to be present              shown in earlier examples in Table 1. Recent work has highlighted
+at training time. This is especially challenging for contextual fake          the importance of incorporating temporality not only for fake news
+new detection or general social network analysis, as their structure          detection [26, 35], but also for modeling online information dis-
+is constantly evolving.                                                       semination [14]. We use the following stance labels: neutral sup-
+   With these points in mind, we build our work on GraphSage                  port, negative support, deny, report. The major support and deny
+that generates embeddings by sampling and aggregating features                stances are consistent with the prior work (e.g., [28]), whereas the
+from a node’s local neighborhood [12]. GraphSage provides signif-             two types of support —neutral support and negative support— are
+icant flexibility in defining the information propagation pattern             based on reported correlation between news factuality and invoked
+with parameterized random walks and recurrent aggregators. It                 sentiment [1]. We assign the report stance label to a user–news
+is well-suited for representation learning with unsupervised node             engagement when the user simply spreads the news article without
+proximity loss, and generalizes well in minimal supervision settings.         expressing any opinion. Overall, we use stances to characterize
+Moreover, it uses a dynamic inductive algorithm that allows the               news articles based on opinions about them as well as social users
+creation of unseen nodes and edges at inference time.                         by their view on various news articles.
+                                            Table 3: Interactions in FANG’s social context network.
+
+          Interaction    Linking Entities      Link Type                   Description                                                         Temporal
+          Followership   User–user             Unweighted, undirected      Whether a user follows another user on social media                     No
+          Citation       Source–source         Unweighted, undirected      Whether sources refers to another source via a hyperlink                No
+          Publication    Source–news           Unweighted, undirected      Whether the source published the target news                            Yes
+          Stance         User–news             Multi-label, undirected     The stance of the user with respect to the news                         Yes
+
+
+                     Table 4: Some examples from the stance-annotated dataset, all concerning the same event.
+
+  Text                                                                                                                   Type                 Annotated stance
+  Greta Thunberg tops annual list of highest-paid Activists!                                                             reference headline   -
+  Greta Thunberg is the ‘Highest Paid Activist’                                                                          related headline     support (neutral)
+  No, Greta Thunberg not highest paid activist                                                                           related headline     deny
+  Can’t speak for the rest of ’em, but as far as I know, Greta’s just a schoolgirl and has no source of income.          related post         deny
+  The cover describes Greta Thunberg to be the highest paid activist in the world                                        related tweet        support (neutral)
+  A very wealthy 16yo Fascist at that!                                                                                   related post         support (negative)
+
+
+   Table 5: Statistics about our stance-annotated dataset.                            Social Users. Online users have been studied extensively as the
+                                                                                   main propagator of fake news and rumors in social media. As in
+                     # Samples      # Supports     # Denies                        Section 2, previous work [6, 44] used attributes such as demograph-
+                                                                                   ics, information preferences, social activity, and network structure
+             Train         2,089             931        1,158
+             Test            438             207          231                      such as the number of followers or friends. Shu et al. [39] conducted
+                                                                                   feature analysis of user profiles and pointed out the importance
+                                                                                   of signals derived from profile description and timeline content. A
+   We can now formally define our task as follows:                                 text description such as “American mom fed up with anti american
+                                                                                   leftists and corruption. I believe in US constitution, free enterprise,
+Definition 3.1. Context-based fake news detection: Given a social                  strong military and Donald Trump #maga” strongly indicates the
+context 𝐺 = (𝐴, 𝑆, 𝑈 , 𝐸) constructed from news articles 𝐴, news                   user’s political bias and suggests the tendency to promote certain
+sources 𝑆, social users 𝑈 , and social engagements 𝐸, context-based                narratives. We calculate the user vector 𝑥𝑢 as the concatenation of
+fake news detection is defined as the binary classification task to                a pair consisting of a TF.IDF vector and a semantic vector derived
+predict whether a news article 𝑎 ∈ 𝐴 is fake or real, in other words,              from the user profile’s text description.
+𝐹𝐶 : 𝑎 → {0, 1} such that,                                                            Social Interactions. For each pair of social actors (𝑣𝑖 , 𝑣 𝑗 ) ∈
+                                                                                  𝐴 ∩ 𝑆 ∩ 𝑈 , we add an edge 𝑒 = {𝑣𝑖 , 𝑣 𝑗 , 𝑡, 𝑥𝑒 } to the list of social
+                             0 if 𝑎 is a fake article
+                𝐹𝐶 (𝑎) =                                                           interactions 𝐸 if they are linked via interaction type 𝑥𝑒 . Specifically,
+                             1 otherwise.
+                                                                                   for following, we examine whether user 𝑢𝑖 follows user 𝑢 𝑗 ; for
+3.2      Graph Construction from Social Context                                    publication, we check whether news article 𝑎𝑖 was published by
+                                                                                   source 𝑠 𝑗 ; for citation, we examine whether the Homepage of source
+News Articles. Textual [6, 34, 39, 44] and visual [18, 43] features                𝑠𝑖 contains a hyperlink to source 𝑠 𝑗 . In the case of time-sensitive
+have been widely used to model news article contents, either by                    interactions, i.e., publication and stance, we record their relative
+feature extraction, unsupervised semantics encoding, or learned                    timestamp with respect to the article’s earliest time of publication.
+representation. We use unsupervised textual representations as                        Stance Detection. The task of obtaining a viewpoint for a piece
+they are relatively efficient to construct and optimize. For each                  of text with respect to another one is known as stance detection. In
+article 𝑎 ∈ 𝐴, we construct a TF.IDF [36] vector from the text body                the context of fake news detection, we are interested in the stance
+of the article. We enrich the representation of news by weighting                  of a user reply with respect to the title of a questionable news
+the pre-trained embeddings from GloVe [30] of each word with its                   article. We consider four stances: support with neutral sentiment or
+TF.IDF value, forming a semantic vector. Finally, we concatenate                   neutral support, support with negative sentiment or negative support,
+the TF.IDF and semantic vector to form the news article feature                    deny, and report. We classify a post as verbatim reporting of the
+vector 𝒙 𝑎 .                                                                       news article if it matches the article title after cleaning the text
+   News Sources. We focus on characterizing news media sources                     from emojis, punctuation, stop words, and URLs. We train a stance
+using the textual content of their websites [3, 21]. Similarly to article          detector to classify the remaining posts as support or deny. Popular
+representations, for each source 𝑠, we construct the source feature                stance detection datasets either do not explicitly describe the target
+vector 𝒙 𝑠 as the concatenation of its TF.IDF vector and its semantic              text [8], have a limited number of targets [27, 40], or define the
+vector derived from the words in the Homepage and the About Us                     source/target texts differently, as in the Fake News Challenge.1
+section, as some fake news websites openly declare their content
+to be satirical or sarcastic.                                                      1 http://www.fakenewschallenge.org/
+                                                                               Representation Learning. We first discuss how FANG derives
+                                                                           the representation of each social entity. Previous representation
+                                                                           learning frameworks such as Deep Walk [31] and node2vec [11]
+                                                                           compute a node embedding by sampling its neighborhood, and then
+                                                                           optimizing for the proximity loss similarly to word2vec. However,
+                                                                           the neighborhood is defined by the graph structure. These methods
+                                                                           use the neighborhood structure only, and they are suitable when
+                                                                           the node auxiliary features are unavailable or incomplete, i.e., when
+                                                                           optimizing for each entity’s structural representation separately.
+                                                                           Recently, GraphSage [12] was proposed to overcome this limita-
+                                                                           tion by allowing auxiliary node features to be used jointly with
+                                                                           proximity sampling as part of the representation learning.
+                                                                               Let 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (·) be GraphSage’s node encoding function. Thus,
+                                                                           we can now obtain the structural representation 𝒛𝑢 ∈ R𝑑 of any user
+                                                                           and source node 𝑟 as 𝒛𝑟 = 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (𝑟 ), where 𝑑 is the structural
+                                                                           embedding dimension. For news nodes, we further enrich their
+                                                                           structural representation with user engagement temporality, which
+                                                                           we showed to be distinctive for fake news detection in Section 1
+                                                                           above. This can be formulated as learning an aggregation function
+         Figure 2: Overview of our FANG framework.
+                                                                           𝐹 (𝑎, 𝑈 ) that maps a questionable news 𝑎, and its engaged users 𝑈
+                                                                                                                      𝑡𝑒𝑚𝑝
+                                                                           to a temporal representation 𝒗 𝑎                that captures 𝑎’s engagement
+                                                                           pattern. Therefore, the aggregating model (i.e., the aggregator) has
+    In order to overcome this difficulty, we constructed our own           to be time-sensitive. RNNs fulfill this requirement: specifically, the
+dataset for stance detection between social media posts and news           Bidirectional LSTM (Bi-LSTM) can capture a long-term dependency
+articles, which contains 2,527 labeled source–target sentence pairs        in information sequence in both the forward and the backward
+from 31 news events. For each event with a reference headline, the         directions [15]. On top of the Bi-LSTM, we further incorporate an
+annotators were given a list of related headlines and posts. They          attention mechanism that focuses on essential engagement during
+labeled whether each related headline or post supports or denies           the encoding process. Attention is not only expected to improve
+the claim made by the reference headline. Aside from the refer-            the model quality but also its explainability [9, 24]. By examining
+ence headline–related headline or the headline–related post sentence       the model’s attention, we learn which social profiles influence the
+pairs, we further made second-order inferences for related headline–       decision, mimicking human analytic capability.
+related post sentence pairs. If such a pair expressed a similar stance         Our proposed LSTM input is a user–article engagement sequence
+with respect to the reference headline, we inferred a support stance       {𝑒 1, 𝑒 2, · · · , 𝑒 |𝑈 | }. Let 𝑚𝑒𝑡𝑎(𝑒𝑖 ) ∈ R𝑙 = (𝑡𝑖𝑚𝑒 (𝑒𝑖 ), 𝑠𝑡𝑎𝑛𝑐𝑒 (𝑒𝑖 )) be the
+for the related headline–related post, and deny, otherwise. Tables 4       concatenation of 𝑒𝑖 ’s elapsed time since the news publication and a
+and 5 show example annotations and statistics about the dataset.           one-hot stance vector. Each engagement 𝑒𝑖 has its representation
+The inter-annotator agreement evaluated with Cohen’s Kappa is              𝒙 𝑒𝑖 = (𝒛𝑈𝑖 , 𝑚𝑒𝑡𝑎(𝑒𝑖 )), where 𝒛 𝑼 𝒊 = 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (𝑈𝑖 ). A Bi-LSTM
+0.78, indicating a substantial agreement. In order to choose the           encodes the engagement sequence and outputs two sequences of
+                                                                                                                                     𝑓 𝑓            𝑓
+best stance classifier, we fine-tuned the model on our dataset using       hidden states: (i) a forward sequence, 𝐻 𝑓 = 𝒉1 , 𝒉2 , . . . , 𝒉𝑛 , which
+various pre-trained large-scale Transformers [9, 22]. RoBERTa [22]         starts from the beginning of the engagement sequence, and (ii) a
+turned out to work best, achieving Accuracy of 0.8857, 𝐹 1 score of        backward sequence, 𝐻 𝑏 = 𝒉𝑏1 , 𝒉𝑏2 , . . . , 𝒉𝑏𝑛 , which starts from the end
+0.8379, Precision of 0.8365, and Recall of 0.8395, and thus we chose       of the engagement sequence.
+it for our stance classifier.                                                  Let 𝑤𝑖 be the attention weight paid by our Bi-LSTM encoder
+    In order to further classify support posts into such with neutral                                   𝑓
+                                                                           to the forward (𝒉𝑖 ) and to the backward (𝒉𝑏𝑖 ) hidden states. This
+and with negative sentiment, we fine-tuned a similar architecture          attention should be derived from the similarity of the hidden state
+on the Yelp Review Polarity dataset to obtain a sentiment classifier.      and the news features, i.e., how relevant the engaging users are to
+Altogether, the stance prediction of a user–article engagement 𝑒 is        the discussed content, and the particular time and stance of the
+given as 𝑠𝑡𝑎𝑛𝑐𝑒 (𝑒).                                                       engagement. Therefore, we formulate the attention weight 𝑤𝑖 as:
+
+3.3    Factual News Graph (FANG) Framework                                                       𝑒𝑥𝑝 (𝒛𝑎 M𝑒 𝒉𝑖 + 𝑚𝑒𝑡𝑎(𝑒𝑖 )M𝑚 )
+                                                                                          𝑤𝑖 = Í𝑛                                   .                     (1)
+We now describe our FANG learning framework on the social con-                                  𝑗=1 𝑒𝑥𝑝 (𝒛𝑎 M𝑒 𝒉 𝑗 + 𝑚𝑒𝑡𝑎(𝑒 𝑗 )M𝑚 )
+text graph described in Section 3.2. Figure 2 shows an overview
+of FANG. While optimizing for the fake news detection objective,           where 𝑙 is the meta dimension, 𝑒 is the encoder dimension, and
+FANG also learns generalizable representations for the social enti-        M𝑒 ∈ R𝑑×𝑒 and M𝑚 ∈ R𝑙×1 are the optimizable projection matrices
+ties. This is achieved by optimizing three concurrent losses: (i) unsu-    for engagement and meta features shared across all engagements.
+pervised Proximity Loss, (ii) self-supervised Stance Loss, and (iii) su-   𝑤𝑖 is then used to compute the forward and the backward weighted
+                                                                                                   Í       𝑓          Í
+pervised Fake News Detection Loss.                                         feature vectors as 𝒉 𝑓 = 𝑛𝑖 𝑤𝑖 𝒉𝑖 and 𝒉𝑏 = 𝑛𝑖 𝑤𝑖 𝒉𝑏𝑖 , respectively.
+   Finally, we concatenated the forward and the backward vectors            Algorithm 1: FANG Learning Algorithm
+                                                ∈ R2𝑒 for article 𝑎.
+                                          𝑡𝑒𝑚𝑝
+to obtain the temporal representation 𝒗 𝑎                                    Input : The social context graph 𝐺 = (𝐴, 𝑆, 𝑈 , 𝐸)
+By explicitly setting 2𝑒 = 𝑑, we can combine the temporal and the                       The news labels 𝑌𝐴 , and the stance labels 𝑌𝑈 ,𝐴,𝐶
+structural representations of a news 𝑎 into a single representation:         Output : FANG-optimized parameters 𝜃
+                     𝒛𝑎 = 𝒗 𝑎
+                             𝑡𝑒𝑚𝑝
+                                    + 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (𝑎).                 (2)     Initialize 𝜃 ;
+                                                                             while 𝜃 has not converged do
+   Unsupervised Proximity Loss. We derive the Proximity Loss
+                                                                                 for each news batch 𝐴𝑖 ⊂ 𝐴 do
+from the hypothesis that closely connected social entities often
+                                                                                      for each news 𝑎 ∈ 𝐴𝑖 do
+behave similarly. This is motivated by the echo chamber phenom-
+                                                                                            𝑈𝑎 ← users who have engaged with 𝑎;
+enon, where social entities tend to interact with other entities of
+                                                                                            𝑧𝑎 ← Equation (2);
+common interest to reinforce and to promote their narrative. This
+echo chamber phenomenon encompasses inter-cited news media                                  𝑧𝑠 ← 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (𝑠);
+sources publishing news of similar content or factuality, as well                           for each user 𝑢 ∈ 𝑈𝑎 do
+as social friends expressing similar stance with respect to news                                𝑧𝑢 ← 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (𝑢);
+                                                                                                  ′
+                                                                                                L𝑠𝑡𝑎𝑛𝑐𝑒  ← Equation (4);
+article(s) of similar content. Therefore, FANG should assign such
+nearby entities to a set of proximal vectors in the embedding space.                        end
+We also hypothesize that loosely-connected social entities often be-                  end
+have differently from our observation that social entities are highly                   ′
+                                                                                      L𝑛𝑒𝑤𝑠     ← Equation (5);
+polarized, especially in left–right politics [4]. FANG should enforce            end
+that the representations of these disparate entities are distinctive.            for each news–source or user sub-graph 𝐺 ′ do
+   The social interactions that define the above characteristics the                  for each entity 𝑟 ∈ 𝐺 ′ do
+most are user–user friendship, source–source citation, and news–                            𝑃𝑟 ← positive samples of 𝑟 in 𝐺 ′ ;
+source publication. As these interactions are either (a) between                            𝑁𝑟 ← negative samples of 𝑟 in 𝐺 ′ ;
+sources and news or (b) between news, we divide the social context                            ′
+                                                                                            L𝑝𝑟𝑜𝑥  . ← Equation (3);
+graph into two sub-graphs, namely news–source sub-graph and user
+                                                                                      end
+sub-graph. Within each sub-graph 𝐺 ′ , we formulate the following
+Proximity Loss function:                                                         end
+                                                                                                       ′        ′       ′
+              ∑︁ ∑︁                              ∑︁                               L𝑡𝑜𝑡𝑎𝑙 ← SUM(L𝑠𝑡𝑎𝑛𝑐𝑒       , L𝑛𝑒𝑤𝑠 , L𝑝𝑟𝑜𝑥 . );
+ L𝑝𝑟𝑜𝑥 = −              𝑙𝑜𝑔(𝜎 (𝒛𝑟⊤ 𝒛𝑟 𝑝 )) + 𝑄 ·     𝑙𝑜𝑔(𝜎 (−𝒛𝑟⊤ 𝒛𝑟𝑛 )),         𝜃 ← Backpropagate(L𝑡𝑜𝑡𝑎𝑙 );
+            𝑢 ∈𝐺 ′ 𝑟 𝑝 ∈𝑃𝑟                     𝑟𝑛 ∈𝑁𝑟
+                                                                             end
+                                                                     (3)
+                                                                             return 𝜃
+where 𝑧𝑟 ∈ R𝑑 is the representation of entity 𝑟 , 𝑃𝑟 is the set of
+nearby nodes or positive set of 𝑟 , and 𝑁𝑟 is the set of disparate
+nodes or negative set of 𝑟 . 𝑃𝑟 is obtained using our fixed-length
+random walk, and 𝑁𝑟 is derived using negative sampling [12].                  This contextual representation is then input into a fully con-
+   Self-supervised Stance Loss. We also propose an analogous               nected layer whose outputs are computed as 𝑜𝑎 = W𝒗 𝑎 + 𝑏, where
+hypothesis for the user–news interaction, in terms of stance. If           𝑾 ∈ R2𝑑×1 and 𝑏 ∈ R are the weights and the biases of the layer.
+a user expresses a stance with respect to a news article, their re-        The output value 𝑜𝑎 ∈ R is finally passed through a sigmoid activa-
+spective representations should be close. For each stance 𝑐, we first      tion function 𝜎 (·), and trained using the following cross-entropy
+learn a user projection function 𝛼𝑐 (𝑢) = Ac𝑧𝑢 and a news article          Fake News Loss L𝑛𝑒𝑤𝑠 , defined as follows:
+projection function 𝛽𝑐 (𝑎) = Bc𝑧𝑎 that map a node representation                       1 ∑︁
+                                                                             L𝑛𝑒𝑤𝑠 =         {𝑦𝑎 · 𝑙𝑜𝑔(𝜎 (𝑜𝑎 )) + (1 − 𝑦𝑎 ) · 𝑙𝑜𝑔(1 − 𝜎 (𝑜𝑎 ))}, (5)
+of R𝑑 to a representation in the stance space 𝑐 of R𝑑𝑐 . Given a user                 𝑇 𝑎
+𝑢 and a news article 𝑎, we compute their similarity score in the
+stance space 𝑐 as 𝛼 (𝑢) ⊤ 𝛽 (𝑎). If 𝑢 expresses stance 𝑐 with respect to   where 𝑇 is the batch size, 𝑦𝑎 = 0 if 𝑎 is a fake article, and 𝑦𝑎 = 1
+𝑎, we maximize this score, and we minimize it otherwise. This is           otherwise.
+the stance classification objective, optimized using the Stance Loss:         We define the total loss by linearly combining these three com-
+                             ∑︁ ∑︁                                         ponent losses: L𝑡𝑜𝑡𝑎𝑙 = L𝑝𝑟𝑜𝑥 . + L𝑠𝑡𝑎𝑛𝑐𝑒 + L𝑛𝑒𝑤𝑠 . We provide
+              L𝑠𝑡𝑎𝑛𝑐𝑒 = −             𝑦𝑢,𝑎,𝑐 𝑙𝑜𝑔(𝑓 (𝑢, 𝑎, 𝑐)),       (4)   detailed instructions for training FANG in Algorithm 1.
+                             𝑢,𝑎 𝑐
+where 𝑓 (𝑢, 𝑎, 𝑐) = softmax(𝛼𝑐 (𝑢) ⊤ 𝛽𝑐 (𝑎)) and                           4 EXPERIMENTS
+                    
+          𝑦𝑢,𝑎,𝑐 =
+                      1 if 𝑢 expresses stance 𝑐 over 𝑎,                    4.1 Data
+                      0 otherwise.                                         We conducted our experiments on a Twitter dataset collected by
+   Supervised Fake News Loss. We directly optimize the main                related work on rumor classification [20, 25] and fake news detec-
+learning objective of fake news detection via the supervised Fake          tion [37]. For each article, we collected its source, a list of engaged
+News Loss. In order to predict whether article 𝑎 is false, we obtain its   users, and their tweets if they were not already available in the pre-
+contextual representation as the concatenation of its representation       vious dataset. This dataset also includes Twitter profile description
+and the structural representation of its source, i.e., 𝒗 𝑎 = (𝒛𝑎 , 𝒛𝑠 ).   and the list of Twitter profiles each user follows.
+                 Table 6: Statistics about our dataset.                         Table 7: Comparison between FANG and baseline models on
+                                                                                fake news detection, evaluated with AUC score.
+ Fake    448         Publications / source      2.38   Cites / source    8.38
+ Real    606         Engagements / news         71.9   Friends / user   58.25    Model                            Contextual   Temporal   Graphical   AUC
+ Sources 442         Neu. support / news       19.07   Deny / news       5.27
+                                                                                 Feature SVM                                                          0.5525
+ Users 54461         Neg. support / news       10.83   Report / news    36.73
+                                                                                 CSI(-𝑡 ) (without 𝑡𝑖𝑚𝑒 (𝑒 ) )        ✓                               0.6678
+                                                                                 CSI                                  ✓           ✓                   0.6911
+                                                                                 GCN                                  ✓                      ✓        0.7064
+   We further crawled additional data about media sources, includ-               FANG(-𝑡 ) (without 𝑡𝑖𝑚𝑒 (𝑒 ) )       ✓                      ✓        0.7179
+ing the content of their Homepage and their About us page, together              FANG                                 ✓           ✓          ✓        0.7518
+with their frequently cited sources on their Homepage.
+   The truth value of the articles, namely, whether they are fake
+or real news, is based on two fact-checking websites: Snopes and                5     DISCUSSION
+Politifact. We release the source code of FANG and the stance                   We now answer the following research questions (RQs) to better
+detection dataset.2 Table 6 shows some statistics about our dataset.            understand FANG’s performance under different scenarios:
+                                                                                   • RQ1: Does FANG work well with limited training data?
+4.2      Fake News Detection Results
+                                                                                   • RQ2: Does FANG differentiate between fake and real news
+We benchmark the performance of FANG on fake news detection                           based on their contrastive engagement temporality?
+against several competitive models: (i) a content-only model, (ii) a               • RQ3: How effective is FANG’s representation learning?
+Euclidean contextual model, and (iii) another graph learning model.
+In order to compare our FANG with the content-only model, we                    5.1      Limited Training Data (RQ1)
+use a Support Vector Machine (SVM) model on TF.IDF feature vec-
+                                                                                In order to address RQ1, we conducted the experiments described
+tors constructed from the news content (see Section 3.2). We also
+                                                                                in Section 4.2 using different sizes of the training dataset. We found
+compare our approach with a current Euclidean model, CSI [35],
+                                                                                consistent improvements over the baselines under both limited and
+a fundamental yet effective recurrent encoder that aggregates the
+                                                                                sufficient data conditions. Table 8 shows the experimental results
+user features, the news content, and the user–news engagements.
+                                                                                and Figure 3 (left) further visualizes them. We can see that FANG
+We re-implement the CSI with source features by concatenating
+                                                                                consistently outperforms the two baselines for all training sizes:
+the overall score for the users and the article representation with
+                                                                                10%, 30%, 50%, 70%, and 90% of the data. In terms of AUC score at
+our formulated source description to obtain the result vector for
+                                                                                decreasing training size, among the graph-based models, GCN’s
+CSI’s Integrated module mentioned in the original paper. Lastly,
+                                                                                performance drops by 16.22% from 0.7064 at 90% to 0.5918 at 10%,
+we compare against the GCN graph learning framework [19]. First,
+                                                                                while FANG’s performance drops by 11.11% from 0.7518 at 90% to
+we represent each of 𝑘 social interactions in a separated adjacency
+                                                                                0.6683 at 10%. We further observe that CSI’s performance drops
+matrix. We then concatenate GCN’s output on 𝑘 adjacency ma-
+                                                                                the least by only 7.93% from 0.6911 at 90% to 0.6363 at 10%. An-
+trices as the final representation of each node, before passing the
+                                                                                other result from an ablated baseline, FANG(-𝑠), where we removed
+representation through a linear layer for classification.
+                                                                                the stance loss, highlights the importance of this self-supervised
+   We also verify the importance of modeling temporality by exper-
+                                                                                objective. When training on 90% of the data, the relative under-
+imenting on two variants of CSI and FANG: (i) temporal-insensitive
+                                                                                performing margin of FANG(-𝑠) compared to FANG is only 1.42%
+CSI(-𝑡) and FANG(-𝑡) without 𝑡𝑖𝑚𝑒 (𝑒) in the engagement 𝑒’s repre-
+                                                                                in terms of AUC. However, this relative margin increases as the
+sentation 𝒙 𝑒 , and (ii) temporal sensitive CSI and FANG with 𝑡𝑖𝑚𝑒 (𝑒).
+                                                                                availability of training data decreases, to at most 6.39% at 30% train-
+Table 7 shows the macroscopic results. For evaluation, we use the
+                                                                                ing data. Overall, the experimental results emphasize our model’s
+area under the Receiver Operating Characteristic curve or AUC
+                                                                                effectiveness even at low training data availability compared to the
+score as standard. All context-aware models (i.e., CSI(-𝑡), CSI, GCN,
+                                                                                ablated version, GNN and Euclidean, which confirms RQ1.
+and FANG(-𝑡)) and FANG improve over the context-unaware base-
+line by 0.1153 absolute with CSI(-𝑡) and by 0.1993 absolute with
+FANG in terms of AUC score. This demonstrates that considering
+                                                                                5.2      Engagement Temporality Study (RQ2)
+social context is helpful for fake news detection. We further ob-               To address RQ2 and to verify whether our model makes its decisions
+serve that both time-sensitive CSI and FANG improve over their                  based on the distinctive temporal patterns between fake and real
+time-insensitive variants, CSI(-𝑡) and FANG(-𝑡) by 0.0233 and 0.0339,           news, we examined FANG’s attention mechanism. We accumulated
+respectively. These results demonstrate the importance of modeling              the attention weights produced by FANG within each time window
+the temporality of news spreading. Finally, two graph-based mod-                and we compared them across time windows. Figure 3 (right) shows
+els, FANG(-𝑡) and GCN are consistently better than the Euclidean                the attention distribution over time for fake and for real news.
+CSI(-𝑡) by 0.0501 and 0.0386, respectively: this demonstrates the                  We can see that FANG pays 68.08% of its attention to the user
+effectiveness of our social graph representation described in Sec-              engagement that occurred in the first 12 hours after a news arti-
+tion 3.2. Overall, we can observe that FANG outperforms the other               cle has been published to decide whether it is fake. Its attention
+context-aware, temporally-aware, and graph-based models.                        then sharply decreases to 18.83% for the next 24 hours, then to
+                                                                                4.14% from 36 hours to two weeks after publication, and finally to
+2 https://github.com/nguyenvanhoang7398/FANG                                    approximately 9.04% from the second week onward.
+Table 8: Comparison of FANG against baselines (AUC score)
+by varying the size of the training data.
+
+ Systems                          AUC score at different training percentages
+                                  10%    30%        50%      70%      90%
+ CSI                              0.6363   0.6714   0.6700   0.6887   0.6911
+ GCN                              0.5918   0.6445   0.6797   0.6642   0.7064
+ FANG(-𝑠) (without stance loss)   0.6396   0.6708   0.6773   0.7090   0.7411
+ FANG                             0.6683   0.7036   0.7166   0.7232   0.7518
+
+
+
+
+                                                                                Figure 4: 2D PCA plot of FANG’s representations with factu-
+                                                                                ality labels (top left) and OPTICS clustering labels (top right),
+                                                                                and GCN’s news representations with factuality labels (bot-
+                                                                                tom left) and OPTICS clustering labels (bottom right).
+
+Figure 3: FANG’s performance against baselines (AUC score)
+                                                                                    In the extrinsic evaluation, we verify how generalizable the su-
+for varying training data sizes (left), and attention distribu-
+                                                                                pervised source representations are for a new task: source factuality
+tion across time windows for fake vs. real news (right).
+                                                                                prediction. We first train FANG on 90% of the training data to obtain
+                                                                                all source 𝑠 representations as 𝑧𝑠 = 𝐺𝑟𝑎𝑝ℎ𝑆𝑎𝑔𝑒 (𝑠), and the total rep-
+                                                                                                              Í
+                                                                                resentation as 𝑣𝑠 = (𝑧𝑠 , 𝑥𝑠 , 𝑎 ∈𝑝𝑢𝑏𝑙𝑖𝑠ℎ (𝑠) 𝑥𝑎 ), where 𝑥𝑠 , 𝑝𝑢𝑏𝑙𝑖𝑠ℎ(𝑠),
+    On the other hand, for real news, FANG places only 48.01% of                and 𝑥𝑎 denote the source 𝑠 content representation, the list of all
+its attention on the first 12 hours, which then decreases to 17.59%             articles published by 𝑠, and their content representations.
+and to 12.85% in the time windows of 12 to 36 hours and 36 hours                    We propose two baseline representations that do not consider the
+to two weeks, respectively. We also observe that FANG maintains                 source 𝑠 content, 𝑣𝑠′ = (𝑧𝑠 , 𝑥𝑠 ). Finally, we train two separate SVM
+21.53% attention even when the real news has been published after               models for 𝑣𝑠 and 𝑣𝑠′ on the source factuality dataset, consisting
+two weeks.                                                                      of 129 sources of high factuality and 103 sources of low factuality,
+    Our model’s characteristics are consistent with the general ob-             obtained from Media Bias/Fact Check3 and PolitiFact.4
+servation that the appalling nature of fake news generates the most                 For intrinsic evaluation, the Principal Component Analysis (PCA)
+engagements within a short period of time after its publication.                plot of labeled FANG representation (see Figure 4 top left) shows
+Therefore, it is reasonable that the model places much emphasis                 moderate collocation for the groups of fake and real news, while
+on these crucial engagements. On the other hand, genuine news                   the PCA plot of labeled GCN representation (Figure 4 bottom left)
+attracts fewer engagements, but it is circulated for a longer period            shows little collocation within either the fake or the real news
+of time, which explains FANG’s persistent attention even after two              groups. Quantitatively, FANG’s OPTICS clusters (shown in Figure 4
+weeks after publication. Overall, the temporality study here high-              top right) achieve a homogeneity score of 0.051 based on news fac-
+lights the transparency of our model’s decision, largely thanks to              tuality labels, compared to 0.0006 homogeneity score for the GCN
+the incorporated attention mechanism.                                           OPTICS clusters. This intrinsic evaluation demonstrates FANG’s
+                                                                                strong representation closeness within both the fake and the real
+5.3     Representation Learning (RQ3)                                           news groups, indicating that FANG yields improved representation
+                                                                                learning over another fully supervised graph neural framework.
+Our core claim is to improve the quality of representation with
+                                                                                    For the extrinsic evaluation on downstream source factuality
+FANG, and we verify it in intrinsic and extrinsic evaluations.
+                                                                                classification, our context-aware model achieves an AUC score of
+    In the intrinsic evaluation, we verify how generalizable the min-
+                                                                                0.8049 compared to 0.5842 for the baseline. We further examined the
+imally supervised news representations are for the fake news de-
+                                                                                FANG representations for sources to explain this 0.2207 absolute
+tection task. We first optimize both GCN and FANG on 30% of the
+                                                                                improvement. Figure 5 shows the source representations obtained
+training data to obtain news representations. We then cluster these
+                                                                                from the textual features, GCN, and FANG with their factuality
+representations using an unsupervised clustering algorithm, OP-
+                                                                                labels, i.e., high, low, mixed, and citation relationship. In the left
+TICS [2], and we measure the homogeneity score — the extent to
+                                                                                sub-figure, we can observe that the textual features are insufficient
+which clusters contain a single class. The higher the homogeneity
+                                                                                to differentiate the factuality of media, as a fake news spreading
+score, the more likely the news articles of the same factuality label
+                                                                                site such as cnsnews could mimic factual media in terms of web
+(i.e., fake or real) are to be close to each other, which yields higher
+                                                                                design and news content.
+quality representation. Figure 4 visualizes the representations ob-
+tained from two approaches with factuality labels and OPTICS                    3 https://www.mediabiasfactcheck.com
+clustering labels.                                                              4 http://politifact.com
+Figure 5: Plots for source representations using textual features (left), GCN (middle), and FANG (right) with factuality labels.
+
+
+   However, the citation between a low-factuality website and high-
+factuality sites would not be as high, and it is effectively used by
+the two graph learning frameworks: GCN and especially FANG. Yet,
+GCN fails to differentiate low-factuality sites with higher citations,
+such as jewsnews.co.il and cnsnews, from high-factuality sites. On
+the other hand, sources such as news.yahoo despite being textually
+different, as shown in Figure 5 (left), should still cluster with other
+credible media for their high inter-citation frequency. FANG, with
+much more emphasis on contextual representation learning, makes
+these sources more distinguishable. Its representation space gives            Figure 6: A test example explaining FANG’s decision.
+us a glance into the landscape of news media, where there is a
+large central cluster of high-factuality inter-cited sources such as
+nytimes, washingtonpost and news.yahoo. At the periphery lie less
+connected media including both high- and low-factuality ones.
+   We also see cases where all models failed to differentiate mixed-
+factuality media, such as buzzfeednews and nypost, which have high
+citation counts with high-factuality media. Overall, the results from
+intrinsic and extrinsic evaluation, as well as the observations, con-
+firm RQ3 on the improvement of FANG’s representation learning.
+
+5.4    Scalable Inductiveness
+FANG overcomes the transductive limitation of previous approaches
+while inferring the credibility of unseen nodes. MVDAM [21] has
+to randomly initialize an embedding and to optimize it iteratively
+using node2vec [11] for any unseen node, whereas FANG directly
+infers the embedding with its learned feature aggregator. Other           Figure 7: Another test example explaining FANG’s decision.
+graphical approaches using matrix factorization [39] or graph con-
+volutional layers [10, 29] learn parameters whose dimensionality is
+fixed to the network size 𝑁 , and can be as expensive as 𝑂 (𝑁 3 ) [10]
+in terms of inference time complexity. FANG infers the embeddings            In contrast, a denying tweet from user A is not paid so much
+of unseen nodes without reconstructing the adjacency matrix, and          attention, due to the insignificant description of its author’s profile.
+its inference time complexity only depends on the size of the neigh-      Our model bases its prediction on the support stance from the fact-
+borhood of unseen nodes.                                                  checker, which is indeed the correct label.
+                                                                             In the second example, shown in Figure 7, FANG pays most atten-
+                                                                          tion to a tweet by user C. Although this profile does not provide any
+5.5    Microscopic Analysis                                               description, it has a record of correctly denying the fake news about
+It is also helpful to analyze FANG’s predictions by examining spe-        the dead NFL lawyer. Furthermore, the profiles that follow Twitter
+cific test examples. The first example is shown in Figure 6, where        user C, namely user D and user E, have credible descriptions of a
+we can see that FANG pays most of its attention to a tweet by user        proof reader and of a tech community, respectively. This explains
+B. This can be explained by B’s Twitter profile description of a          why our model bases its prediction of the news being fake thanks
+fact-checking organization, which indicates high reliability.             to the reliable denial, which is again the correct label.
+5.6     Limitations                                                                    [17] Zhiwei Jin, Juan Cao, Yongdong Zhang, and Jiebo Luo. 2016. News Verification
+                                                                                            by Exploiting Conflicting Social Viewpoints in Microblogs. In AAAI. 2972–2978.
+We note that entity and interaction features are constructed before                    [18] Dhruv Khattar, Jaipal Singh Goud, Manish Gupta, and Vasudeva Varma. 2019.
+passing to FANG, and thus errors from upstream tasks, such as                               MVAE: Multimodal Variational Autoencoder for Fake News Detection. In WWW.
+                                                                                            2915–2921.
+textual encoding or stance detection, can propagate to FANG. Future                    [19] Thomas N. Kipf and Max Welling. 2017. Semi-Supervised Classification with
+work can address this in an end-to-end framework, where textual                             Graph Convolutional Networks. In ICLR.
+encoding [9] and stance detection can be jointly optimized.                            [20] Elena Kochkina, Maria Liakata, and Arkaitz Zubiaga. 2018.              PHEME
+                                                                                            dataset for Rumour Detection and Veracity Classification.             (6 2018).
+   Another limitation is that the dataset for contextual fake news de-                      https://figshare.com/articles/dataset/PHEME_dataset_for_Rumour_Detection_
+tection can quickly become obsolete as hyperlinks and social media                          and_Veracity_Classification/6392078
+traces at the time of publication might no longer be retrievable.                      [21] Vivek Kulkarni, Junting Ye, Steven Skiena, and William Yang Wang. 2018. Multi-
+                                                                                            view Models for Political Ideology Detection of News Articles. In EMNLP. 3518–
+                                                                                            3527.
+6     CONCLUSION AND FUTURE WORK                                                       [22] Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer
+                                                                                            Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. 2019. RoBERTa: A
+We have demonstrated the importance of modeling the social con-                             Robustly Optimized BERT Pretraining Approach. arXiv:1907.11692 (2019).
+text for the task of fake news detection. We further proposed FANG,                    [23] Yang Liu and Yi-Fang Brook Wu. 2018. Early Detection of Fake News on Social
+                                                                                            Media Through Propagation Path Classification with Recurrent and Convolu-
+a graph learning framework that enhances representation quality                             tional Networks. In AAAI. 354–361.
+by capturing the rich social interactions between users, articles,                     [24] Minh-Thang Luong, Hieu Pham, and Christopher D. Manning. 2015. Effective
+and media, thereby improving both fake news detection and source                            Approaches to Attention-based Neural Machine Translation. In EMNLP. 1412–
+                                                                                            1421.
+factuality prediction. We have demonstrated the efficiency of FANG                     [25] Jing Ma, Wei Gao, Prasenjit Mitra, Sejeong Kwon, Bernard J. Jansen, Kam-Fai
+with limited training data and its capability of capturing distinc-                         Wong, and Meeyoung Cha. 2016. Detecting Rumors from Microblogs with
+tive temporal patterns between fake and real news with a highly                             Recurrent Neural Networks. In IJCAI. 3818–3824.
+                                                                                       [26] Jing Ma, Wei Gao, Zhongyu Wei, Yueming Lu, and Kam-Fai Wong. 2015. Detect
+explainable attention mechanism. In future work, we plan more                               Rumors Using Time Series of Social Context Information on Microblogging
+analysis of the representations of social users. We further plan to                         Websites. In CIKM. 1751–1754.
+                                                                                       [27] Saif Mohammad, Svetlana Kiritchenko, Parinaz Sobhani, Xiaodan Zhu, and Colin
+apply multi-task learning to jointly address the tasks of fake news                         Cherry. 2016. SemEval-2016 Task 6: Detecting Stance in Tweets. In SemEval-2016.
+detection, source factuality prediction, and echo chamber discovery.                        31–41.
+                                                                                       [28] Mitra Mohtarami, Ramy Baly, James Glass, Preslav Nakov, Lluís Màrquez, and
+                                                                                            Alessandro Moschitti. 2018. Automatic Stance Detection Using End-to-End
+REFERENCES                                                                                  Memory Networks. In NAACL-HLT. 767–776.
+ [1] O. Ajao, D. Bhowmik, and S. Zargari. 2019. Sentiment Aware Fake News Detection    [29] Federico Monti, Fabrizio Frasca, Davide Eynard, Damon Mannion, and Michael M
+     on Online Social Networks. In ICASSP. 2507–2511.                                       Bronstein. 2019. Fake News Detection on Social Media using Geometric Deep
+ [2] Mihael Ankerst, Markus M Breunig, Hans-Peter Kriegel, and Jörg Sander. 1999.           Learning. arXiv preprint arXiv:1902.06673 (2019).
+     OPTICS: Ordering Points to Identify the Clustering Structure. ACM SIGMOD          [30] Jeffrey Pennington, Richard Socher, and Christopher D. Manning. 2014. GloVe:
+     Record 28, 2 (1999), 49–60.                                                            Global Vectors for Word Representation. In EMNLP. 1532–1543.
+ [3] Ramy Baly, Georgi Karadzhov, Dimitar Alexandrov, James Glass, and Preslav         [31] Bryan Perozzi, Rami Al-Rfou, and Steven Skiena. 2014. DeepWalk: Online Learn-
+     Nakov. 2018. Predicting Factuality of Reporting and Bias of News Media Sources.        ing of Social Representations. In KDD. 701–710.
+     In EMNLP. 3528–3539.                                                              [32] Kashyap Popat, Subhabrata Mukherjee, Jannik Strötgen, and Gerhard Weikum.
+ [4] Levi Boxell, Matthew Gentzkow, and Jesse M. Shapiro. 2017. Is the Internet             2016. Credibility Assessment of Textual Claims on the Web. In CIKM. 2173–2178.
+     Causing Political Polarization? Evidence from Demographics. Technical Report      [33] Kashyap Popat, Subhabrata Mukherjee, Jannik Strötgen, and Gerhard Weikum.
+     NBER Working Paper No. 23258. National Bureau of Economic Research.                    2017. Where the Truth Lies: Explaining the Credibility of Emerging Claims on
+ [5] Michael M. Bronstein, Joan Bruna, Yann LeCun, Arthur Szlam, and Pierre Van-            the Web and Social Media. In WWW. 1003–1012.
+     dergheynst. 2017. Geometric Deep Learning: Going beyond Euclidean data. IEEE      [34] Kashyap Popat, Subhabrata Mukherjee, Jannik Strötgen, and Gerhard Weikum.
+     Signal Processing Magazine 34, 4 (2017), 18–42.                                        2018. CredEye: A Credibility Lens for Analyzing and Explaining Misinformation.
+ [6] Carlos Castillo, Marcelo Mendoza, and Barbara Poblete. 2011. Information Credi-        In WWW. 155–158.
+     bility on Twitter. In WWW. 675–684.                                               [35] Natali Ruchansky, Sungyong Seo, and Yan Liu. 2017. CSI: A Hybrid Deep Model
+ [7] Kareem Darwish, Dimitar Alexandrov, Preslav Nakov, and Yelena Mejova. 2017.            for Fake News Detection. In CIKM. 797–806.
+     Seminar Users in the Arabic Twitter Sphere. In SocInfo. 91–108.                   [36] Gerald Salton and Michael J. McGill. 1983. Introduction to Modern Information
+ [8] Leon Derczynski, Kalina Bontcheva, Maria Liakata, Rob Procter, Geraldine Wong          Retrieval. McGraw-Hill.
+     Sak Hoi, and Arkaitz Zubiaga. 2017. SemEval-2017 Task 8: RumourEval: Deter-       [37] Kai Shu, Deepak Mahudeswaran, Suhang Wang, Dongwon Lee, and Huan Liu.
+     mining rumour veracity and support for rumours. In SemEval-2017. 69–76.                2018. FakeNewsNet: A Data Repository with News Content, Social Context and
+ [9] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019. BERT:          Dynamic Information for Studying Fake News on Social Media. arXiv preprint
+     Pre-training of Deep Bidirectional Transformers for Language Understanding. In         arXiv:1809.01286 (2018).
+     NAACL. 4171–4186.                                                                 [38] Kai Shu, Amy Sliva, Suhang Wang, Jiliang Tang, and Huan Liu. 2017. Fake
+[10] Ming Dong, Bolong Zheng, Nguyen Quoc Viet Hung, Han Su, and Guohui Li.                 News Detection on Social Media: A Data Mining Perspective. ACM SIGKDD
+     2019. Multiple Rumor Source Detection with Graph Convolutional Networks. In            Explorations Newsletter 19, 1 (2017), 22–36.
+     CIKM. 569–578.                                                                    [39] Kai Shu, Suhang Wang, and Huan Liu. 2019. Beyond News Contents: The Role
+[11] Aditya Grover and Jure Leskovec. 2016. node2vec: Scalable Feature Learning for         of Social Context for Fake News Detection. In WSDM. 312–320.
+     Networks. In KDD. 855–864.                                                        [40] Parinaz Sobhani, Diana Inkpen, and Xiaodan Zhu. 2017. A Dataset for Multi-
+[12] William L. Hamilton, Zhitao Ying, and Jure Leskovec. 2017. Inductive Represen-         Target Stance Detection. In EACL. 551–557.
+     tation Learning on Large Graphs. In NIPS. 1024–1034.                              [41] Zoe Thomas. 2020. WHO says fake coronavirus claims causing ‘infodemic’. BBC
+[13] Naeemul Hassan, Gensheng Zhang, Fatma Arslan, Josue Caraballo, Damian                  News (13th Feb, 2020). https://www.bbc.com/news/technology-51497800
+     Jimenez, Siddhant Gawsane, Shohedul Hasan, Minumol Joseph, Aaditya Kulkarni,      [42] James Thorne and Andreas Vlachos. 2018. Automated Fact Checking: Task
+     Anil K. Nayak, Vikas Sable, Chengkai Li, and Mark Tremayne. 2017. ClaimBuster:         Formulations, Methods and Future Directions. In COLING. 3346–3359.
+     The First-ever End-to-end Fact-checking System. VLDB 10, 12 (2017), 1945–1948.    [43] Yaqing Wang, Fenglong Ma, Zhiwei Jin, Ye Yuan, Guangxu Xun, Kishlay Jha, Lu
+[14] Xiangnan He, Ming Gao, Min-Yen Kan, Yiqun Liu, and Kazunari Sugiyama. 2014.            Su, and Jing Gao. 2018. EANN: Event Adversarial Neural Networks for Multi-
+     Predicting the Popularity of Web 2.0 Items based on User Comments. In SIGIR.           Modal Fake News Detection. In KDD. 849–857.
+     233–242.                                                                          [44] Fan Yang, Yang Liu, Xiaohui Yu, and Min Yang. 2012. Automatic Detection of
+[15] Sepp Hochreiter and Jürgen Schmidhuber. 1997. Long Short-Term Memory.                  Rumor on Sina Weibo. In MDS. 1–7.
+     Neural Computation 9, 8 (1997), 1735–1780.                                        [45] Chunyuan Yuan, Qianwen Ma, Wei Zhou, Jizhong Han, and Songlin Hu. 2019.
+[16] Zhiwei Jin, Juan Cao, Yu-Gang Jiang, and Yongdong Zhang. 2014. News Credibility        Jointly Embedding the Local and Global Relations of Heterogeneous Graph for
+     Evaluation on Microblog with a Hierarchical Propagation Model. In ICDM. 230–           Rumor Detection. In ICDM. 796–805.
+     239.
+

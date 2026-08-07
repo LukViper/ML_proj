@@ -1,0 +1,493 @@
+                                                 X-FACT: A New Benchmark Dataset for Multilingual Fact Checking
+
+
+                                                                                 Ashim Gupta, Vivek Srikumar
+                                                                                     School of Computing,
+                                                                                      University of Utah
+                                                                               {ashim,svivek}@cs.utah.edu
+
+
+
+
+                                                                   Abstract                         with 12,836 claims from PolitiFact. Recently, Au-
+                                                                                                    genstein et al. (2019) introduced MultiFC, an even
+                                                 In this work, we introduce X-FACT: the lar-        larger corpus of 34,918 claims collected from 26
+                                                 gest publicly available multilingual dataset for
+
+
+
+
+arXiv:2106.09248v1 [cs.CL] 17 Jun 2021
+                                                                                                    fact-checking websites.
+                                                 factual verification of naturally existing real-
+                                                                                                        Although misinformation transcends countries
+                                                 world claims. The dataset contains short sta-
+                                                 tements in 25 languages and is labeled for ve-     and languages (Bradshaw and Howard, 2019; Is-
+                                                 racity by expert fact-checkers. The dataset        lam et al., 2020), much of the recent work focuses
+                                                 includes a multilingual evaluation benchmark       on claims and statements made in English. Deve-
+                                                 that measures both out-of-domain generaliza-       loping Automated Fact Checking (AFC) systems
+                                                 tion, and zero-shot capabilities of the multi-     in other languages is much more challenging, the
+                                                 lingual models. Using state-of-the-art multi-      primary reason being the absence of a manually
+                                                 lingual transformer-based models, we develop       annotated benchmark dataset for those languages.
+                                                 several automated fact-checking models that,
+                                                 along with textual claims, make use of additi-
+                                                                                                    Moreover, there are fewer fact-checkers in these
+                                                 onal metadata and evidence from news stories       languages, and as a result, a non-English mono-
+                                                 retrieved using a search engine. Empirically,      lingual dataset will inevitably be small and less
+                                                 our best model attains an F-score of around        effective in developing fact-checking systems. As
+                                                 40%, suggesting that our dataset is a challen-     recent research points out, a possible solution in de-
+                                                 ging benchmark for evaluation of multilingual      aling with data scarcity is to train multilingual mo-
+                                                 fact-checking models.                              dels (Aharoni et al., 2019; Wu and Dredze, 2019;
+                                                                                                    Hu et al., 2020). Indeed, this finding motivates us
+                                         1       Introduction                                       to construct a large multilingual resource that the
+                                         Curbing the spread of fake news and misinforma-            research community can use to further the develop-
+                                         tion on the web has become an important societal           ment of fact-checking systems in languages other
+                                         challenge. Several fact-checking initiatives, such as      than English.
+                                         PolitiFact,1 expend a significant amount of manual             Recent efforts in the construction of a mul-
+                                         labor to investigate and determine the truthfulness        tilingual dataset are limited, both in scope and
+                                         of viral statements made by public figures, organi-        in size (Shahi and Nandini, 2020; Patwa et al.,
+                                         zations, and social media users. Of course, since          2020). For instance, FakeCovid, a dataset intro-
+                                         this process is time-consuming, often, a large num-        duced by Shahi and Nandini (2020) contains 3066
+                                         ber of falsified statements go unchecked.                  non-English claims about COVID-19. In compa-
+                                            With the aim of assisting fact-checkers, resear-        rison, X-FACT contains 31,189 general domain
+                                         chers in NLP have sought to develop computatio-            non-English claims from 25 languages. Moreover,
+                                         nal approaches to fact-checking (Vlachos and Rie-          FakeCovid contains only two labels, namely, False,
+                                         del, 2014; Wang, 2017; Pérez-Rosas et al., 2018).         and Others. We argue that this is undesirable, as
+                                         Many such works use the FEVER dataset, which               fact checking is a fine-grained classification task.
+                                         contains claims extracted from Wikipedia docu-             Due to subtle differences in language, most claims
+                                         ments (Thorne et al., 2018). Using real-world              are neither entirely true nor entirely false (Rash-
+                                         claims, Wang (2017) introduced LIAR, a dataset             kin et al., 2017). In contrast, our dataset contains
+                                                                                                    seven labels—we make distinctions between true,
+                                             1
+                                                 https://www.politifact.com/                        mostly true, half-true etc. Table 1 shows two such
+    Claim         Muslimische Gebete sind Pflichtpro-     Sources of Claims. We relied on a list of non-
+                  gramm an katholischer Schule.           partisan fact-checkers compiled by International
+                  Muslim prayers are compulsory in        Fact-Checking Network (IFCN)2 , and Duke Re-
+                  Catholic schools.
+    Label         Mostly-False (Grösstenteils Falsch)    porter’s Lab3 . We removed all the websites that
+    Claimant      Freie Welt                              conduct fact-checks in English and are covered
+    Language      German
+    Source        de.correctiv.org                        by previous work(Wang, 2017; Augenstein et al.,
+    Claim Date    March 16, 2018                          2019). As a starting point, we first queried Go-
+    Review Date   March 23, 2018                          ogle’s Fact Check Explorer (GFCE)4 for all the
+    Claim         Temos, hoje, a despesa de Pre-          fact-checks done by a particular website. Then we
+                  vidência Social representando 57%      crawled the linked article on the website and ad-
+                  do orçamento.
+                  Today, we have Social Security ex-      ditional metadata such as claimant, URL, date of
+                  penses representing 57% of the bud-     the claim. For websites not linked through GFCE,
+                  get.
+    Label         Partly-True (Exagerado)                 we directly crawled all the available fact-checking
+    Claimant      Henrique Meirelles                      articles from the fact-checker’s website. We left
+    Language      Portuguese (Brazilian)                  out some fact-checkers because either the claims
+    Source        pt.piaui.folha.uol.com.br
+    Claim Date    None                                    on their websites were not well specified or the fact-
+    Review Date   May 2, 2018                             checker did not use any rating scale. We performed
+                                                          semi-automated text processing to remove dupli-
+Table 1: Examples from X-FACT. Original labels are        cate claims and examples where the label appeared
+shown in parenthesis along with the manually mapped       in the claim itself. This resulted in data from a total
+labels. For reference, translations are also shown.       of 85 fact checkers for further processing. Refer to
+                                                          the appendix for more details on the this process.
+examples from German and Brazilian Portuguese.            Filtering the Dataset. There are two major chal-
+  In summary, our contributions are:                      lenges in using the crawled data directly: a) the
+                                                          labels are in different languages, and b) each fact
+    1. We release a multilingual fact-checking ben-       checker uses a different rating scale for categoriza-
+       chmark X-FACT, which includes 31,189 short         tion. To deal with these issues, first, we manually
+       statements labeled for factual correctness and     translated all ratings to English, followed by semi-
+       covers 25 typologically diverse languages          automatic merging of labels if they were found to
+       across 11 language families. X-FACT is an          be synonyms. Second, in consultation with Fac-
+       order of magnitude larger than any other mul-      tly,5 an IFCN signatory, we created a rating scale
+       tilingual dataset available for fact checking.     compatible with most fact-checkers. Our label set
+                                                          contains five labels with a decreasing level of truth-
+    2. Apart from the standard test set, we create two    fulness: True, Mostly-True, Partly-True, Mostly-
+       additional challenge sets to evaluate fact chec-   False, and False. To encompass several other cases
+       king systems’ generalization abilities across      where assigning a label is difficult due to lack of
+       different domains and languages.                   evidence or subjective interpretations, we introdu-
+                                                          ced Unverifiable as another label. A final label
+    3. We report results for several modeling approa-     Other was used to denote cases that do not fall un-
+       ches and find that these models underperform       der the above-specified categories. Following the
+       on all three test sets in our benchmark, sug-      process described, we reviewed each fact-checker’s
+       gesting the need for more sophisticated and        rating system along with some examples and ma-
+       robust modeling methods.                           nually mapped these labels to our newly designed
+                                                          label scheme. See table 1 for examples. In our sub-
+  The X-FACT dataset, and the code for our expe-
+                                                          sequent discussions, we refer to each fact-checking
+riments, can be obtained at https://github.com
+                                                          website as a source.
+/utahnlp/x-fact.
+                                                             2
+                                                              https://www.poynter.org/ifcn/
+                                                             3
+                                                              https://reporterslab.org/fact-checki
+2     The X-FACT Dataset                                  ng/
+                                                            4
+                                                              https://toolbox.google.com/factcheck
+X-FACT is constructed from several fact-checking          /explorer
+                                                            5
+sources. We briefly outline this process here.                https://factly.in
+  Data split                   # claims      # languages           ber of labeled examples. The average number of
+                                                                   examples per language is 1784, with Serbian being
+  Train                           19079                  13
+                                                                   the smallest (835). We split the data into training
+  Development                      2535                  12
+                                                                   (75%), development (10%), and α1 test set (15%).
+  In-domain (α1 )                  3826                  12
+                                                                   This leaves us with 13 languages for our zero-shot
+  Out-of-domain (α2 )              2368                   4
+                                                                   test set (α3 ). The remaining set of sources form
+  Zero-Shot (α3 )                  3381                  12
+                                                                   our out-of-domain test set (α2 ). See table 2 for the
+                                                                   number of claims and langauges in each of these
+Table 2: Dataset details. X-FACT contains three
+challenge sets, namely, In-domain Test (α1 ), Out-of-              splits.
+domain Test (α2 ), Zero-Shot Test (α3 ).                              In total, X-FACT covers the following 25 lan-
+                                                                   guages (shown with their ISO 639-1 code for bre-
+                                                                   vity): ar, az, bn, de, es, fa, fr, gu, hi, id, it, ka, mr,
+   We found that the data from several sources was                 no, nl, pa, pl, pt, ro, ru, si, sr, sq, ta, tr. Please refer
+dominated by a single label (> 80%). Since it is                   to the appendix for more details.
+difficult to train machine learning models on highly
+imbalanced datasets, we removed 54 such websites.                  3     Experiments and Results
+We additionally removed fact-checking websites
+                                                                   3.1    Experimental Setting
+that contained fewer than 60 examples. In total, our
+dataset contains 31,189 fact-checks.                               The goal of our experiments is to study how dif-
+                                                                   ferent modeling choices address the task of mul-
+A Single Test Set is Not Sufficient. Recent ad-                    tilingual fact-checking. All our experiments use
+vances in NLP have shown that multilingual mo-                     mBERT, the multilingual variant of BERT (Devlin
+dels are effective for cross-lingual transfer (Kon-                et al., 2019) and use macro F1 score as the eva-
+dratyuk and Straka, 2019; Wu and Dredze, 2019;                     luation metric.7 We report average F1 scores and
+Hu et al., 2020). A multilingual fact-checking sys-                standard deviations on four runs with different ran-
+tem of similar transfer capabilities will certainly                dom seeds.
+be an asset, especially in languages with no or few                    We implement the following multilingual mo-
+fact-checkers. From this perspective, we seek to                   dels as baselines for future work:
+provide a robust evaluation benchmark that can
+help us understand the generalization abilities of                     1. Claim Only Model (Claim-Only): We pro-
+our fact-checking systems.                                                vide textual claim as the only input to the mo-
+   With this objective, we construct three test sets,                     del, in effect treating the problem as a simple
+namely α1 , α2 , and α3 .6 The first test set (α1 ) is                    sentence classification problem.
+distributionally similar to the training set. The α1
+                                                                       2. Attention-based Evidence Aggregator
+set contains fact-checks from the same languages
+                                                                          (Attn-EA): Typically, to determine the
+and sources as the training set.
+                                                                          veracity of a claim, fact-checkers first gather
+   Second, the out-of-domain test set (α2 ), contains
+                                                                          relevant evidence by performing a web search
+claims from the same languages as the training
+                                                                          and then aggregate this evidence to reach their
+set but are from a different source. A model that
+                                                                          final decision. We emulate this procedure
+performs well on both α1 and α2 can be presumed
+                                                                          by developing an attention-based evidence
+to generalize across different source distributions.
+                                                                          aggregation model that operates on evidence
+   Third test set is the zero-shot set (α3 ), which se-
+                                                                          documents retrieved after performing web
+eks to measure the cross-lingual transfer abilities of
+                                                                          search with the claim using Google. For each
+fact-checking systems. The α3 set contains claims
+                                                                          claim, we obtain the top five results and use
+from languages not contained in the training set.
+                                                                          them as evidence. Using full text from web
+Models that overfit language-specific artifacts will
+                                                                          pages is not feasible, as the mBERT model
+underperform on α3 .
+                                                                          has a restricted input sequence length of 512.
+Languages. For training and development, we                               Following previous work (Augenstein et al.,
+choose the top twelve languages based on the num-                         2019), we use snippets from search results as
+   6                                                                      our evidence.
+     The names for our test sets, and the idea of having mul-
+                                                                      7
+tiple test sets without corresponding training sets, is inspired        Although it is possible to develop partial scoring metrics,
+by Gupta et al. (2020).                                            which we leave for future work to explore.
+      For a given claim and a collection of n evi-            Does the dataset exhibit claim-only bias? Be-
+      dence documents, we first encode the claim              fore moving to more sophisticated systems, let us
+      and evidences separately using mBERT by                 first examine if the model can predict a statement’s
+      extracting the output of the CLS token, deno-           veracity by only using the textual claim. Note that
+      ted as: c, [e1 , e2 , ..., en ]. We first apply dot-    this setting is similar to that of hypothesis only
+      product attention (Luong et al., 2015) to ob-           models for the task of Natural Language Inference
+      tain the attention weights [α1 , α2 , ..., αn ], and    (NLI) (Poliak et al., 2018). From table 3, we see
+      then compute a linear combination P      using these    that a claim-only model outperforms a majority
+      attention coefficients: e = i αi ei . This re-          baseline by a large margin. We can draw two infe-
+      presentation is then concatenated with c and            rences: a) A significant number of examples in α1
+      fed to the classification layer. In all our expe-       can be labeled by just relying on the textual claim,
+      riments, we fix the number of evidence docu-            and b) the claim-only model has learned spurious
+      ments to five.                                          correlations from the dataset.
+
+  3. Augmenting metadata (+Meta): We con-                     Do search snippets improve fact-checking?
+     catenate additional key-value metadata with              First, results from table 3 show that augmenting
+     the claim text by representing it as a se-               models with metadata is helpful. Second, using
+     quence of the form: Key : Value (Chen                    search snippets as evidence with an attention-based
+     et al., 2019). This metadata includes the                model along with metadata improves performance
+     language, website-name, claimant,                        by 2.5 percentage points on the in-domain test set
+     claim-date, and review-date. If a cer-                   (α1 ). To further validate that snippets indeed help
+     tain field is not available for a claim, we repre-       the evidence-based model, we perform another ex-
+     sent the value by none.                                  periment in which we pair each claim with random
+                                                              search snippets of the same language. Since there
+   All the models are trained in a multilingual set-          is no relevant evidence, the performance is indeed
+ting, i.e., a single model is trained for all languages.      similar to the claim-only model. This again con-
+We could not use monolingual models as the trai-              firms our finding that the dataset exhibits some
+ned monolingual models were unstable due to the               claim-only bias.
+small size of data for each language.                            While the Attn-EA model provides some per-
+                                                              formance improvement on the in-domain test set,
+  Model                        α1          α2          α3     surprisingly, the claim-only model outperforms the
+  Majority                  6.9(–)     10.6(–)      7.6(–)    evidence-based model by a small margin on α3 .
+  Claim-Only              38.2(0.9)   16.2(0.9)   14.7(0.6)   This might be due to the evidence-based over-fitting
+  Claim-Only + Meta       39.4(0.9)   15.4(0.8)   16.7(1.1)   the in-domain data.
+  Attn-EA (Random)        37.5(0.8)   16.3(0.5)   14.9(1.2)   How informative are the search snippets?
+  Attn-EA                 38.9(0.2)   15.7(0.1)   16.5(0.7)
+                                                              Note that we used snippets to summarize the retrie-
+  Attn-EA + Meta          41.9(1.2)   15.4(1.5)   16.0(0.3)
+                                                              ved search results. To gauge the relevance of these
+Table 3: Average F1 scores (and standard deviations) of       snippets, we manually examine 100 examples from
+the models studied in this work. Models in top rows are       α1 test set for Hindi. Our preliminary analysis re-
+claim-only models while those in bottom are evidence-         veals that only 45% of snippets provide sufficient
+based. Attn-EA (Random) denotes the results of the            information to classify the claim, indicating why
+evidence-based model when it is trained with random           the performance increase with the evidence-based
+search snippets. (+ Meta) models denote those augmen-         model is small. Our same analysis suggests that
+ted with additional metadata.
+                                                              for 83% of the examples, using full text of the web
+                                                              pages provides sufficient evidence to determine ve-
+3.2   Results                                                 racity of the claim. Hypothetically, this means,
+                                                              were the models able to ingest large documents
+The results are shown in table 3. We will discuss             (web pages), their performance increase could have
+results by answering a series of research questions.          been much more significant.
+As an indicator of label distribution, we include a
+majority baseline with the most frequent label of             Do the models generalize across sources and
+the distribution (i.e. false).                                languages? We observe that performance on α2
+and α3 is worse than on α1 , not only highligh-              ally Mr. Shashi Kiran Deshetti, for discussions in
+ting the difficulty of these challenge sets, but also        developing a rating scale compatible with most fact-
+showing that models overfit both source-specific             checkers. The authors acknowledge the support of
+patterns (α2 ) and language-specific patterns (α3 ).         NSF grants #1801446 (SATC) and #1822877 (Cy-
+   Importantly, these results underscore the utility         berlearning) and an award from Verisk Inc.
+of our challenge sets in assessing model generali-
+zability as well as diagnosing overfitting.
+                                                             References
+    Model                      α1         α2          α3     Roee Aharoni, Melvin Johnson, and Orhan Firat. 2019.
+                                                               Massively multilingual neural machine translation.
+                        X-FACT
+                                                               In Proceedings of the 2019 Conference of the North
+    Claim-Only + Meta    39.4(0.9)   15.4(0.8)   16.7(1.1)     American Chapter of the Association for Compu-
+    Attn-EA + Meta       41.9(1.2)   15.4(1.5)   16.0(0.3)     tational Linguistics: Human Language Technolo-
+                 X-FACT + English                              gies, Volume 1 (Long and Short Papers), pages
+    Claim-Only + Meta 37.1(2.7) 14.5(0.5)        14.4(0.3)     3874–3884, Minneapolis, Minnesota. Association
+                                                               for Computational Linguistics.
+    Attn-EA + Meta    38.0(4.5) 14.7(2.6)        14.3(1.9)
+                                                             Isabelle Augenstein, Christina Lioma, Dongsheng
+Table 4: Performance comparison when augmenting                 Wang, Lucas Chaves Lima, Casper Hansen, Ch-
+the dataset with 12,311 English claims from PolitiFact.         ristian Hansen, and Jakob Grue Simonsen. 2019.
+Average F1 scores (and standard deviations) of the mo-          MultiFC: A real-world multi-domain dataset for
+dels are reported over four random runs.                        evidence-based fact checking of claims. In Procee-
+                                                                dings of the 2019 Conference on Empirical Methods
+                                                                in Natural Language Processing and the 9th Inter-
+Can we improve performance by augmenting                        national Joint Conference on Natural Language Pro-
+                                                                cessing (EMNLP-IJCNLP), pages 4685–4697, Hong
+training data with English claims? Since X-
+                                                                Kong, China. Association for Computational Lin-
+FACT does not contain any examples from En-                     guistics.
+glish, we answer this question by augmenting the
+training set with 12,311 claims from the PolitiFact          Samantha Bradshaw and Philip N Howard. 2019. The
+                                                               global disinformation order: 2019 global inventory
+subset of the MultiFC (Augenstein et al., 2019).               of organised social media manipulation. Project on
+Results are shown in table 4. Interestingly, we see            Computational Propaganda.
+that augmenting the models with English data hurts
+                                                             Wenhu Chen, Hongmin Wang, Jianshu Chen, Yunkai
+model performance. A possible cause is that the
+                                                               Zhang, Hong Wang, Shiyang Li, Xiyou Zhou, and
+augmented data mostly contains political claims,              William Yang Wang. 2019. TabFact: A large-scale
+while our dataset contains general claims.                     dataset for table-based fact verification. In Internati-
+                                                               onal Conference on Learning Representations.
+4       Conclusion
+                                                             Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kris-
+We presented X-FACT, the currently largest multi-               tina Toutanova. 2019. BERT: Pre-training of deep
+lingual dataset for fact-checking. Compared to the              bidirectional transformers for language understan-
+                                                                ding. In Proceedings of the 2019 Conference of
+prior work, X-FACT is an order of magnitude lar-                the North American Chapter of the Association for
+ger, enabling the exploration of large transformer-             Computational Linguistics: Human Language Tech-
+based multilingual approaches to fact-checking.                 nologies, Volume 1 (Long and Short Papers), pa-
+We presented results for several multilingual mo-               ges 4171–4186, Minneapolis, Minnesota. Associa-
+                                                                tion for Computational Linguistics.
+deling methods and showed that the models find
+this new dataset challenging. We envision our da-            Vivek Gupta, Maitrey Mehta, Pegah Nokhiz, and Vivek
+taset as an important benchmark in development                 Srikumar. 2020. INFOTABS: Inference on tables as
+and evaluation of multilingual approaches to fact-             semi-structured data. In Proceedings of the 58th An-
+                                                               nual Meeting of the Association for Computational
+checking.                                                      Linguistics, pages 2309–2324, Online. Association
+                                                               for Computational Linguistics.
+Acknowledgments
+                                                             Junjie Hu, Sebastian Ruder, Aditya Siddhant, Graham
+We would like to thank members of the Utah NLP                 Neubig, Orhan Firat, and Melvin Johnson. 2020.
+group for their valuable insights, reviewers for their         XTREME: A massively multilingual multi-task ben-
+helpful feedback, and the team of Factly,8 especi-             chmark for evaluating cross-lingual generalisation.
+                                                               In International Conference on Machine Learning,
+    8
+        https://factly.in/                                     pages 4411–4421. PMLR.
+Md Saiful Islam, Tonmoy Sarkar, Sazzad Hossain            In Proceedings of the 2018 Conference of the North
+ Khan, Abu-Hena Mostofa Kamal, SM Murshid Ha-             American Chapter of the Association for Computa-
+ san, Alamgir Kabir, Dalia Yeasmin, Mohammad Ari-         tional Linguistics: Human Language Technologies,
+ ful Islam, Kamal Ibne Amin Chowdhury, Kazi Selim         Volume 1 (Long Papers), pages 809–819, New Orle-
+ Anwar, et al. 2020. Covid-19–related infodemic and       ans, Louisiana. Association for Computational Lin-
+ its impact on public health: A global social media       guistics.
+ analysis. The American Journal of Tropical Medi-
+ cine and Hygiene, 103(4):1621.                         Andreas Vlachos and Sebastian Riedel. 2014. Fact
+                                                          checking: Task definition and dataset construction.
+Dan Kondratyuk and Milan Straka. 2019. 75 langua-         In Proceedings of the ACL 2014 Workshop on Lan-
+  ges, 1 model: Parsing Universal Dependencies uni-       guage Technologies and Computational Social Sci-
+  versally. In Proceedings of the 2019 Conference on      ence, pages 18–22, Baltimore, MD, USA. Associa-
+  Empirical Methods in Natural Language Processing        tion for Computational Linguistics.
+  and the 9th International Joint Conference on Na-
+  tural Language Processing (EMNLP-IJCNLP), pa-         William Yang Wang. 2017. “liar, liar pants on fire”: A
+  ges 2779–2795, Hong Kong, China. Association for        new benchmark dataset for fake news detection. In
+  Computational Linguistics.                              Proceedings of the 55th Annual Meeting of the As-
+                                                          sociation for Computational Linguistics (Volume 2:
+Thang Luong, Hieu Pham, and Christopher D. Man-           Short Papers), pages 422–426, Vancouver, Canada.
+  ning. 2015. Effective approaches to attention-based     Association for Computational Linguistics.
+  neural machine translation. In Proceedings of the
+  2015 Conference on Empirical Methods in Natu-         Thomas Wolf, Lysandre Debut, Victor Sanh, Julien
+  ral Language Processing, pages 1412–1421, Lis-          Chaumond, Clement Delangue, Anthony Moi, Pi-
+  bon, Portugal. Association for Computational Lin-       erric Cistac, Tim Rault, Rémi Louf, Morgan Fun-
+  guistics.                                               towicz, et al. 2019. Huggingface’s transformers:
+                                                          State-of-the-art natural language processing. arXiv
+Parth Patwa, Shivam Sharma, Srinivas PYKL, Vineeth        preprint arXiv:1910.03771.
+  Guptha, Gitanjali Kumari, Md Shad Akhtar, Asif Ek-
+  bal, Amitava Das, and Tanmoy Chakraborty. 2020.       Shijie Wu and Mark Dredze. 2019. Beto, bentz, be-
+  Fighting an infodemic: Covid-19 fake news dataset.      cas: The surprising cross-lingual effectiveness of
+  arXiv preprint arXiv:2011.03327.                        BERT. In Proceedings of the 2019 Conference on
+                                                          Empirical Methods in Natural Language Processing
+Verónica Pérez-Rosas, Bennett Kleinberg, Alexandra      and the 9th International Joint Conference on Natu-
+  Lefevre, and Rada Mihalcea. 2018. Automatic de-         ral Language Processing (EMNLP-IJCNLP), pages
+  tection of fake news. In Proceedings of the 27th        833–844, Hong Kong, China. Association for Com-
+  International Conference on Computational Linguis-      putational Linguistics.
+  tics, pages 3391–3401, Santa Fe, New Mexico, USA.
+  Association for Computational Linguistics.
+
+Adam Poliak, Jason Naradowsky, Aparajita Haldar,
+  Rachel Rudinger, and Benjamin Van Durme. 2018.
+  Hypothesis only baselines in natural language infe-
+  rence. In Proceedings of the Seventh Joint Confe-
+  rence on Lexical and Computational Semantics, pa-
+  ges 180–191, New Orleans, Louisiana. Association
+  for Computational Linguistics.
+
+Hannah Rashkin, Eunsol Choi, Jin Yea Jang, Svitlana
+  Volkova, and Yejin Choi. 2017. Truth of varying
+  shades: Analyzing language in fake news and po-
+  litical fact-checking. In Proceedings of the 2017
+  Conference on Empirical Methods in Natural Lan-
+  guage Processing, pages 2931–2937, Copenhagen,
+  Denmark. Association for Computational Linguis-
+  tics.
+
+Gautam Kishore Shahi and Durgesh Nandini. 2020. Fa-
+  keCovid – a multilingual cross-domain fact check
+  news dataset for covid-19. In Workshop Procee-
+  dings of the 14th International AAAI Conference on
+  Web and Social Media.
+
+James Thorne, Andreas Vlachos, Christos Christodou-
+  lopoulos, and Arpit Mittal. 2018. FEVER: a large-
+  scale dataset for fact extraction and VERification.
+A        Details on Dataset Construction                  Dataset                 Model          RunTime
+    1. As mentioned in the paper, we omit several         X-FACT                  Claim            1.5 hr
+       fact-checking websites from our data. A large      X-FACT              Claim+Meta           1.5 hr
+       number of these websites are not amenable to       X-FACT                 Attn-EA           2.3 hr
+       crawling and scraping the data. For instance,      X-FACT             Attn-EA + Meta        2.3 hr
+       AFP9 is a prominent fact-checker for many          X-FACT + Eng        Claim+Meta           2.5 Hr
+       Indo-European Romance languages, but the           X-FACT + Eng       Attn-EA + Meta        4.1 Hr
+       template on its website does not lend itself to
+       automatic data extraction tools. We can try       Table 5: Average Training time of the models trained
+       to access this websites using GFCE, but case
+       many times, the ratings assigned are sentences    B.1   Models and Code
+       instead of a single label.
+                                                         As described in the main paper, we used multilin-
+                                                         gual BERT for performing our experiments. We
+    2. Another common reason is that on a number
+                                                         implemented all our models in PyTorch using the
+       of these websites, the claim statements are
+                                                         transformers library (Wolf et al., 2019).
+       not well-specified. Take for example Fakto-
+       graf10 , a website performing fact-checking in    B.2   Computing Infrastructure Used
+       Croatian. On this website , we can neither
+                                                         All of our experiments required access to GPU
+       properly extract the claim statements nor do
+                                                         accelerators. We ran our experiments on three ma-
+       they clearly mention the rating assigned to the
+                                                         chines: Nvidia Tesla V100 (16 GB VRAM), Nvidia
+       articles.
+                                                         Tesla P100 (16 GB VRAM), Tesla A100 (40 GB
+                                                         VRAM). Our experiments for the claim-only model
+    3. For a small percentage of the claim statements,
+                                                         were run on V100, and P100 GPUs and evidence-
+       Google search did not yield any results. We
+                                                         based models required larger VRAM, so they were
+       omitted all of these claims from our training,
+                                                         run on A100 GPUs.
+       development, and test sets. These are only a
+       very small percentage of claims, so we remove     B.3   Hyperparameters and Fine-tuning
+       them from all models.                                   Details
+                                                           1. We used the mBERT-base model for all of
+   Because of these reasons, a large number of                our experiments. This model has 12 layers
+websites in a number of languages could not be                each with hiddem size of 768 and number of
+crawled.                                                      attention heads equal to 12. Total number
+   There are two ways we obtain our claims, la-               of parameters in this model is 125 million.
+bels, and other metadata. One is the Google’s Fact            We set all the hyper-parameters as suggested
+Check Explorer (GFCE)11 , and the other is by cra-            by Devlin et al. (2019), except the batch size
+wling from the respective fact-checking website. In           which is fixed to 8.
+case, the links are available on GFCE, we down-
+load other metadata by visiting the website. Also,         2. All our models were run with four random
+we will release the label mapping we created along            seeds (seed = [1, 2, 3, 4]) and the numbers re-
+with the dataset. Appendix A provides more details            ported in paper are the means of these four
+on the dataset we collected.                                  runs. We fine-tuned all models for ten epochs
+                                                              and the model performing the best on deve-
+B        Reproducibility                                      lopment set across all epochs was chosen as
+                                                              the final model.
+In this section, we provide details on our hyper-
+parameter settings along with some comments on             3. Due to constraints on the VRAM of the GPUs,
+reproducibility.                                              we restricted the number of evidence docu-
+                                                              ments to five.
+     9
+     https://factuel.afp.com/
+    10
+     https://faktograf.hr/ocjena-tocnosti/               Average Run times       Average training times are
+  11
+     https://toolbox.google.com/factcheck                presented in table 5.
+/explorer
+               ISO
+Language       639-1     FactChecker                     Language Family        Train   Dev     α1    α2    α3
+               code
+Arabic         ar        misbar.com                      Afro-Asiatic
+Bengali        bn        dailyo.in                       IE: Indo-Aryan
+Spanish        es        chequeado.com                   IE: Romance
+Persian        fa        factnameh.com                   IE: Iranian
+Indonesian     id        cekfakta.com                    Austronesian
+Indonesian     id        cekfakta.tempo.co               Austronesian
+Italian        it        pagellapolitica.it              IE: Romance
+Italian        it        agi.it                          IE: Romance
+Hindi          hi        aajtak.in                       IE: Indo-Aryan
+Hindi          hi        hindi.newschecker.in            IE: Indo-Aryan
+Gujarati       gu        gujarati.newschecker.in         IE: Indo-Aryan
+Georgian       ka        factcheck.ge                    Kartvelian
+Marathi        mr        marathi.newschecker.in          IE: Indo-Aryan
+Punjabi        pa        punjabi.newschecker.in.txt      IE: Indo-Aryan
+Polish         pl        demagog.org.pl                  IE: Slavic
+Portuguese     pt        piaui.folha.uol.com.br          IE: Romance
+Portuguese     pt        poligrafo.sapo.pt               IE: Romance
+Romanian       ro        factual.ro                      IE: Romance
+Norwegian      no        faktisk.no                      IE: Germanic
+Sinhala        si        srilanka.factcrescendo.com      IE
+Serbian        sr        istinomer.rs                    IE: Slavic
+Tamil          ta        youturn.in                      Dravidian
+Albanian       sq        kallxo.com                      IE: Albanian
+Albanian       sq        faktoje.al                      IE: Albanian
+Russian        ru        factcheck.kz                    IE: Slavic
+Turkish        tr        dogrulukpayi.com                Turkic
+Turkish        tr        teyit.org                       Turkic
+Azerbaijani    az        faktyoxla.info                  Turkic
+Portuguese     pt        aosfatos.org                    IE: Romance
+German         de        correctiv.org                   IE: Germanic
+Dutch          nl        nieuwscheckers.nl               IE: Germanic
+French         fr        fr.africacheck.org              IE: Romance
+
+Table 6: Details of the X-FACT dataset. Our dataset belongs to 25 typologically diverse languages across 11
+language families. The table shows the composition of training, development, and three challenge sets. IE: denotes
+Indo-Aryan
+

@@ -1,0 +1,324 @@
+                             “Liar, Liar Pants on Fire”:
+                   A New Benchmark Dataset for Fake News Detection
+
+                                              William Yang Wang
+                                       Department of Computer Science
+                                     University of California, Santa Barbara
+                                        Santa Barbara, CA 93106 USA
+                                         william@cs.ucsb.edu
+
+
+                         Abstract                                 ing young children as sex slaves as part of a child-
+                                                                  abuse ring led by Hillary Clinton”1 . The man was
+      Automatic fake news detection is a chal-                    later arrested by police, and he was charged for
+      lenging problem in deception detection,                     firing an assault rifle in the restaurant (Kang and
+      and it has tremendous real-world politi-                    Goldman, 2016).
+      cal and social impacts. However, statis-                       The broadly-related problem of deception de-
+      tical approaches to combating fake news                     tection (Mihalcea and Strapparava, 2009) is not
+      has been dramatically limited by the lack                   new to the natural language processing commu-
+      of labeled benchmark datasets. In this                      nity. A relatively early study by Ott et al. (2011)
+      paper, we present LIAR: a new, publicly                     focuses on detecting deceptive review opinions
+      available dataset for fake news detection.                  in sentiment analysis, using a crowdsourcing ap-
+      We collected a decade-long, 12.8K man-                      proach to create training data for the positive class,
+      ually labeled short statements in various                   and then combine with truthful opinions from
+      contexts from P OLITI FACT. COM, which                      TripAdvisor. Recent studies have also proposed
+      provides detailed analysis report and links                 stylometric (Feng et al., 2012), semi-supervised
+      to source documents for each case. This                     learning (Hai et al., 2016), and linguistic ap-
+      dataset can be used for fact-checking re-                   proaches (Pérez-Rosas and Mihalcea, 2015) to de-
+      search as well. Notably, this new dataset                   tect deceptive text on crowdsourced datasets. Even
+      is an order of magnitude larger than pre-                   though crowdsourcing is an important approach to
+      viously largest public fake news datasets                   create labeled training data, there is a mismatch
+      of similar type. Empirically, we investi-                   between training and testing. When testing on
+      gate automatic fake news detection based                    real-world review datasets, the results could be
+      on surface-level linguistic patterns. We                    suboptimal since the positive training data was
+      have designed a novel, hybrid convolu-                      created in a completely different, simulated plat-
+      tional neural network to integrate meta-                    form.
+      data with text. We show that this hybrid                       The problem of fake news detection is more
+      approach can improve a text-only deep                       challenging than detecting deceptive reviews,
+      learning model.                                             since the political language on TV interviews,
+                                                                  posts on Facebook and Twitters are mostly short
+1     Introduction
+                                                                  statements. However, the lack of manually la-
+In this past election cycle for the 45th President                beled fake news dataset is still a bottleneck
+of the United States, the world has witnessed a                   for advancing computational-intensive, broad-
+growing epidemic of fake news. The plague of                      coverage models in this direction. Vlachos and
+fake news not only poses serious threats to the                   Riedel (2014) are the first to release a public fake
+integrity of journalism, but has also created tur-                news detection and fact-checking dataset, but it
+moils in the political world. The worst real-world                only includes 221 statements, which does not per-
+impact is that fake news seems to create real-life                mit machine learning based assessments.
+fears: last year, a man carried an AR-15 rifle and                   To address these issues, we introduce the LIAR
+walked in a Washington DC Pizzeria, because he                       1
+                                                                       http://www.nytimes.com/2016/12/05/business/media/comet-
+recently read online that “this pizzeria was harbor-              ping-pong-pizza-shooting-fake-news-consequences.html
+
+                                                            422
+    Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Short Papers), pages 422–426
+              Vancouver, Canada, July 30 - August 4, 2017. c 2017 Association for Computational Linguistics
+                                           https://doi.org/10.18653/v1/P17-2067
+dataset, which includes 12,836 short statements
+                                                                Statement: “The last quarter, it was just
+labeled for truthfulness, subject, context/venue,
+                                                                announced, our gross domestic product
+speaker, state, party, and prior history. With such
+                                                                was below zero. Who ever heard of this?
+volume and a time span of a decade, LIAR is an
+                                                                Its never below zero.”
+order of magnitude larger than the currently avail-
+                                                                Speaker: Donald Trump
+able resources (Vlachos and Riedel, 2014; Ferreira
+                                                                Context: presidential announcement
+and Vlachos, 2016) of similiar type. Additionally,
+                                                                speech
+in contrast to crowdsourced datasets, the instances
+                                                                Label: Pants on Fire
+in LIAR are collected in a grounded, more natural
+                                                                Justification: According to Bureau of
+context, such as political debate, TV ads, Face-
+                                                                Economic Analysis and National Bu-
+book posts, tweets, interview, news release, etc. In
+                                                                reau of Economic Research, the growth
+each case, the labeler provides a lengthy analysis
+                                                                in the gross domestic product has been
+report to ground each judgment, and the links to
+                                                                below zero 42 times over 68 years. Thats
+all supporting documents are also provided.
+                                                                a lot more than “never.” We rate his
+   Empirically, we have evaluated several pop-
+                                                                claim Pants on Fire!
+ular learning based methods on this dataset.
+The baselines include logistic regression, support              Statement: “Newly Elected Republican
+vector machines, long short-term memory net-                    Senators Sign Pledge to Eliminate Food
+works (Hochreiter and Schmidhuber, 1997), and a                 Stamp Program in 2015.”
+convolutional neural network model (Kim, 2014).                 Speaker: Facebook posts
+We further introduce a neural network architecture              Context: social media posting
+to integrate text and meta-data. Our experiment                 Label: Pants on Fire
+suggests that this approach improves the perfor-                Justification: More than 115,000 so-
+mance of a strong text-only convolutional neural                cial media users passed along a story
+networks baseline.                                              headlined, “Newly Elected Republican
+                                                                Senators Sign Pledge to Eliminate Food
+2       LIAR : a New Benchmark Dataset
+                                                                Stamp Program in 2015.” But they failed
+The major resources for deceptive detection of re-              to do due diligence and were snook-
+views are crowdsourced datasets (Ott et al., 2011;              ered, since the story came from a pub-
+Pérez-Rosas and Mihalcea, 2015). They are very                 lication that bills itself (quietly) as a
+useful datasets to study deception detection, but               “satirical, parody website.” We rate the
+the positive training data are collected from a                 claim Pants on Fire.
+simulated environment. More importantly, these
+datasets are not suitable for fake statements detec-            Statement: “Under the health care law,
+tion, since the fake news on TVs and social media               everybody will have lower rates, better
+are much shorter than customer reviews.                         quality care and better access.”
+   Vlachos and Riedel (2014) are the first to                   Speaker: Nancy Pelosi
+construct fake news and fact-checking datasets.                 Context: on ’Meet the Press’
+They obtained 221 statements from C HANNEL 42                   Label: False
+and P OLITI FACT. COM3 , a Pulitzer Prize-winning               Justification: Even the study that
+website. In particular, PolitiFact covers a wide-               Pelosi’s staff cited as the source of that
+range of political topics, and they provide detailed            statement suggested that some people
+judgments with fine-grained labels. Recently, Fer-              would pay more for health insurance.
+reira and Vlachos (2016) have released the Emer-                Analysis at the state level found the
+gent dataset, which includes 300 labeled rumors                 same thing. The general understanding
+from PolitiFact. However, with less than a thou-                of the word “everybody” is every per-
+sand samples, it is impractical to use these datasets           son. The predictions dont back that up.
+as benchmarks for developing and evaluating ma-                 We rule this statement False.
+chine learning algorithms for fake news detection.
+                                                              Figure 1: Some random excerpts from the LIAR
+    2
+      http://blogs.channel4.com/factcheck/                    dataset.
+    3
+      http://www.politifact.com/
+
+                                                        423
+       Dataset Statistics
+       Training set size                 10,269
+       Validation set size                1,284
+       Testing set size                   1,283
+       Avg. statement length (tokens)      17.9
+       Top-3 Speaker Affiliations
+       Democrats                          4,150
+       Republicans                        5,687
+       None (e.g., FB posts)              2,185
+
+         Table 1: The LIAR dataset statistics.                Figure 2: The proposed hybrid Convolutional
+                                                              Neural Networks framework for integrating text
+                                                              and meta-data.
+Therefore, it is of crucial significance to introduce
+a larger dataset to facilitate the development of             job, home state, and credit history are also pro-
+computational approaches to fake news detection               vided. In particular, the credit history includes the
+and automatic fact-checking.                                  historical counts of inaccurate statements for each
+   We show some random snippets from our                      speaker. For example, Mitt Romney has a credit
+dataset in Figure 1. The LIAR dataset4 in-                    history vector h = {19, 32, 34, 58, 33}, which cor-
+cludes 12.8K human labeled short statements from              responds to his counts of “pants on fire”, “false”,
+P OLITI FACT. COM’s API5 , and each statement is              “barely true”, “half true”, “mostly true” for histor-
+evaluated by a P OLITI FACT. COM editor for its               ical statements. Since this vector also includes the
+truthfulness. After initial analysis, we found du-            count for the current statement, it is important to
+plicate labels, and merged the full-flop, half-flip,          subtract the current label from the credit history
+no-flip labels into false, half-true, true labels re-         when using this meta data vector in prediction ex-
+spectively. We consider six fine-grained labels for           periments.
+the truthfulness ratings: pants-fire, false, barely-             These statements are sampled from various
+true, half-true, mostly-true, and true. The distri-           of contexts/venues, and the top categories in-
+bution of labels in the LIAR dataset is relatively            clude news releases, TV/radio interviews, cam-
+well-balanced: except for 1,050 pants-fire cases,             paign speeches, TV ads, tweets, debates, Face-
+the instances for all other labels range from 2,063           book posts, etc. To ensure a broad coverage of
+to 2,638. We randomly sampled 200 instances to                the topics, there is also a diverse set of subjects
+examine the accompanied lengthy analysis reports              discussed by the speakers. The top-10 most dis-
+and rulings. Not that fact-checking is not a classic          cussed subjects in the dataset are economy, health-
+labeling task in NLP. The verdict requires exten-             care, taxes, federal-budget, education, jobs, state-
+sive training in journalism for finding relevant evi-         budget, candidates-biography, elections, and im-
+dence. Therefore, for second-stage verifications,             migration.
+we went through a randomly sampled subset of
+the analysis reports to check if we agreed with the           3    Automatic Fake News Detection
+reporters’ analysis. The agreement rate measured              One of the most obvious applications of our
+by Cohens kappa was 0.82. We show the corpus                  dataset is to facilitate the development of machine
+statistics in Table 1. The statement dates are pri-           learning models for automatic fake news detec-
+marily from 2007-2016.                                        tion. In this task, we frame this as a 6-way multi-
+   The speakers in the LIAR dataset include a mix             class text classification problem. And the research
+of democrats and republicans, as well as a sig-               questions are:
+nificant amount of posts from online social me-
+                                                                  • Based on surface-level linguistic realizations
+dia. We include a rich set of meta-data for each
+                                                                    only, how well can machine learning algo-
+speaker—in addition to party affiliations, current
+                                                                    rithms classify a short statement into a fine-
+   4
+    https://www.cs.ucsb.edu/˜william/                               grained category of fakeness?
+data/liar_dataset.zip
+  5
+    http://static.politifact.com/api/                             • Can we design a deep neural network archi-
+v2apidoc.html                                                       tecture to integrate speaker related meta-data
+
+                                                        424
+         with text to enhance the performance of fake                  Models                  Valid.   Test
+         news detection?                                               Majority                0.204    0.208
+                                                                       SVMs                    0.258    0.255
+   Since convolutional neural networks architec-                       Logistic Regress0ion    0.257    0.247
+tures (CNNs) (Collobert et al., 2011; Kim, 2014;                       Bi-LSTMs                0.223    0.233
+Zhang et al., 2015) have obtained the state-of-the-                    CNNs                    0.260    0.270
+art results on many text classification datasets, we                   Hybrid CNNs
+build our neural networks model based on a re-                         Text + Subject          0.263    0.235
+cently proposed CNN model (Kim, 2014). Fig-                            Text + Speaker          0.277    0.248
+ure 2 shows the overview of our hybrid convo-                          Text + Job              0.270    0.258
+lutional neural network for integrating text and                       Text + State            0.246    0.256
+meta-data.                                                             Text + Party            0.259    0.248
+   We randomly initialize a matrix of embedding                        Text + Context          0.251    0.243
+vectors to encode the metadata embeddings. We                          Text + History          0.246    0.241
+use a convolutional layer to capture the depen-                        Text + All              0.247    0.274
+dency between the meta-data vector(s). Then,
+a standard max-pooling operation is performed                    Table 2: The evaluation results on the LIAR
+on the latent space, followed by a bi-directional                dataset. The top section: text-only models. The
+LSTM layer. We then concatenate the max-pooled                   bottom: text + meta-data hybrid models.
+text representations with the meta-data representa-
+tion from the bi-directional LSTM, and feed them
+to fully connected layer with a softmax activation               while no L2 penalty was imposed. The batch size
+function to generate the final prediction.                       for stochastic gradient descent optimization was
+                                                                 set to 64, and the learning process involves 10
+4       LIAR : Benchmark Evaluation                              passes over the training data for text model. For
+                                                                 the hybrid model, we use 3 and 8 as filter sizes,
+In this section, we first describe the experimental
+                                                                 and the number of filters was set to 10. We con-
+setup, and the baselines. Then, we present the em-
+                                                                 sidered 0.5 and 0.8 as dropout probabilities. The
+pirical results and compare various models.
+                                                                 hybrid model requires 5 training epochs.
+4.1       Experimental Settings                                     We used grid search to tune the hyperparame-
+We used five baselines: a majority baseline, a reg-              ters for LR and SVM models. We chose accuracy
+ularized logistic regression classifier (LR), a sup-             as the evaluation metric, since we found that the
+port vector machine classifier (SVM) (Crammer                    accuracy results from various models were equiv-
+and Singer, 2001), a bi-directional long short-term              alent to f-measures on this balanced dataset.
+memory networks model (Bi-LSTMs) (Hochreiter
+and Schmidhuber, 1997; Graves and Schmidhu-                      4.2   Results
+ber, 2005), and a convolutional neural network
+                                                                 We outline our empirical results in Table 2. First,
+model (CNNs) (Kim, 2014). For LR and SVM,
+                                                                 we compare various models using text features
+we used the L IB S HORT T EXT toolkit6 , which was
+                                                                 only. We see that the majority baseline on this
+shown to provide very strong performances on
+                                                                 dataset gives about 0.204 and 0.208 accuracy on
+short text classification problems (Wang and Yang,
+                                                                 the validation and test sets respectively. Standard
+2015). For Bi-LSTMs and CNNs, we used Ten-
+                                                                 text classifier such as SVMs and LR models ob-
+sorFlow for the implementation. We used pre-
+                                                                 tained significant improvements. Due to overfit-
+trained 300-dimensional word2vec embeddings
+                                                                 ting, the Bi-LSTMs did not perform well. The
+from Google News (Mikolov et al., 2013) to
+                                                                 CNNs outperformed all models, resulting in an ac-
+warm-start the text embeddings. We strictly tuned
+                                                                 curacy of 0.270 on the heldout test set. We com-
+all the hyperparameters on the validation dataset.
+                                                                 pare the predictions from the CNN model with
+The best filter sizes for the CNN model was
+                                                                 SVMs via a two-tailed paired t-test, and CNN was
+(2,3,4). In all cases, each size has 128 filters. The
+                                                                 significantly better (p < .0001). When consider-
+dropout keep probabilities was optimized to 0.8,
+                                                                 ing all meta-data and text, the model achieved the
+    6
+        https://www.csie.ntu.edu.tw/˜cjlin/libshorttext/         best result on the test data.
+
+                                                           425
+5   Conclusion                                                  Cecilia Kang and Adam Goldman. 2016. In washing-
+                                                                  ton pizzeria attack, fake news brought real guns. In
+We introduced LIAR, a new dataset for automatic                   the New York Times.
+fake news detection. Compared to prior datasets,
+                                                                Yoon Kim. 2014. Convolutional neural networks for
+LIAR is an order of a magnitude larger, which en-
+                                                                  sentence classification. In Proceedings of the 2014
+ables the development of statistical and computa-                 Conference on Empirical Methods in Natural Lan-
+tional approaches to fake news detection. LIAR’s                  guage Processing (EMNLP).
+authentic, real-world short statements from vari-
+                                                                Rada Mihalcea and Carlo Strapparava. 2009. The lie
+ous contexts with diverse speakers also make the                  detector: Explorations in the automatic recognition
+research on developing broad-coverage fake news                   of deceptive language. In Proceedings of the ACL-
+detector possible. We show that when combin-                      IJCNLP 2009 Conference Short Papers.
+ing meta-data with text, significant improvements               Tomas Mikolov, Kai Chen, Greg Corrado, and Jef-
+can be achieved for fine-grained fake news detec-                 frey Dean. 2013. Efficient estimation of word
+tion. Given the detailed analysis report and links to             representations in vector space. arXiv preprint
+source documents in this dataset, it is also possible             arXiv:1301.3781 .
+to explore the task of automatic fact-checking over             Myle Ott, Yejin Choi, Claire Cardie, and Jeffrey T
+knowledge base in the future. Our corpus can also                Hancock. 2011. Finding deceptive opinion spam
+be used for stance classification, argument min-                 by any stretch of the imagination. In Proceed-
+ing, topic modeling, rumor detection, and political              ings of the 49th Annual Meeting of the Association
+                                                                 for Computational Linguistics: Human Language
+NLP research.                                                    Technologies-Volume 1. Association for Computa-
+                                                                 tional Linguistics, pages 309–319.
+
+References                                                      Verónica Pérez-Rosas and Rada Mihalcea. 2015. Ex-
+                                                                  periments in open domain deception detection. In
+Ronan Collobert, Jason Weston, Léon Bottou, Michael              EMNLP. pages 1120–1125.
+  Karlen, Koray Kavukcuoglu, and Pavel Kuksa.
+  2011. Natural language processing (almost) from               Andreas Vlachos and Sebastian Riedel. 2014. Fact
+  scratch. Journal of Machine Learning Research                   checking: Task definition and dataset construction.
+  12(Aug):2493–2537.                                              Proceedings of the ACL 2014 Workshop on Lan-
+                                                                  guage Technology and Computational Social Sci-
+Koby Crammer and Yoram Singer. 2001. On the algo-
+                                                                  ence .
+  rithmic implementation of multiclass kernel-based
+  vector machines. Journal of machine learning re-              William Yang Wang and Diyi Yang. 2015. That’s
+  search 2(Dec):265–292.                                          so annoying!!!: A lexical and frame-semantic em-
+Song Feng, Ritwik Banerjee, and Yejin Choi. 2012.                 bedding based data augmentation approach to au-
+  Syntactic stylometry for deception detection. In                tomatic categorization of annoying behaviors using
+  Proceedings of the 50th Annual Meeting of the                   #petpeeve tweets. In Proceedings of the 2015 Con-
+  Association for Computational Linguistics: Short                ference on Empirical Methods in Natural Language
+  Papers-Volume 2. Association for Computational                  Processing (EMNLP 2015). ACL, Lisbon, Portugal.
+  Linguistics, pages 171–175.                                   Xiang Zhang, Junbo Zhao, and Yann LeCun. 2015.
+William Ferreira and Andreas Vlachos. 2016. Emer-                 Character-level convolutional networks for text clas-
+  gent: a novel data-set for stance classification. In            sification. In Advances in neural information pro-
+  Proceedings of the 2016 Conference of the North                 cessing systems. pages 649–657.
+  American Chapter of the Association for Computa-
+  tional Linguistics: Human Language Technologies.
+  ACL.
+Alex Graves and Jürgen Schmidhuber. 2005. Frame-
+  wise phoneme classification with bidirectional lstm
+  and other neural network architectures. Neural Net-
+  works 18(5):602–610.
+Zhen Hai, Peilin Zhao, Peng Cheng, Peng Yang, Xiao-
+  Li Li, Guangxia Li, and Ant Financial. 2016. De-
+  ceptive review spam detection via exploiting task re-
+  latedness and unlabeled data. In EMNLP.
+Sepp Hochreiter and Jürgen Schmidhuber. 1997.
+  Long short-term memory. Neural computation
+  9(8):1735–1780.
+
+                                                          426
+

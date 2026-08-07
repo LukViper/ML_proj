@@ -1,0 +1,73 @@
+                             1                                      2
+
+
+
+
+                           3
+
+                                                                                                4
+
+
+
+
+                           5
+
+
+
+
+Figure 16: Interface of quality control. 1 Text field for entering the justification. 2 Label of the
+claim and the checkbox of unreadable. Notice that once the unreadable option is selected, annotators
+do not need to select the label for the claim. 3 The question corresponds to the current claim. Here
+we have two question-answer pairs. If the annotator think the there exist potential problems with this
+question, check any options applied. 4 The answers corresponds to the question on the left. If the
+annotator think the there exist potential problems with the answer, check any options applied. 5
+Buttons for submitting the current claim, going to the previous claim, and next claim.
+
+
+price of vanilla icecream, for which an increase did take place, but leaves out other flavours, where
+no increase happened.”
+
+J.6     Dispute Resolution
+
+For some claims, there may be a disagreement between the labels produced by annotators in the
+question generation and quality control phases. In those cases, the claim will go through a second
+round of question generation and quality control. While the instructions given in Sections J.4.3
+and J.5 still apply, we give a few extra recommendations specific to dispute resolution here.
+
+J.6.1    Vague Claims
+
+Some claims may pass to the dispute resolution phase because they are too vague for annotators in
+phases two and three to agree on the meaning. In order to catch these cases, the final step of dispute
+resolution – that is, the extra quality control step at the end – includes an additional label, Claim Too
+Vague. This should be select when and only when an annotator can understand the claim (e.g. it is
+readable), but there is too much doubt over how it is supposed to be interpreted. For example, the
+claim “Ohio is the best state” is too vague as it is not clear what “best” refers to.
+
+
+                                                   39
+J.6.2   Adding and Modifying Questions
+The aim of dispute resolution is to resolve the conflict so that a potential new reader would come to a
+conclusive verdict. As such, the annotator should not necessarily agree with either the Phase Two or
+the Phase Three-verdict; they should attempt to make the fact-checking unambiguous. There may be
+cases where new questions must be added, and cases where existing questions should be changed
+but no new questions are necessary. There may also be cases where no change to the evidence is
+necessary at all, but where either the Phase Two or Phase Three-annotator has simply entered a wrong
+verdict. For this final category adding additional evidence to provide clarity can still be helpful, but it
+is not necessary; annotators should use their own judgment here.
+
+J.6.3   NEI-verdicts
+A common case for dispute resolution is the situation where the Phase Two annotator has selected
+Supported, Refuted, or Conflicting Evidence/Cherrypicking as the verdict, but the Phase Three
+annotator has selected Not Enough Evidence. This can happen for example if Phase Two annotators
+forget to gather some of the evidence they use to reach the verdict, rely on aspects only stated in
+the fact-checking article without making it explicit through a question-answer pair, or overestimate
+the strength of the evidence they have gathered. In these cases, the aim of dispute resolution is to
+gather additional evidence and resolve the conflict that way; i.e. it is not sufficient to give a Not
+Enough Information-verdict without attempting to add evidence (although the same time limit as in
+P2 applies).
+
+
+
+
+                                                    40
+

@@ -1,0 +1,737 @@
+  Split                                          Train                        Dev               Test (old)               Test (new)
+  Claims                                          3,068                      500                     1,000                     1,215
+  Question / Claim                                 2.60                      2.57                     2.57                      2.89
+  Re-annotated (%)                                 28.1                      24.4                     25.1                      20.0
+  End date                                 25-08-2020                 31-10-2020              22-12-2021                13-08-2023
+  Labels (S/R/C/N)                    27.6/56.8/6.4/9.2         24.4/61.0/7.6/7.0        25.5/62.0/6.3/6.2        17.3/66.5/4.1/12.1
+  Types (PS/NC/EPC/QV/CC)        7.8/33.7/57.8/9.6/11.5   5.8/23.8/61.4/13.8/10.8   7.0/21.9/69.8/7.7/11.9    3.5/24.3/71.9/5.2/16.1
+  Strategies (WE/NCP/FR/EC/SS)   78.8/30.6/6.6/29.9/3.6    88.6/19.0/7.4/27.4/2.0   88.0/19.2/7.7/29.6/1.8   82.4/22.6/10.0/37.6/4.0
+
+Table 1: Statistics for the new test set. For better comparison, we present the statistics for the original dataset. The
+Labels (%) are Supported (S), Refuted (R), Conflicting Evidence/Cherry-picking (C), and Not Enough Evidence
+(N). The Claim Types (%) are Position Statement (PS), Numerical Claim (NC), Event/Property Claim (EPC), Quote
+Verification (QV), and Causal Claim (CC). The Fact-checker strategies (%) are Written Evidence (WE), Numerical
+Comparison (NCP), Fact-checker Reference (FR), Expert Consultation (EC) and Satirical Source (SS). Note that we
+for simplicity omitted very low-frequent fact-checker strategies, e.g., Geo-location (0.3%).
+
+
+fourth and fifth phases, respectively. If the labels               2.2      Knowledge Store
+given by the fourth and fifth annotators still do not              As mentioned in Schlichtkrull et al. (2023a), re-
+match, we discard this instance. In this way, we                   liance on the Google search API made the original
+obtain 1,215 new instances. Each is annotated with                 baseline prohibitively expensive. Thus, to mitigate
+a normalized claim, meta-data, QA pairs as evi-                    the cost, we released a knowledge store along with
+dence, a verdict label and a justification for it. For             the shared task. The knowledge store contains a
+the detailed annotation guidelines and procedures,                 collection of potentially useful evidence documents
+please refer to Schlichtkrull et al. (2023a).                      for each claim, obtained via Google search.
+   To ensure high quality, we train our annotators                    We collected the knowledge store using a pro-
+before formal annotation. For each phase, annota-                  cess inspired by our original baseline. We extracted
+tors are first asked to annotate 10 instances. We                  a variety of search queries using ChatGPT4 , based
+then provide feedback and highlight their most fre-                on the claim, gold questions, and gold answers. We
+quent and common mistakes. They are then asked                     further used distractor queries created by changing
+to annotate another 10 instances. We select qual-                  entities, dates, and events in the claim, in order to
+ified annotators based on their performance on 3                   add plausible – but irrelevant – documents to the
+tasks: (1) claim type and fact-checking strategies                 knowledge store. All queries can be seen in Ap-
+over 70%+ F -1 scores; (2) 2+ QA pairs per claim;                  pendix A. For each query, we collected every URL
+(3) veracity prediction over 50%+ accuracy. These                  returned on the first page of the Google Search
+criteria are based on empirical consideration from                 API. We used the same temporal restrictions as in
+the earlier AV ERI T E C annotation (Schlichtkrull                 Schlichtkrull et al. (2023a), ensuring that the in-
+et al., 2023a). Finally, we selected 12 qualified                  cluded documents would have been available on
+annotators from 34 participants.                                   the web before the claim was made. We also in-
+                                                                   cluded the annotator-selected evidence documents
+Comparison between Original and New Test
+                                                                   selected for each claim. We deduplicated and shuf-
+Sets Table 1 presents the statistics of our new
+                                                                   fled the documents corresponding to each claim.
+test set in comparison with the original AV ERI T E C
+                                                                      We provided the URL for each document, as
+dataset. Our new test set (with claims up to 2023)
+                                                                   well as a text version scraped using trafilatura
+is temporally further removed from the training set
+                                                                   (Barbaresi, 2021). The knowledge store includes
+(ending in 2020). As such, there can be a domain
+                                                                   text scraped from PDF URLs, a step omitted in
+shift between new and old data, regarding the fact-
+                                                                   Schlichtkrull et al. (2023a). Furthermore, for the
+checking content. However, the majority (66.5%)
+                                                                   train and development splits (but not test), we
+of claim labels are refuted, which is consistent with
+                                                                   made available the specific Google search query
+previous data. Additionally, the distributions of
+                                                                   used for each document, as well as the category
+claim labels, claim types and fact-checking strate-
+                                                                   (see Table 11). The average claim has 955 as-
+gies are largely similar in terms of their proportions.
+                                                                   sociated documents, each of which have on av-
+The new test set has slightly more questions per
+                                                                   erage of 6,095 tokens. The most common URL
+claim compared to the original one, indicating that
+the annotation process was at least as thorough.                      4
+                                                                          We used gpt-3.5-turbo-0125.
+
+                                                               3
+domains for knowledge store documents are, in               2.4     Evaluation
+order, the National Center for Biotechnology Infor-         The primary evaluation metric for the shared
+mation (NCBI), Wikipedia, Quora, the New York               task is AV ERI T E C score, discussed in depth in
+Times, and CNN.                                             Schlichtkrull et al. (2023a). We first compute re-
+   The knowledge store allowed participants to              sults for question generation and question-answer
+compete without access to a paid search engine.             generation using Hungarian METEOR score. That
+Further, it allowed inexpensive experimentation             is, we use the Hungarian Algorithm (Kuhn, 1955)
+with a variety of different retrieval strategies. Our       to find an optimal matching of generated text to ref-
+construction process for the knowledge store re-            erence text in terms of METEOR score. Formally,
+lies on information not available normally to par-          let X : Ŷ × Y → {0, 1} be a boolean function
+ticipants, such as the gold question-answer pairs.          denoting the assignment between the first 10 gener-
+We found that these were necessary to ensure that           ated question-answer pairs (or questions only) Ŷ
+good, relevant evidence was included. At the same           and the reference question-answer pairs (or ques-
+time, relying on the knowledge store complicates            tions only) Y . Then, the Q + A score (or Q only
+the finding of alternative evidence paths to the one        score) u is calculated as:
+used by our annotators. Exploring alternative evi-
+dence paths was easier for systems which directly                                 1       XX
+                                                                uf (Ŷ , Y ) =        max    f (ŷ, y)X(ŷ, y)
+integrated their own search engine. As such, there                               |Y |
+                                                                                         ŷ∈Ŷ y∈Y
+were upsides to both strategies.
+                                                                                                             (1)
+                                                            where the pairwise scoring function f : S × S →
+2.3 Baseline
+                                                            R is METEOR score (Banerjee and Lavie, 2005)
+Our baseline closely follows the approach de-               using the NLTK implementation (Bird et al., 2009).
+scribed in Schlichtkrull et al. (2023a), with the              To compute the AV ERI T E C score, we ap-
+main difference being that, instead of requiring di-        plied a cutoff of uf (Ŷ , Y ) ≥ 0.25 to determine
+rect access to the paid Google Search API, we use           whether adequate evidence has been retrieved, us-
+the aforementioned knowledge store. This adjust-            ing the Q + A Hungarian METEOR score. Any
+ment aims to reduce the costs of participating in           claim for which this score is lower then 0.25 re-
+the Shared Task.                                            ceives an AV ERI T E C score of 0. For claims
+   Our baseline consists of the following steps. (1)        where the evidence score is higher than 0.25, the
+We parse the scraped text into sentences and rank           AV ERI T E C score is defined as the accuracy of the
+their similarity to the claim using BM25 (Robert-           predicted verdict (veracity). As also discussed in
+son and Zaragoza, 2009), retaining the top 100              Schlichtkrull et al. (2023a), both for Q only, Q+A,
+sentences per claim. (2) Questions-answer (QA)              and AV ERI T E C score, if a system provided more
+pairs are generated for these top 100 sentences             than 10 QA pairs, all pairs after the 10th were dis-
+using BLOOM,5 with the 10 most similar claim-               carded. We note that QA pairs beyond the 10th can
+QA pairs from the training set used as in-context           still be input to veracity prediction components,
+examples. (3) The QA pairs are then re-ranked               and may as such still be useful to some systems.
+using a pretrained BERT model as described in
+Schlichtkrull et al. (2023a). (4) Finally, using the        3     Results
+top-3 QA pairs as evidence, we predict the veracity
+label of the claim with another pretrained BERT             The overall results for the shared task can be seen
+model, as detailed in Schlichtkrull et al. (2023a).         in Table 2. Each of the 21 participating teams were
+   The baseline results are shown in Table 2. We            invited to submit a paper to be reviewed in the
+note that on both the development set, the old              FEVER workshop – detailed descriptions for each
+test set, and the new test set, the shared task             system can be found in the corresponding papers.
+baseline and the baseline from Schlichtkrull et al.         15 system description papers were submitted to the
+(2023a) perform similarly. Further details regard-          workshop (with a 16th submitted and withdrawn).
+ing the implementation, knowledge store, and                We analyse the model components discussed in
+pretrained BERT models are available at https:              each paper – see Table 3. Below, we present our
+//huggingface.co/chenxwh/AVeriTeC.                          general observations on the techniques used by
+                                                            participants, as reported in their respective system
+   5
+       We used bigscience/bloom-7b1.                        description papers.
+                                                        4
+      Rank     Team Name                                            Q only    Q+A        AV ERI T E C @ .25
+      1        TUDA_MAI (Rothermel et al., 2024)                       0.45     0.34                    0.63
+      2        HUMANE (Yoon et al., 2024)                              0.48     0.35                    0.57
+      3        CTU AIC (Ullrich et al., 2024)                          0.46     0.32                    0.50
+      4        Dunamu-ml (Park et al., 2024)                           0.49     0.35                    0.50
+      5        Papelo (Malon, 2024)                                    0.44     0.30                    0.48
+      6        UHH (Sevgili et al., 2024)                              0.48     0.32                    0.45
+      7        SynApSe (Churina et al., 2024)                          0.41     0.30                    0.42
+      8        arioriAveri (Momii et al., 2024)                        0.38     0.29                    0.39
+      9        Data-Wizards (Singhal et al., 2024)                     0.35     0.27                    0.33
+      10       MA-Bros-H (Mohammadkhani et al., 2024)                  0.38     0.24                    0.27
+      11       mitchelldehaven                                         0.27     0.23                    0.25
+      12       SK_DU (Malviya and Katsigiannis, 2024)                  0.40     0.26                    0.22
+      13       UPS (Omar, 2024)                                        0.31     0.27                    0.21
+      14       FZI-WIM (Liu et al., 2024b)                             0.32     0.21                    0.20
+      15       KnowComp (Liu et al., 2024a)                            0.32     0.21                    0.18
+      16       IKR3-UNIMIB (Urbani et al., 2024)                       0.32     0.24                    0.18
+      17       ngetach                                                 0.37     0.21                    0.14
+      18       VGyasi                                                  0.38     0.22                    0.12
+      19       Baseline                                                0.24     0.20                    0.11
+      20       InfinityScalers!                                        0.26     0.19                    0.08
+      21       AYM                                                     0.13     0.12                    0.06
+      22       Factors                                                 0.20     0.14                    0.05
+
+Table 2: Overall results for the AV ERI T E C shared task. Performance is evaluated on the total of 2214 hidden test
+set examples. Scores are given in Hungarian METEOR for question-only and question-answer performance, and in
+AV ERI T E C-score at evidence cutoff 0.25 for total performance (see Schlichtkrull et al. (2023a)).
+
+
+Knowledge Source Papelo, SynApSe, and                        did not correctly handle evidence from PDFs and
+KnowComp relied on the Google Search API as                  videos. In their submission, Dunamu-ML extended
+knowledge source, while the remaining systems all            the scraper to extract text and transcripts from PDFs
+used our knowledge store. Participants identified            and YouTube videos, and noted that this helped
+shortcomings in both approaches: the knowledge               performance. When constructing AV ERI T E C, our
+store is guaranteed to include the gold evidence             annotators filtered out claims requiring multimodal
+and can be searched with highly performant em-               reasoning; all claims in the dataset are textual and
+bedding methods, whereas the search API allows               can be verified through exclusively textual evi-
+for more freedom in what information can be re-              dence. Nevertheless, the helpfulness of video tran-
+trieved (i.e., if generating questions for a different       scripts suggests that multimodal evidence can be
+evidence path than the one our annotators used, the          useful even for that scenario.
+knowledge store may not be able to answer those
+questions). As evidenced by the strong results of            Question Generation & Retrieval Most sys-
+Team Papelo, despite the predominance of systems             tems employed an LLM-based question genera-
+relying on the knowledge store, the Google Search            tion strategy. That is, they generated questions or
+API (with which the knowledge store itself was               queries, and then retrieved evidence based on those
+built) remained a competitive option (see Table 2).          questions. Generating questions, rather than simply
+   One issue identified by several participants was          searching for the claim, was noted by many top-
+the scraper we used for the knowledge store, based           scoring systems to be essential for good retrieval
+on Trafilatura (Barbaresi, 2021). Papelo identified          performance. This supports our hypothesis from
+how, in 297 out of 500 development examples, at              Schlichtkrull et al. (2023a) that question genera-
+least one gold document was not correctly scraped.           tion (or query expansion (Mao et al., 2021)) is a
+Dunamu-ML similarly discussed how the scraper                key avenue for further gains in retrieval.
+                                                         5
+  Team Name          Evidence    QG               Retrieval                       QA                Veracity
+  TUDA_MAI           KS          GPT-4o           gte_base_en_v1.5                GPT-4o            GPT-4o
+                                                  BM25
+  HUMANE             KS          Llama-3-8b       SFR-embedding-2                 -                 Llama-3.1-70b
+                                                  Llama-3.1-70b
+  CTU AIC            KS          GPT-4o           mxbai-large-v1                  GPT-4o            GPT-4o
+  Dunamu-ML          KS          GPT-4            BM25                            GPT-4             GPT-4
+                                 T5-large
+  Papelo             Google                       -                               GPT-4o            GPT-4o
+                                 GPT-4o
+                                                  BM25
+  UHH                KS          GPT-4o-mini                                      GPT-4o-mini       Mixtral-8x7B
+                                                  gte_base_en_v1.5
+                                                                                                    GPT-4o
+  SynApSe            Google      GPT-4o           all-MiniLM-L6-v2                GPT-4o            GPT-3.5
+                                                                                                    Mistral-7B
+  aioriAveri         KS          GPT-4o           stella_en_400M_v5               GPT-4o            GPT-4o
+  Data-Wizards       KS          Phi-3-medium     stella_en_1.5B_v5               Mixtral-8x22B     Mixtral-8x22B
+  MA-Bros-H          KS          Llama-3-70B      BM25                            Llama-3-70B       Llama-3-70B
+                                                  BM25
+  SK_DU              KS          GPT-4o                                           -                 deberta-v3-base
+                                                  ms-marco-MiniLM-L-12-v2
+                                                  BM25
+  UPS                KS          T5-large                                         -                 BERT
+                                                  BERT
+                                                                                  Llama-3-70B
+  FZI-WIM            KS          Llama-3-70B      ms-marco-MiniLM-L-12-v2                           Llama-3-70B
+                                                                                  bart-large-mnli
+  KnowComp           Google      Llama-3-8b       -                               Llama-3-8b        Llama-3-8b
+                                                  BM25
+  IKR3-UNIMIB        KS          -                                                GPT-3.5           BERT
+                                                  ColBERT
+
+Table 3: Components used by systems that submitted description papers. Systems are ordered based on AVeriTeC-
+score (see Table 2). - indicates, respectively, that a system directly used claims and nothing else for search queries,
+that retrieval was done only through a search API with no reranking, and that the answer used was the entire
+retrieved passage.
+
+
+  Question generation was typically implemented                  As can be seen in Table 5, high-performing sys-
+using large-scale LLMs, such as GPT-4o or Llama-              tems tended to generate and submit a high num-
+3.1-70b. Some systems based on smaller model                  ber of questions. This may be a consequence of
+– HUMANE with Llama-3-8b, UHH with GPT-                       our evaluation setup – there is no brevity penalty
+4o-mini, Data-Wizards with Phi-3-medium, and                  (other than documents past the 10th being ignored),
+Papelo with T5 (for the first question only) – also           so submitting more evidence documents means a
+achieved a high question-only score. This suggests            higher chance of recalling the gold evidence. Sev-
+that smaller models can be competitive on search              eral teams also noted that even duplicates of the
+query generation.                                             same question could slightly increase their score.
+   Several teams – Papelo, SynApSe, and IKR3 –                   We tested this, and observed baseline perfor-
+mentioned that they saw benefits from modeling the            mance increase by 2 points QA score and 0.5 points
+retrieval task as multi-hop retrieval. That is, instead       AV ERI T E C score when including two additional
+of retrieving all documents at once, their systems            duplicates of each question. There are two rea-
+used multiple rounds of retrieval with each round             sons this might happen. First, some generated QA
+conditional on previous rounds. The benefits of this          pairs may be the best match for multiple gold QA
+strategy were also documented in previous FEVER               pairs (i.e. because they are very long, or because
+shared tasks, e.g., Malon (2021). Team Papelo                 other QA pairs are irrelevant to the claim). Dupli-
+further expanded on this strategy, showing that the           cating QA pairs means the generated pair can be
+use of different components at different retrieval            matched to multiple gold pairs when computing the
+steps – T5 for the first question and GPT-4o for              Hungarian algorithm, marginally increasing over-
+subsequent questions – yielded higher performance             all performance. Second, Hungarian METEOR is
+than using a single-question generation model.                computed by averaging over gold question-answer
+                                                          6
+  Team Name          Text   PDF    Table   Metadata   Audio    Video   Image   Other   1 doc   2 docs   3+ docs
+  TUDA_MAI           0.34   0.35    0.36       0.31    0.31     0.33    0.32    0.33    0.39    0.35       0.31
+  HUMANE             0.34   0.36    0.38       0.32    0.34     0.32    0.33    0.38    0.41    0.35       0.31
+  CTU AIC            0.31   0.33    0.36       0.30    0.26     0.30    0.32    0.35    0.33    0.33       0.29
+  Dunamu-ml          0.34   0.36    0.39       0.31    0.24     0.33    0.34    0.37    0.40    0.36       0.32
+  Papelo              0.3   0.31    0.32       0.27    0.22     0.29    0.29     0.3    0.35     0.3       0.27
+  UHH                0.31   0.34    0.36       0.29    0.23     0.31    0.31    0.37    0.37    0.32       0.28
+  SynApSe            0.29   0.31    0.32       0.25    0.25     0.28    0.28    0.31    0.38    0.32       0.22
+  arioriAveri        0.28   0.29    0.32       0.26    0.21     0.27    0.27    0.32    0.34    0.29       0.25
+  Data-Wizards       0.26   0.26    0.28       0.23    0.17     0.27    0.25    0.27    0.36    0.29       0.19
+  MA-Bros-H          0.23   0.25    0.28       0.22    0.16     0.23    0.22    0.27     0.3    0.26       0.19
+  mitchelldehaven    0.22   0.23    0.24       0.18    0.19     0.22     0.2    0.22    0.28    0.23       0.19
+  SK_DU              0.25   0.26    0.27       0.22    0.17     0.25    0.24    0.27    0.34    0.28       0.18
+  UPS                0.26   0.29    0.31       0.25    0.23     0.27    0.28    0.31    0.29    0.27       0.25
+  FZI-WIM             0.2   0.22    0.24       0.18    0.12     0.18    0.19    0.21    0.27    0.22       0.15
+  KnowComp            0.2   0.22    0.23       0.18    0.05     0.18    0.19    0.22    0.29    0.23       0.14
+  IKR3-UNIMIB        0.23   0.24    0.26       0.19    0.13     0.23    0.21    0.25    0.31    0.25       0.16
+  ngetach            0.21   0.22    0.23       0.18    0.15     0.19     0.2    0.23    0.24    0.23       0.18
+  VGyasi             0.21   0.22    0.24        0.2    0.11     0.22     0.2    0.24    0.27    0.24       0.17
+  Baseline           0.19    0.2    0.23       0.17    0.14     0.19    0.19    0.21    0.24    0.21       0.14
+  Factors            0.19   0.19    0.21       0.16    0.21     0.18    0.16    0.17    0.24     0.2       0.15
+  InfinityScalers!   0.11   0.11     0.1       0.08    0.07     0.11     0.1    0.09    0.22    0.12       0.06
+  AYM                0.13   0.13    0.13        0.1    0.05     0.12    0.11    0.13    0.26    0.14       0.06
+  Average            0.25   0.26    0.28       0.22    0.18     0.24    0.24    0.26    0.31    0.26        0.2
+
+Table 4: Retrieval results in terms of Q+A Hungarian METEOR, broken down according to 1) the document type of
+the gold evidence, and 2) the number of gold evidence QA pairs for the claim. The overall best performance on
+retrieval was achieved by Dunamu-ML.
+
+
+pairs. If there are more gold pairs than generated             The overall best performing retrieval system was
+pairs, some gold pairs will be unmatched. These             Dunamu-ML, closely followed by HUMANE. In
+will receive a score of 0, as the “matched” evidence        Table 4, we break down performance on retrieval
+is the empty string, dragging down the average.             according to which document type the gold evi-
+Effectively, systems are heavily penalised for gen-         dence originated from. We see that Dunamu-ML
+erating too few questions, and may benefit slightly         do have top performance on PDFs and videos (for
+from generating too many.                                   which they added a custom scraper), but tie respec-
+   For evidence retrieval, vector-based dense re-           tively with HUMANE and TUDA_MAI on these
+trieval systems (Karpukhin et al., 2020) were com-          categories. On the other hand, Dunamu-ML per-
+mon, along with BM25 (Robertson and Zaragoza,               form better than other systems on tabular and image
+2009). Several teams – HUMANE, UHH, SK_DU                   evidence, while HUMANE is the top performer on
+– proposed hybrid systems where coarse retrieval            Metadata, Audio, and “Other” evidence (used by
+with BM25 was followed by reranking with a                  participants mostly for social media posts, as well
+vector-based approach. For vector-based retriev-            to link to external web tools, such as a calculator
+ers, the gte (Li et al., 2023; Zhang et al., 2024)          in support of numerical reasoning).
+family of models were popular, and noted by par-
+ticipants to perform well on the task; this includes           In Table 4, we also break down retrieval perfor-
+Stella6 , an MRL (Kusupati et al., 2022) approach           mance by the number of gold evidence question-
+based on gte. Several teams noted that their gte- or        answer pairs per claim. HUMANE performs the
+Stella-based retrievers were chosen as they, at the         best on claims with only one gold document, nar-
+time of the competition, were top performers on             rowly followed by Dunamu-ML. As the number of
+the MTEB (Muennighoff et al., 2023) leaderboard.            claims increases, Dunamu-ML takes the lead. With
+                                                            an average of 2.74 questions per claim in the test
+   6
+    https://huggingface.co/dunzhang/stella_en_              set, this may explain why Dunamu-ML achieved
+400M_v5                                                     the overall highest retrieval performance.
+                                                        7
+   Team name            QV        N    E/P       C      PS        S       R   NEE     CE/C     Avg. # Docs
+   TUDA_MAI            0.64    0.58    0.64   0.64     0.58    0.64    0.73    0.12     0.19              9.3
+   HUMANE              0.59    0.57    0.58   0.55     0.46    0.76    0.62    0.01     0.12            10.0
+   CTU AIC             0.57    0.49    0.51   0.52     0.38    0.58    0.58     0.1     0.01            9.89
+   Dunamu-ml           0.44    0.49     0.5   0.55      0.4    0.69     0.5    0.31     0.12           12.41
+   Papelo              0.51    0.38     0.5   0.51     0.45    0.45    0.59     0.0      0.0            9.95
+   UHH                 0.46    0.43    0.46   0.48     0.39    0.47    0.54     0.0      0.0            10.0
+   SynApSe             0.45    0.39    0.43   0.43     0.36    0.42     0.5    0.02     0.21            4.26
+   arioriAveri         0.44    0.37    0.39    0.4     0.29    0.45    0.44    0.09     0.06            8.98
+   Data-Wizards        0.37     0.3    0.34   0.32     0.29    0.44    0.36    0.05     0.04              3.0
+   MA-Bros-H           0.29     0.3    0.26   0.25     0.19     0.4    0.27    0.08      0.0            3.74
+   mitchelldehaven     0.24    0.26    0.25   0.25     0.16     0.4    0.25     0.0      0.0              5.0
+   SK_DU               0.27     0.3    0.21   0.15     0.14    0.36    0.22    0.01     0.11              3.0
+   UPS                 0.29    0.18    0.22    0.2     0.21    0.17    0.24    0.08     0.14            10.0
+   FZI-WIM             0.21    0.25    0.18   0.16     0.21    0.31    0.18    0.12     0.02            2.52
+   KnowComp            0.16    0.19    0.19   0.15     0.13    0.27    0.19     0.0     0.01            2.55
+   IKR3-UNIMIB         0.21    0.22    0.17   0.17     0.15    0.28    0.19    0.01     0.05              3.0
+   ngetach             0.16    0.13    0.14   0.17     0.09     0.0    0.22     0.0      0.0            4.25
+   VGyasi              0.16    0.11    0.13   0.11     0.10     0.1    0.12    0.22     0.03            3.46
+   Baseline            0.14    0.16    0.11   0.10     0.06    0.17    0.12     0.0     0.04             3.0
+   InfinityScalers!    0.04    0.10    0.09   0.08     0.08    0.24    0.04    0.04     0.10            3.52
+   AYM                 0.07    0.06    0.06   0.03     0.10    0.11    0.05     0.0      0.0              1.0
+   Factors             0.04    0.05    0.05   0.05     0.04    0.13    0.03    0.04     0.01              1.0
+   Average             0.31    0.29    0.29   0.29     0.24    0.36    0.32    0.06     0.06            5.63
+
+Table 5: We compute separate results based on claim type (QV = Quote Verification, N = Numerical, E/P =
+Event/Property, C = Causal, PS = Position Statement). We also compute results separated by gold verdict (S =
+Supported, R = Refuted, NEE = Not Enough Evidence, CE/C = Conflicting Evidence / Cherrypicking). Finally, we
+report the average number of evidence documents submitted per claim. We note that if a team submitted more than
+10 documents for a claim, only the first 10 were used to compute retrieval scores for evaluation.
+
+
+Veracity Prediction Veracity prediction was also           Types & Verdicts In Table 5, we provide
+dominated by LLM-based approaches, including               a detailed breakdown of the results based on
+GPT-4o, Llama 3.1, and Mixtral. Teams HUMANE               claim type (quote verification, numerical claims,
+and SynApSe note that some fine-tuning was nec-            event/property claims, causal claims, position state-
+essary for good performance on veracity prediction.        ments) and verdict (supported, refuted, conflicting
+Various teams saw improvements both from full              evidence/cherrypicking, not enough evidence). For
+fine-tuning of all the weights, and from fine-tuning       each category, we report AV ERI T E C scores on the
+with LORA (Hu et al., 2022). Interestingly, one            corresponding subset of the test set.
+team – Papelo – chose to prevent their veracity               Systems performed slightly better on quote veri-
+prediction system from predicting Not Enough Ev-           fication, slightly worse on position statements, and
+idence and Conflicting Evidence, arguing that their        approximately equally well on other claims. This is
+prompting-based model too frequently chose these           interesting, as quote verification and position state-
+rarer labels. This may explain why calibration was         ments are relatively similar tasks. In the former,
+especially helpful for this task.                          systems must verify if a person has uttered a quote
+   We note that top-scoring systems tended to use          verbatim; in the latter, systems must verify if a per-
+very large models for veracity prediction, such as         son or organisation holds a specific position (e.g.,
+GPT-4o, Llama-3.1-70b, or Mixtral-8x7b. The su-            supporting a policy), but not necessarily verbatim.
+perior reasoning capabilities of these cutting-edge        Verifying position statements often required abduc-
+models appear especially critical to this stage of         tive reasoning, which LLMs are known to struggle
+the pipeline, unlike for question generation.              with (Dougrez-Lewis et al., 2024).
+                                                       8
+   Among the top performing systems, perfor-                   Therefore, we further investigated submissions
+mance is frequently lower on numerical statements           via manual evaluation. In particular, we focused
+(along with position statements) compared to other          on instances which the NLI model identified as
+claims. This suggests that the gap is smaller for           either neutral or contradiction, and on the top-4
+numerical reasoning than other forms of reason-             performing systems (i.e.: TUDA_MAI, HUMANE,
+ing. As top performers often use very large LLMs,           CTU AIC and Dunamu-ml). We randomly selected
+that is suggestive of the type of reasoning gains           20 neutral or contradicting instances from each
+accomplished by scaling up these models.                    submission, and then performed human evaluation.
+   In terms of performance across the different la-         Given an instance with its corresponding QA pairs
+bels, there is significant variation. First, systems        and retrieved documents, we identified whether the
+often have different calibration to predict supported       answers were entailed by the retrieved documents.
+versus refuted claims. As refuted claims domi-                 Generally, we found that all systems were mostly
+nate (making up approximately two-thirds of the             reliable, with the evidence they generate being sup-
+dataset), this yields a significant advantage for           ported by the retrieved documents. All answers
+some participants. We note that a common strategy           from TUDA_MAI were extractive from source doc-
+among participants was to ignore the rarer veracity         uments and thus entailed. The answers from the
+labels – not enough evidence, and conflicting evi-          other three systems were more abstractive. Al-
+dence. As mentioned e.g. by team Papelo in their            though the answers can contain some hallucina-
+system description paper, large language models             tion (e.g., generating answers that contradict the
+tend to overpredict these rarer classes. Neverthe-          retrieved documents by mistake), our manual eval-
+less, many top performers, including the winning            uation found the answers were mostly (HUMANE:
+system, made significant gains on these classes.            19/20; CTU AIC: 17/20; Dunamu-ml: 12/20)
+Quality Controls on Test Submissions To en-                 entailed by their associated documents. Errors
+sure the reliability of submitted systems, we con-          were typically due to mistakes by the question-
+ducted quality control on our submissions. Here,            answering components, such as taking a snippet
+reliability refers to the evidence (QA pairs) being         from the associated document out of context. Thus,
+grounded and supported by their retrieved docu-             we conclude that the systems evaluated were re-
+ments. Typically, participants returned answers             liable and find relevant documents that provide
+generated based on retrieved documents; although            useful information for predicting veracity.
+some systems generated answers e.g. with an LLM,
+and subsequently matched the answer to a “backing           4   Human Evaluation of Evidence
+document”.
+   We first used an automatic method to evalu-
+                                                            Following the approach taken in the first FEVER
+ate the entailment between the answers and the
+                                                            shared task (Thorne et al., 2018b), we conducted
+retrieved documents. Specifically, we applied
+                                                            human evaluation of the evidence retrieved by the
+a DeBERTa-large-based NLI model (He et al.,
+                                                            systems participating in the shared task, motivated
+2020)7 on all submissions, taking each answer
+                                                            by two concerns. First, the incompleteness of the
+as hypothesis and its corresponding document as
+                                                            gold evidence annotation, since it is often the case
+premise. Generally, we find that most teams see a
+                                                            that adequate evidence to determine the verdict
+small proportion of entailment labels and a large
+                                                            for a claim can be found in multiple webpages, as
+proportion of neutral labels ( 80%). This can be
+                                                            shown in the inter-annotation agreement study of
+because the NLI model cannot perform well on
+                                                            Schlichtkrull et al. (2023a). Second, the inaccura-
+out-of-distribution data in a zero-shot setting, in
+                                                            cies of automatic evaluation metrics of textual eval-
+particular when the retrieved document is much
+                                                            uation, especially in the case of token-matching
+longer than the standard NLI premise (e.g., the av-
+                                                            metrics such as METEOR (Banerjee and Lavie,
+erage document length in words in TUDA_MAI’s
+                                                            2005) used here, but also of more recent neural
+submission is over 4,000, while it is around 50 in
+                                                            ones such as FactScore (Min et al., 2023). Thus
+ANLI (Mishra et al., 2021)).
+                                                            we can gain a deeper understanding of the qual-
+   7
+    https://huggingface.co/MoritzLaurer/                    ity of the retrieved evidence, and assess how well
+DeBERTa-v3-large-mnli-fever-anli-ling-wanli,
+which demonstrates the best performance on NLI tasks        the AV ERI T E C scores assigned to the retrieved
+amongst Hugging Face models.                                evidence aligns with human judgements.
+                                                        9
+Evaluation Process We conducted human evalu-                            Label/Pred   CE/C    NEE     Refuted   Supported
+ation in collaboration with the participating teams.                      CE/C        35.7    3.6      53.6       7.1
+Sixteen top-performing teams were invited to par-                         NEE          5.9    22.1     60.3       11.8
+                                                                         Refuted       3.9    4.9      85.4       5.8
+ticipate in the evaluation. However, teams Dunamu-                      Supported      7.6     0       16.5       76.0
+ml, mitchelldehaven, and KnowComp did not take
+part. Each of the remaining thirteen participating                    Table 6: Overview of verdict labelled by human evalua-
+teams manually evaluated thirty evidence samples                      tors (rows) versus system predictions (columns).
+from other participants. Out of these, five were
+gold-labeled, which were included to assist in the
+post-processing of the collected annotations and to                   completely irrelevant to the given claim (9.4%), we
+assess their quality. The evidence samples were                       were left with 344 valid annotations. Among these,
+randomly selected and evenly distributed across                       66 annotations corresponded to gold-labeled sam-
+all submitted systems, representing both high- and                    ples. Excluding the gold-labeled samples, resulted
+low-scoring systems, as shown in Table 5.                             in a final set of 278 evidence annotations.
+   Figures in Appendix B depict the evaluation                           Before labeling the system-retrieved evidence,
+form and the instructions provided to human anno-                     participants were first asked to label the ver-
+tators during evaluation. As a first step, we asked                   dict of the retrieved evidence. Table 6 provides
+annotators to assess whether “at least some part                      an overview of the matching between system-
+of the evidence” was “non-empty, understandable,                      predicted labels (columns) and human-labeled ver-
+and related to the claim.” If so, it was considered                   dicts (rows). While human annotators generally
+eligible for further rating. In addition to assigning a               agreed with evidence labeled as refuted or sup-
+verdict label, we asked annotators to rate retrieved                  ported, there was less overlap for evidence labeled
+evidence in comparison to provided reference evi-                     as NEE and CE/C by the submitted systems.
+dence8 . Annotators rated the evidence on a scale                        Analyzing human judgments across the five eval-
+from 1 to 5 across five dimensions:                                   uated dimensions (see Table 10), we find that the
+(1) Coverage: Measures how much of the refer-                         majority of predicted evidence was labeled as very
+ence evidence is covered by the predicted evidence,                   coherent, consistent, relevant, and containing lim-
+ensuring that the content, meaning, entities, and                     ited repetition. However, in the dimension of se-
+other key elements of the reference are fully repre-                  mantic coverage, approximately 15% of the evi-
+sented in the retrieved evidence.                                     dence received a rating of 0, indicating that “the
+(2) Coherence: Captures whether the retrieved                         predicted evidence covers none of the reference evi-
+evidence is coherent, i.e., if all sentences are con-                 dence.” Additionally, around 20% received a rating
+nected sensibly and the evidence makes sense as a                     of 1, meaning that “very little of the reference evi-
+whole.                                                                dence is covered.” This does not necessarily mean
+(3) Repetition: Evaluates whether the retrieved                       that the evidence is false – low coverage can also
+evidence exhibits repetition of its content.                          occur if the retrieved evidence uses different infor-
+(4) Consistency: Assesses whether the retrieved                       mation, arguments, or sources than the reference
+evidence is semantically consistent and does not                      evidence. Ideally, we aim for an evidence evalu-
+contain conflicting information. Unlike coherence,                    ation that can fairly assess evidence even when it
+which focuses on how well the information is struc-                   differs from the reference and has low coverage.
+tured, consistency evaluates whether the arguments                       To assess the relationship between human scor-
+presented in the evidence for or against a claim are                  ing and the Hungarian METEOR (see Sec 2.4),
+sound and aligned.                                                    we computed both the Spearman correlation coeffi-
+(5) Relevance: Measures how relevant the re-                          cient (ρ (Spearman, 1987)) and the Pearson correla-
+trieved evidence is to the content of the claim.                      tion coefficient (r (Pearson, 1896)) as shown in Ta-
+                                                                      ble 8. Correlations were calculated using both the
+Insights Gained The annotation process resulted                       entire evidence text and the question text only. In
+in a total of 389 annotations. After filtering out evi-               both cases, we observed a low correlation between
+dence samples that were labeled by evaluators as                      the Hungarian Meteor and the assessed dimensions,
+entirely empty (1%), not understandable (1.8%), or                    with the highest correlation seen in the category of
+   8
+     We provide the exact instruction for rating each criteria        “repetition” (see Table 8). While the results show a
+in the appendix.                                                      similar ranking of participating systems compared
+                                                                 10
+          Rating    COV      COV %       COH     COH %   REP       REP %    CON    CON %      REL    REL %
+             1        42       15.16     4       1.44     23        8.27     6       2.17      4      1.44
+             2        59       21.30     42      15.11    51       18.35     35      12.64     26      9.35
+             3        59       21.30     64      23.02    61       21.94     57      20.58     51     18.35
+             4        71       25.63     81      29.14    71       25.54     82      29.60     83     29.86
+             5        46       16.61     87      31.29    72       25.90     97      35.02    114     41.01
+
+Table 7: Overview of ratings for Semantic Coverage, Coherence, Repetition, Consistency, and Relevance. For each
+evaluation dimension, the first column depicts the absolute number of annotations for a specific score (from 1 to 5)
+and the second column the percentages.
+
+
+                 Dimension         ρ      r                       Certain low-ranked examples highlight differ-
+                                                               ent challenges (see Table 13). For example, the
+                 Coverage         .005   -.024                 predicted evidence in the first row received a low
+                 Coherence        .076   .057                  AV ERI T E C score despite receiving the highest
+                 Repetition       .117   .025                  score of 5 across all categories in human evaluation.
+                 Consistency      .039   .024                  Despite both sets of evidence reaching the same
+                 Relevance        .008   .003                  conclusion, the large disparity in answer length
+                                                               and wording leads to a much lower AV ERI T E C
+Table 8: Correlation between Q + A scores (Hungarian
+METEOR) and human-rated subset of evidence. We cal-            score. The example in the second row, also ranks
+culate correlation using the Spearman (ρ) and Pearson          low according to AV ERI T E C score, even though
+(r) correlation coefficients.                                  it scores high in all categories except for cover-
+                                                               age, where it scores 3. Here, both the reference
+                                                               and predicted evidence reach the same verdict, but
+to human evaluations on the subset, further work               the predicted evidence supports the claim with dif-
+is needed to develop scoring methods that align                ferent information and wording, resulting in low
+more closely with human assessments of evidence.               semantic coverage and a low AV ERI T E C score.
+With that said, overall, the top-ranked teams (based
+on AV ERI T E C score) also perform well on human              5   Lessons Learned
+evaluation, while the lower-ranked teams remain
+similarly positioned, with only minor shifts in their          Providing a knowledge store rather than requiring
+order.9 It is important to note that this evaluation           participants to rely on a search engine API made
+was solely based on a small sample of system pre-              the task more accessible. Given the cost of API ac-
+dictions, and that the results should therefore be             cess, this allowed substantial analysis and work by
+taken with a grain of salt.                                    participants on retrieval. We note that most submis-
+   Human evaluation of evidence predictions of-                sions – 13 of 16 system description papers – used
+fers valuable insights into the limitations of the             the knowledge store. Nevertheless, because of the
+AV ERI T E C score, and suggests directions for                size of the knowledge store and the inclusion of
+future research. A notable observation is the                  distractor documents, the knowledge store did not
+discrepancy between human evaluation and the                   trivialise the task, and systems relying on search
+AV ERI T E C score for some of the highest-ranked              remain competitive and provide unique advantages.
+samples, such as the examples provided in Table 12             Several participants, such as team FZI-WIM, com-
+in the appendix. For instance, in row three, the pre-          mented on how the two are complementary, and
+dicted evidence directly contradicts the reference             suggested hybrid systems using both as a poten-
+evidence by providing different numbers, yet it re-            tially fruitful extension of their systems.
+ceives a high AV ERI T E C score due to similar word-             AV ERI T E C presupposes a strong focus on
+ing. Similarly, for the first two rows in Table 12, the        evidence retrieval. The overall score, as in
+semantic coverage score is rated with the second               FEVER (Thorne et al., 2018a), is determined both
+lowest score 1, whereas the average score across               by retrieval performance and by veracity prediction
+all examples is 3, indicating misalignment between             performance. In the AV ERI T E C shared task, partic-
+the predicted and reference evidence.                          ipant systems innovated across the pipeline, and all
+                                                               of the top-scoring systems suggest improvements
+   9
+       See Table 10 in the appendix.                           to multiple subtasks of fact-checking.
+                                                          11
+      Team name             0-1000      1000-2215                     The scraper we used for the knowledge store
+                                                                   (same as in Schlichtkrull et al. (2023a)) to retrieve
+      TUDA_MAI                 0.61            0.64                evidence turned out to be a significant weakness.
+      HUMANE                   0.55            0.58                As some participants noticed, many knowledge
+      CTU AIC                  0.45            0.55                store documents are empty. The submission with
+      Dunamu-ml                 0.5             0.5                the best retrieval performance, Dunamu-ml, used a
+      Papelo                   0.49            0.46                custom scraper, and may have derived significant
+      UHH                      0.41            0.48                gains from that choice. We suggest that this may
+      SynApSe                  0.41            0.43                be an interesting area for further research.
+      arioriAveri              0.35            0.42
+                                                                      During the competition, we identified an issue
+      Data-Wizards             0.32            0.34
+                                                                   with the knowledge store data for the last 1215
+      MA-Bros-H                0.22            0.31
+                                                                   test examples. Due to an error with date formats,
+      mitchelldehaven          0.22            0.27
+                                                                   for some claims, web pages published after the
+      SK_DU                     0.2            0.25
+                                                                   claim were included in the knowledge store. This
+      UPS                      0.15            0.25
+                                                                   included fact-checking articles, as also mentioned
+      FZI-WIM                  0.19             0.2
+                                                                   by CTU AIC in their system description paper. As
+      KnowComp                 0.19            0.18
+                                                                   the first 1000 examples were not affected, we com-
+      IKR3-UNIMIB              0.16             0.2
+                                                                   puted performance on the first 1000 and last 1215
+      ngetach                  0.12            0.16
+                                                                   test examples separately – see Table 9.
+      VGyasi                   0.12            0.12
+                                                                      As can be seen, the ranking of participants on
+      Baseline                 0.11            0.12
+                                                                   the two splits is roughly the same – and, indeed,
+      InfinityScalers!          0.1            0.07
+                                                                   roughly the same as for the entire test set. The
+      AYM                      0.06            0.06
+                                                                   second half was easier, and many systems perform
+      Factors                  0.06            0.04
+                                                                   slightly better there. Somewhat surprisingly, some
+      Average                  0.27              0.3               systems which relied on Google search – specif-
+                                                                   ically, SynApSe – also saw a performance gain
+Table 9: AV ERI T E C scores for different subsections of          when measured only on the second split. As such,
+the dataset. We compute results for the initial test set of
+                                                                   we do not believe this issue majorly impacted any
+1000 examples collected by Schlichtkrull et al. (2023a),
+and for the additional 1215 test examples collected for            subset of participants, such as those not relying
+this shared task.                                                  on the knowledge store. We release an updated
+                                                                   knowledge store along with our shared task pa-
+                                                                   per, accessible at https://fever.ai/dataset/
+   When submitting test set predictions,                           averitec.html. We have re-compiled the knowl-
+we required participants to include a field                        edge store with the correct date cutoff, and removed
+(“scraped_text”) for each piece of evidence in                     any fact-checking articles that snuck through from
+their submission, corresponding to the webpage                     the evidence base.
+providing backing for that piece of evidence. This
+enabled us to carry out manual and automatic                       6   Conclusions & Future Work
+quality control evaluation verifying that systems do
+indeed ground their evidence in external sources                   The AV ERI T E C shared task attracted submissions
+(see Section 3). This enabled us to detect, for                    from 21 teams, 18 of which outperformed our base-
+example, if some systems were hallucinating evi-                   line. The leaderboard was dominated by systems
+dence; we did not see any evidence of hallucinated                 relying on large language models, especially GPT-
+evidence, but we consider guardrails against this                  4o; nevertheless, especially for question generation
+crucial. Unfortunately, the inclusion of this field                and retrieval, smaller models – such as LLama-3-
+made some submissions substantial in size, as                      8b – also achieved top performance. The winner
+entire webpages were included – up to 2.3gb for                    of the shared task was team TUDA_MAI, which
+the largest submission. Our submission portal,                     achieved an AV ERI T E C-score of 63%. In this pa-
+eval.ai, was not able to handle these large files,                 per we have analysed the shared task, highlighting
+blocking the portal for all participants during the                aspects of the 16 submitted system description pa-
+last few days of the competition. We extended the                  pers, as well as key takeaways from the shared task
+deadline to compensate.                                            itself.
+                                                              12
+   The strong performance of the participating                References
+teams establishes a firm foundation for automating            Rami Aly, Zhijiang Guo, Michael Sejr Schlichtkrull,
+aspects of real-world fact-checking. The results fur-           James Thorne, Andreas Vlachos, Christos
+thermore indicate clear directions for future work.             Christodoulopoulos, Oana Cocarascu, and Arpit
+First, most participating systems – especially for              Mittal. 2021. The fact extraction and VERification
+                                                                over unstructured and structured information
+veracity prediction – relied on very large models,              (FEVEROUS) shared task. In Proceedings of the
+such as GPT-4. Further, many of these are blackbox              Fourth Workshop on Fact Extraction and VERifica-
+models. These models may be prohibitively expen-                tion (FEVER), pages 1–13, Dominican Republic.
+sive for some real-world use cases, e.g., assisting             Association for Computational Linguistics.
+smaller fact-checking organisations (Schlichtkrull            Isabelle Augenstein, Christina Lioma, Dongsheng
+et al., 2023b). Given that, we suggest that get-                 Wang, Lucas Chaves Lima, Casper Hansen, Chris-
+ting smaller, more efficient models to reach the                 tian Hansen, and Jakob Grue Simonsen. 2019. Mul-
+performance of their larger counterparts may be                  tiFC: A real-world multi-domain dataset for evidence-
+                                                                 based fact checking of claims. In Proceedings of
+a fruitful direction for further research. Similarly,            the 2019 Conference on Empirical Methods in Natu-
+we note that performance for most top-scoring sys-               ral Language Processing and the 9th International
+tems was much higher on supported and refuted                    Joint Conference on Natural Language Processing
+claims, compared to conflicting evidence and not                 (EMNLP-IJCNLP), pages 4685–4697, Hong Kong,
+                                                                 China. Association for Computational Linguistics.
+enough evidence. We suggest that leveling this gap
+is another clear avenue for future improvements.              Satanjeev Banerjee and Alon Lavie. 2005. METEOR:
+                                                                An automatic metric for MT evaluation with im-
+7   Limitations & Ethics                                        proved correlation with human judgments. In Pro-
+                                                                ceedings of the ACL Workshop on Intrinsic and Ex-
+The datasets and models described in this paper are             trinsic Evaluation Measures for Machine Transla-
+                                                                tion and/or Summarization, pages 65–72, Ann Arbor,
+not intended for truth-telling, e.g. for the design of          Michigan. Association for Computational Linguis-
+fully automated content moderation systems. The                 tics.
+evidence selection and veracity labels provided in
+                                                              Adrien Barbaresi. 2021. Trafilatura: A web scraping
+the AV ERI T E C dataset relate only to the evidence
+                                                                library and command-line tool for text discovery and
+recovered by annotators, and as such are subject to             extraction. In Proceedings of the 59th Annual Meet-
+the biases of annotators and journalists. Participant           ing of the Association for Computational Linguistics
+systems, which sought to maximize performance                   and the 11th International Joint Conference on Nat-
+on AV ERI T E C, may replicate those biases. We                 ural Language Processing: System Demonstrations,
+                                                                pages 122–131, Online. Association for Computa-
+furthermore note that shared task leaderboards are              tional Linguistics.
+a limited representation of real-world task needs,
+not the least because the test set is static. Act-            Steven Bird, Ewan Klein, and Edward Loper. 2009. Nat-
+                                                                 ural language processing with Python: analyzing text
+ing on veracity estimates arrived at through biased              with the natural language toolkit. " O’Reilly Media,
+means, including automatically produced ranking                  Inc.".
+decisions for evidence retrieval, risks causing epis-
+                                                              Svetlana Churina, Anab Maulana Barik, and
+temic harm (Schlichtkrull et al., 2023b).
+                                                                Saisamarth Rajesh Phaye. 2024.         Improving
+                                                                evidence retrieval on claim verification pipeline
+Acknowledgments                                                 through question enrichment. In Proceedings of the
+                                                                Seventh Workshop on Fact Extraction and VERifi-
+Michael, Yulong, Chenxi, Zhenyun, and Andreas                   cation (FEVER). Association for Computational
+received funding from the European Research                     Linguistics.
+Council (ERC) under the European Union’s Hori-
+                                                              Sarah Cohen, Chengkai Li, Jun Yang, and Cong Yu.
+zon 2020 Research and Innovation programme                      2011. Computational journalism: A call to arms to
+grant AVeriTeC (Grant agreement No. 865958).                    database researchers. In 5th Biennial Conference on
+Rui is funded by a grant from the Alan Turing                   Innovative Data Systems Research (CIDR).
+Institute and DSO National Laboratories (Singa-               John Dougrez-Lewis, Mahmud Elahi Akhter, Yulan He,
+pore). Rami Aly was supported by the Engineering                and Maria Liakata. 2024. Assessing the reasoning
+and Physical Sciences Research Council Doctoral                 abilities of chatgpt in the context of claim verification.
+Training Partnership (EPSRC). The annotation of                 Preprint, arXiv:2402.10735.
+the new test set was conducted by a donation from             Andy Dudfield. 2020. How we’re using AI to scale
+Google.                                                         up global fact checking. https://fullfact.org/
+                                                         13
+  blog/2020/jul/afc-global/. Accessed: 2023-                   Jin Liu, Steffen Thoma, and Achim Rettinger. 2024b.
+  01-17.                                                          FZI-WIM at averitec shared task: Real-world fact-
+                                                                  checking with question answering. In Proceedings of
+Max Glockner, Yufang Hou, and Iryna Gurevych. 2022.               the Seventh Workshop on Fact Extraction and VER-
+ Missing counter-evidence renders NLP fact-checking               ification (FEVER). Association for Computational
+ unrealistic for misinformation. In Proceedings of                Linguistics.
+ the 2022 Conference on Empirical Methods in Nat-
+ ural Language Processing, pages 5916–5936, Abu                Christopher Malon. 2021. Team papelo at FEVEROUS:
+ Dhabi, United Arab Emirates. Association for Com-               Multi-hop evidence pursuit. In Proceedings of the
+ putational Linguistics.                                         Fourth Workshop on Fact Extraction and VERifica-
+                                                                 tion (FEVER), pages 40–49, Dominican Republic.
+Pengcheng He, Xiaodong Liu, Jianfeng Gao, and                    Association for Computational Linguistics.
+  Weizhu Chen. 2020. Deberta: Decoding-enhanced
+  bert with disentangled attention. arXiv preprint             Christopher Malon. 2024. Multi-hop evidence pursuit
+  arXiv:2006.03654.                                              meets the web: Team papelo at FEVER 2024. In
+                                                                 Proceedings of the Seventh Workshop on Fact Ex-
+Edward J Hu, yelong shen, Phillip Wallis, Zeyuan Allen-          traction and VERification (FEVER). Association for
+  Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu               Computational Linguistics.
+  Chen. 2022. LoRA: Low-rank adaptation of large
+  language models. In International Conference on              Shrikant Malviya and Stamos Katsigiannis. 2024.
+  Learning Representations.                                      SK_DU team: Cross-encoder based evidence re-
+                                                                 trieval and question generation with improved prompt
+Vladimir Karpukhin, Barlas Oguz, Sewon Min, Patrick              for the AVeriTeC shared task. In Proceedings of the
+  Lewis, Ledell Wu, Sergey Edunov, Danqi Chen, and               Seventh Workshop on Fact Extraction and VERifica-
+  Wen-tau Yih. 2020. Dense passage retrieval for open-           tion (FEVER). Association for Computational Lin-
+  domain question answering. In Proceedings of the               guistics.
+  2020 Conference on Empirical Methods in Natural
+  Language Processing (EMNLP), pages 6769–6781,                Yuning Mao, Pengcheng He, Xiaodong Liu, Yelong
+  Online. Association for Computational Linguistics.             Shen, Jianfeng Gao, Jiawei Han, and Weizhu Chen.
+                                                                 2021. Generation-augmented retrieval for open-
+H. W. Kuhn. 1955. The hungarian method for the assign-           domain question answering. In Proceedings of the
+   ment problem. Naval Research Logistics Quarterly,             59th Annual Meeting of the Association for Compu-
+   2(1-2):83–97.                                                 tational Linguistics and the 11th International Joint
+                                                                 Conference on Natural Language Processing (Vol-
+Aditya Kusupati, Gantavya Bhatt, Aniket Rege,                    ume 1: Long Papers), pages 4089–4100, Online. As-
+  Matthew Wallingford, Aditya Sinha, Vivek Ramanu-               sociation for Computational Linguistics.
+  jan, William Howard-Snyder, Kaifeng Chen, Sham
+  Kakade, Prateek Jain, et al. 2022. Matryoshka repre-         Sewon Min, Kalpesh Krishna, Xinxi Lyu, Mike Lewis,
+  sentation learning. In Advances in Neural Informa-             Wen-tau Yih, Pang Koh, Mohit Iyyer, Luke Zettle-
+  tion Processing Systems.                                       moyer, and Hannaneh Hajishirzi. 2023. FActScore:
+                                                                 Fine-grained atomic evaluation of factual precision
+Stephan Lewandowsky, John Cook, Ullrich Ecker,                   in long form text generation. In Proceedings of the
+   Dolores Albarracin, Michelle Amazeen, Panayiota               2023 Conference on Empirical Methods in Natural
+   Kendeou, Doug Lombardi, Eryn Newman, Gor-                     Language Processing, pages 12076–12100, Singa-
+   don Pennycook, Ethan Porter, David G. Rand,                   pore. Association for Computational Linguistics.
+   David N. Rapp, Jason Reifler, Jon Roozenbeek,
+   Philipp Schmid, Colleen M. Seifert, Gale M. Sina-           Sebastião Miranda, Andreas Vlachos, David Nogueira,
+   tra, Briony Swire-Thompson, Sander van der Lin-               Andrew Secker, Afonso Mendes, Rebecca Garrett,
+   den, Emily K. Vraga, Thomas J. Wood, and Maria S.             Jeffrey J Mitchell, and Zita Marinho. 2019. Auto-
+   Zaragoza. 2020. Debunking Handbook 2020. https:               mated fact checking in the news room. In The Web
+  //sks.to/db2020.                                               Conference 2019, pages 3579–3583, United States.
+                                                                 Association for Computing Machinery (ACM). 2019
+Zehan Li, Xin Zhang, Yanzhao Zhang, Dingkun Long,                World Wide Web Conference, WWW 2019 ; Confer-
+  Pengjun Xie, and Meishan Zhang. 2023. Towards                  ence date: 13-05-2019 Through 17-05-2019.
+  general text embeddings with multi-stage contrastive
+  learning. Preprint, arXiv:2308.03281.                        Anshuman Mishra, Dhruvesh Patel, Aparna Vijayaku-
+                                                                 mar, Xiang Lorraine Li, Pavan Kapanipathi, and Kar-
+Jiayu Liu, Junhao Tang, Hanwen Wang, Baixuan Xu,                 tik Talamadupula. 2021. Looking beyond sentence-
+   Haochen Shi, Weiqi Wang, and Yangqiu Song. 2024a.             level natural language inference for question answer-
+   GProofT: A multi-dimension multi-round fact check-            ing and text summarization. In Proceedings of the
+   ing framework based on claim fact extraction. In              2021 Conference of the North American Chapter of
+   Proceedings of the Seventh Workshop on Fact Ex-               the Association for Computational Linguistics: Hu-
+   traction and VERification (FEVER). Association for            man Language Technologies, pages 1322–1336, On-
+   Computational Linguistics.                                    line. Association for Computational Linguistics.
+                                                          14
+

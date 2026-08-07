@@ -1,0 +1,65 @@
+                                                           Claim: Braeden Lemasters, an American actor,
+                                                         musician, and voice actor, appeared in six films since
+                                                         2008 and also appeared in TV shows such as Six Feet
+     Claim: Mike Ledwith (a professional baseball
+                                                              Under where he starred as Frankie.
+  player) played one game in MLB and scored one run.
+                                                                              Evidence
+                      Evidence
+                                                                    P: wiki/Braeden_Lemasters
+               P: wiki/Mike Ledwith
+                                                                          S2: Filmography
+                 S0: Introduction
+                                                         e1 : Braeden Lemasters (born January 27, 1996) is an
+   e1 : Michael Ledwith, was a professional baseball
+                                                               American actor, musician, and voice actor.
+  player who played catcher in one game for the 1874
+                                                                                  e2 :
+                  Brooklyn Atlantics.
+                 S0: Introduction                            Year                  Film               Role
+                      Mike Ledwith                         2008           Beautiful Loser                Jake
+                                                           2009            The Stepfather      Sean Harding
+                      MLB statistics
+                                                           2010                   Easy A 8th Grade Todd
+           e2 :    Games played         1                  2012     A Christmas Story 2      Ralphie Parker
+                     Runs scored        1                  2017                    Totem                Todd
+                             Hits       1                  2017             Flock of Four       Joey Grover
+                  Batting average   0.250                               S1: Life and career
+                                                          e3 : In 2005, Braeden started his career at age 9, as
+                Verdict: Supported
+                                                                Frankie, on the TV show Six Feet Under.
+   Expected Challenge: Combining Tables and Text
+       Challenge: Combining Tables and Text
+                                                                       Verdict: Supported
+                                                          Expected Challenge: Combining Tables and Text
+                                                              Challenge: Combining Tables and Text
+
+Figure 13: Two examples from the FEVEROUS dataset that require both unstructured and structured
+information. The dataset contains both short, simple claims (left) and complex claims (right).
+
+
+statistics such as the number of claims an annotator generated that have been reported by verification
+annotators, to identify error patterns and giving annotators further individual feedback. An interface
+was provided to annotators to see the annotations that have been quality checked and to allow them to
+maintain an overview on their performance.
+Figure 14 shows the QA interface for project managers. QA annotations with only partial agreement
+or complete disagreement are highlighted in the interface in red. The QA interface for annotators
+looks similar, with ID’s being anonymized.
+
+7.11   Author statement
+
+The authors of this paper bear all responsibility in case of violation of copyrights associated with the
+FEVEROUS dataset.
+
+
+
+
+                                                  31
+Figure 14: QA annotation interface for project managers. Interface for annotators looks similar, with
+ID’s being anonymized
+
+
+
+
+                                                 32
+

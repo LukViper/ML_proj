@@ -1,0 +1,529 @@
+                                              Fake News Detection on Social Media using
+                                                     Geometric Deep Learning
+
+
+                                         Federico Monti1,2      Fabrizio Frasca1,2       Davide Eynard1,2        Damon Mannion1,2
+
+                                                                        Michael M. Bronstein1,2,3
+
+
+
+
+arXiv:1902.06673v1 [cs.SI] 10 Feb 2019
+                                                       1                       2                     3
+                                                         Fabula AI              USI Lugano           Imperial College
+                                                     United Kingdom             Switzerland          United Kingdom
+
+
+
+                                                                                   Abstract
+
+
+
+
+                                             Social media are nowadays one of the main news sources for millions of people
+                                             around the globe due to their low cost, easy access, and rapid dissemination.
+                                             This however comes at the cost of dubious trustworthiness and significant risk of
+                                             exposure to ‘fake news’, intentionally written to mislead the readers. Automatically
+                                             detecting fake news poses challenges that defy existing content-based analysis
+                                             approaches. One of the main reasons is that often the interpretation of the news
+                                             requires the knowledge of political or social context or ‘common sense’, which
+                                             current natural language processing algorithms are still missing. Recent studies
+                                             have empirically shown that fake and real news spread differently on social media,
+                                             forming propagation patterns that could be harnessed for the automatic fake news
+                                             detection. Propagation-based approaches have multiple advantages compared to
+                                             their content-based counterparts, among which is language independence and
+                                             better resilience to adversarial attacks. In this paper, we show a novel automatic
+                                             fake news detection model based on geometric deep learning. The underlying
+                                             core algorithms are a generalization of classical convolutional neural networks to
+                                             graphs, allowing the fusion of heterogeneous data such as content, user profile and
+                                             activity, social graph, and news propagation. Our model was trained and tested
+                                             on news stories, verified by professional fact-checking organizations, that were
+                                             spread on Twitter. Our experiments indicate that social network structure and
+                                             propagation are important features allowing highly accurate (92.7% ROC AUC)
+                                             fake news detection. Second, we observe that fake news can be reliably detected at
+                                             an early stage, after just a few hours of propagation. Third, we test the aging of
+                                             our model on training and testing data separated in time. Our results point to the
+                                             promise of propagation-based approaches for fake news detection as an alternative
+                                             or complementary strategy to content-based approaches.
+1    Introduction
+
+In the past decade, social media have become one of the main sources of information for people
+around the world. Yet, using social media for news consumption is a double-edged sword. On the one
+hand, it offers low cost, easy access, and rapid dissemination. On the other hand, it comes with the
+danger of exposure to ‘fake news’ containing poorly checked or even intentionally false information
+aimed at misleading and manipulating the readers to pursue certain political or economic agendas.
+The extensive spread of fake news has recently become a global problem and threat to modern
+democracies. The extensive spread of fake news before the United States 2016 presidential elections
+[3] and the Brexit vote in United Kingdom has become the centerpiece of the controversy surrounding
+these political events and allegations of public opinion manipulation. Due the very high societal and
+economic cost of the phenomenon [11], in the past year, fake news detection in social media has
+attracted enormous attention in the academic and industrial realms [16].
+Automatically detecting fake news poses challenges that defy existing content-based analysis ap-
+proaches. One of the main reasons is that often the interpretation of the news is highly nuanced and
+requires the knowledge of political or social context, or “common sense”, which even the currently
+most advanced natural language processing algorithms are still missing. Furthermore, fake news is
+often intentionally written by bad actors to appear as real news but containing false or manipulative
+information in ways that are hard even for trained human experts to detect.
+
+Prior works. Existing approaches for fake news detection can be divided into three main categories,
+based on content, social context, and propagation [36, 44]. Content-based approaches, which are
+used in the majority of works on fake news detection, rely on linguistic (lexical and syntactical)
+features that can capture deceptive cues or writing styles [1, 32, 30, 29, 28]. The main drawback
+of content-based approaches is that they can be defied by sufficiently sophisticated fake news that
+does not immediately appear as fake. Furthermore, most linguistic features are language-dependent,
+limiting the generality of these approaches.
+Social context features include user demographics (such as age, gender, education, and political
+affiliation [37, 21]), social network structure [38, 35] (in the form of connections between users such
+as friendship or follower/followee relations) and user reactions (e.g. posts accompanying a news item
+[33] or likes [40]).
+Propagation-based approaches are perhaps the most intriguing and promising research direction
+based on studying the news proliferation process over time. It has been argued that the fake news
+dissemination process is akin to infectious disease spread [14] and can be understood with network
+epidemics models. There is substantial empirical evidence that fake news propagate differently from
+true news [42] forming spreading patterns that could potentially be exploited for automatic fake news
+detection. By virtue of being content-agnostic, propagation-based features are likely generalizes
+across different languages, locales, and geographies, as opposed to content-based features that must
+be developed separately for each language. Furthermore, controlling the news spread patterns in a
+social network is generally beyond the capability of individual users, implying that propagation-based
+features would potentially be very hard to tamper with by adversarial attacks.
+
+Main contribution. So far, attempts to exploit news propagation for fake news detection applied
+‘handcrafted’ graph-theoretical features such as centrality, cliques, or connected components [15].
+These features are rather arbitrary, too general, and not necessarily meaningful for the specific task
+of fake news detection. In this paper, we propose learning fake news specific propagation patterns
+by exploiting geometric deep learning, a novel class of deep learning methods designed to work on
+graph-structured data [4]. Geometric deep learning naturally deals with heterogeneous data (such
+as user demographic and activity, social network structure, news propagation and content), thus
+carrying the potential of being a unifying framework for content, social context, and propagation
+based approaches.
+The model proposed in this paper is trained in a supervised manner on a large set of annotated fake
+and true stories spread on Twitter in the period 2013-2018. We perform extensive testing of our
+model in different challenging settings, showing that it achieves very high accuracy (nearly 93% ROC
+AUC), requires very short news spread times (just a few hours of propagation), and performs well
+when the model is trained on data distant in time from the testing data.
+
+
+                                                  2
+Figure 1: Example of a single news story spreading on a subset of the Twitter social network. Social
+connections between users are visualized as light-blue edges. A news URL is tweeted by multiple
+users (cascade roots denotes in red), each producing a cascade propagating over a subset of the social
+graph (red edges). Circle size represents the number of followers. Note that some cascades are small,
+containing only the root (the tweeting user) or just a few retweets.
+
+
+2       Dataset
+One of the key challenges in machine-learning based approaches in general, and in automatic fake
+news detection in particular, is collecting a sufficiently large, rich, and reliably labelled dataset on
+which the algorithms can be trained and tested. Furthermore, the notion of ‘fake news’ itself is
+rather vague and nuanced. To start with, there is no consensus as to what would be considered
+‘news’, let alone the label ‘true’ or ‘false’. A large number of studies exploit the notion of reliable
+or unreliable sources as a proxy for true or false stories. While allowing to gather large datasets,
+such approaches have been criticized as too crude [42]. In our study, we opted for a data collection
+process in which each ‘story’ has an underlying article published on the web, and each such story is
+verified individually. In our classification of true or false statements we rely on professional non-profit
+journalist fact-checking organizations such as Snopes,1 PolitiFact,2 and Buzzfeed.3 We note that our
+use of the term fake news, though disliked in the social science research community for its abuse in
+the political discourse, refers to both misinformation and disinformation, i.e. unintentional as well as
+deliberate spread of misleading or wrong narrative or facts.
+
+Data collection protocol. Our data collection process was inspired by and largely followed the
+pioneering work of Vosoughi et al. [42]. We used a collection of news verified by fact-checking
+organizations with established reputation in debunking rumors; each source fact-checking organization
+provides an archive of news with an associated short claim (e.g. ‘Actress Allison Mack confessed
+that she sold children to the Rothschilds and Clintons’) and a label determining its veracity (‘false’ in
+the above example). First, we gathered the overall list of fact-checking articles from such archives
+and, for simplicity, discarded claims with ambiguous labels, such as ‘mixed’ or ‘partially true/false’.
+Second, for each of the filtered articles we identified potentially related URLs referenced by the
+fact-checkers, filtering out all those not mentioned at least once on Twitter. Third, trained human
+annotators were employed to ascertain whether the web pages associated with the collected URLs
+were matching or denying the claim, or were simply unrelated to that claim. This provided a simple
+method to propagate truth-labels from fact-checking verdicts to URLs: if a URL matches a claim,
+    1
+      https://www.snopes.com/
+    2
+      https://www.politifact.com/
+    3
+      https://www.buzzfeed.com/
+
+
+                                                    3
+                         105
+
+
+
+
+ Number of cascades
+                         104
+                         103
+                         102
+                         101
+                         100
+                               0   500     1,000 1,500 2,000 2,500 3,000 3,500 4,000 4,500 5,000 5,500 6,000
+                                                                Cascade size
+
+
+                          Figure 2: Distribution of cascade sizes (number of tweets per cascade) in our dataset.
+
+
+
+
+ Fraction of cascades
+                        10−2
+
+
+
+                        10−3
+
+
+
+                        10−4
+                               0     100       200      300       400       500      600      700       800        900
+                                                                        URL ID
+Figure 3: Distribution of cascades over the 930 URLs available in our dataset with at least six tweets
+per cascade, sorted by the number cascades in descending order. The first 15 URLs (~1.5% of the
+entire dataset) correspond to 20% of all the cascades.
+
+
+then it directly inherits the verdict; if it denies a claim, it inherits the opposite of the verdict (e.g.
+URLs matching a true claim are labeled as true, URLs denying a true claim are labeled as false).
+URLs gathered from different sources, with same veracity and date of first-appearance on Twitter
+were additionally inspected to ensure they referred to different articles.
+The last part of the data collection process consisted of the retrieval of Twitter data related to the
+propagation of news associated with a particular URL. Following the nomenclature of [42], we term
+as cascade the news diffusion tree produced by a source tweet referencing a URL and all of its
+retweets. For each URL, we searched for all the related cascades and enriched their Twitter-based
+characterization (i.e. users and tweet data) by drawing edges among users according to Twitter’s
+social network (see example in Figure 1).
+With regard to this last step of data collection, our approach is significantly different from the protocol
+of [42], where tweets linking to a fact-checking website were collected, thus essentially retrieving
+only cascades in which someone has posted a ‘proof-link’ with the veracity of the news. Though
+significantly more laborious, we believe that our data collection protocol produces a much cleaner
+dataset.
+
+Statistics. Figures 2–3 depict the statistics of our dataset. Overall, our collection consisted of
+1, 084 labeled claims, spread on Twitter in 158, 951 cascades covering the period from May 2013
+till January 2018. The total number of unique users involved in the spreading was 202, 375 and
+their respective social graph comprised 2, 443, 996 edges. As we gathered 1, 129 URLs, the average
+number of article URLs per claim is around 1.04; as such, a URL can be considered as a good proxy
+for a claim in our dataset and we will thus use the two terms synonymously hereinafter. We also
+note that, similarly to [42], a large proportion of cascades were of small size (the average number of
+
+
+                                                                    4
+Figure 4: Subset of the Twitter network used in our study with estimated user credibility. Vertices
+represent users, gray edges the social connections. Vertex color and size encode the user credibility
+(blue = reliable, red = unreliable) and number of followers of each user, respectively. Numbers 1 to 9
+represent the nine users with most followers.
+
+
+tweets and users in a cascade is 2.79, see also Figure 2 depicting the distribution of cascade sizes),
+which required to use a threshold on a minimum cascade size for classifying these independently in
+some experiments (see details in Section 4.1).
+
+
+
+Features. We extracted the following features describing news, users, and their activity, grouped
+into four categories: User profile (geolocalization and profile settings, language, word embedding of
+user profile self-description, date of account creation, and whether it has been verified), User activity
+(number of favorites, lists, and statuses), Network and spreading (social connections between the
+users, number of followers and friends, cascade spreading tree, retweet timestamps and source device,
+number of replies, quotes, favorites and retweets for the source tweet), and Content (word embedding
+of the tweet textual content and included hashtags).
+
+
+
+Credibility and polarization. The social network collected in our study manifests noticeable
+polarization depicted in Figure 4. Each user in this plot is assigned a credibility score in the
+range [−1, +1] computed as the difference between the proportion of (re)tweeted true and fake
+news (negative values representing fake are depicted in red; more credible users are represented
+in blue). The node positions of the graph are determined by topological embedding computed via
+the Fruchterman-Reingold force-directed algorithm [9], grouping together nodes of the graph that
+are more strongly connected and mapping apart nodes that have weak connections. We observe
+that credible (blue) and non-credible (red) users tend to form two distinct communities, suggesting
+these two categories of tweeters prefer to have mostly homophilic interactions. While a deeper study
+of this phenomenon is beyond the scope of this paper, we note that similar polarization has been
+observed before in social networks, e.g. in the context of political discourse [7] and might be related
+to ‘echo chamber’ theories that attempt to explain the reasons for the difference in fake and true news
+propagation patterns.
+
+
+                                                   5
+Figure 5: The architecture of our neural network model. Top row: GC = Graph Convolution, MP
+= Mean Pooling, FC = Fully Connected, SM = SoftMax layer. Bottom row: input/output tensors
+received/produced by each layer.
+
+
+
+3     Our model
+
+3.1   Geometric deep learning
+
+In the past decade, deep learning techniques have had a remarkable impact on multiple domains, in
+particular computer vision, speech analysis, and natural language processing [17]. However, most
+of popular deep neural models, such as convolutional neural networks (CNNs) [18], are based on
+classical signal processing theory, with an underlying assumption of grid-structured (Euclidean)
+data. In recent years, there has been growing interest in generalizing deep learning techniques to
+non-Euclidean (graph- and manifold-structured) data. Early approaches to learning on graphs [34]
+predate the recent deep learning renaissance and are formulated as fixed points of learnable diffusion
+operators. The modern interest in deep learning on graphs can be attributed to the spectral CNN
+model of Bruna et al. [5]. Since some of the first works in this domain originated in graphics and
+geometry community [22], the term geometric deep learning is widely used as an umbrella term for
+non-Euclidean deep learning approaches [4].
+Broadly speaking, graph CNNs replace the classical convolution operation on grids with a local
+permutation-invariant aggregation on the neighborhood of a vertex in a graph. In spectral graph CNNs
+[5], this operation is performed in the spectral domain, by utilizing the analogy between the graph
+Laplacian eigenvectors and the classical Fourier transform; the filters are represented as learnable
+spectral coefficients. While conceptually important, spectral CNNs suffer from high computational
+complexity and difficulty to generalize across different domains [4]. Follow-up works showed that
+the explicit eigendecomposition of the Laplacian can be avoided altogether by employing functions
+expressible in terms of simple matrix-vector operations, such as polynomials [8, 12] or rational
+functions [19]. Such spectral filters typically scale linearly with the graph size and can be generalized
+to higher order structures [25], dual graphs (edge filters) [26], and product graphs [24].
+The Laplacian operator is only one example of fixed local permutation-invariant aggregation oper-
+ation amounting to weighted averaging. More general operators have been proposed using edge
+convolutions [43], neural message passing [10], local charting [23], and graph attention [41]. On
+non-Euclidean domains with local low-dimensional structure (manifolds, meshes, point clouds), more
+powerful operators have been constructed using e.g. anisotropic diffusion kernels [2].
+Being very abstract models of systems of relations and interactions, graphs naturally arise in various
+fields of science. For this reason, geometric deep learning techniques have been successfully applied
+across the board in problems such as computer graphics and vision [2, 23, 20, 43], protection against
+adversarial attacks [39], recommendation systems [24] quantum chemistry [10] and neutrino detection
+[6], to mention a few.
+
+
+                                                   6
+3.2       Architecture and training settings
+
+Our deep learning model is described below. We used a four-layer Graph CNN with two convolutional
+layers (64-dimensional output features map in each) and two fully connected layers (producing 32-
+and 2-dimensional output features, respectively) to predict the fake/true class probabilities. Figure
+5 depicts a block diagram of our model. One head of graph attention [41] was used in every
+convolutional layer to implement the filters together with mean-pooling for dimensionality reduction.
+We used Scaled Exponential Linear Unit (SELU) [13] as non-linearity throughout the entire network.
+Hinge loss was employed to train the neural network (we preferred hinge loss to the more commonly
+used mean cross entropy as it outperformed the latter in early experiments). No regularization was
+used with our model.
+
+3.3       Input generation
+
+Given a URL u (or a cascade c arising from u) with corresponding tweets Tu = {t1u , t2u , ..., tN    u }
+mentioning it, we describe u in terms of graph Gu . Gu has tweets in Tu as nodes and estimated
+news diffusion paths plus social relations as edges. In other words, given two nodes i and j, edge
+(i, j) ∈ Gu iff at least one of the following holds: i follows j (i.e. the author of tweet i follows the
+author of tweet j), j follows i, news spreading occurs from i to j, or from j to i.
+News diffusion paths defining spreading trees were estimated as in [42] by jointly considering the
+timestamps of involved (re)tweets and the social connections between their authors. Given tnu – the
+retweet of a cascade related to URL u, and {t0u . . . tn−1
+                                                       u   } – the immediately preceding (re)tweets
+belonging to the same cascade and authored by users {a0u , . . . , anu }, then:
+           1. if anu follows at least one user in {a0u , . . . , an−1
+                                                                  u   }, we estimate news spreading to tnu from
+              the very last tweet in {tu . . . tu } whose author is followed by anu ;
+                                        0       n−1
+
+           2. if anu does not follow any of the users in {a0u , . . . , an−1
+                                                                         u   }, we conservatively estimate news
+              spreading to tnu from the user in {a0u , . . . , an−1
+                                                                u   } having the largest number of followers (i.e.
+              the most popular one).
+Finally, nodes and edges of graph Gu have features describing them. Nodes, representing tweets and
+their authors, were characterized with all the features presented in Section 24 . As for edges, we used
+features representing the membership to each of the aforementioned four relations (following and
+news spreading, both directions). Our approach to defining graph connectivity and edge features
+allows, in graph convolution, to spread information independently of the relation direction while
+potentially giving different importance to the types of connections. Features of edge (i, j) are
+concatenated to those of nodes i and j in the attention projection layer to achieve such behavior.
+
+4         Results
+We considered two different settings of fake news detection: URL-wise and cascade-wise, using the
+same architecture for both settings. In the first setting, we attempted to predict the true/fake label of
+a URL containing a news story from all the Twitter cascades it generated. On average, each URL
+resulted in approximately 141 cascades. In the latter setting, which is significantly more challenging,
+we assumed to be given only one cascade arising from a URL and attempted to predict the label
+associated with that URL. Our assumption is that all the cascades associated with a URL inherit the
+label of the latter. While we checked this assumption to be true in most cases in our dataset, it is
+possible that an article is for example tweeted with a comment denying its content. We leave the
+analysis of comments accompanying tweets/retweets as a future research direction.
+
+4.1       Model performance
+
+For URL-wise classification, we used five randomized training/test/validation splits. On average, the
+training, test, and validation sets contained 677, 226, and 226 URLs, respectively, with 83.26% true
+and 16.74% false labels (± 0.06% and 0.15% for training and validation/test set respectively). For
+cascade-wise classification we used the same split initially realized for URL-wise classification (i.e.
+      4
+    For tweet content and user description embeddings we averaged together the embeddings of the constituent
+words (GloVe[27] 200-dimensional vectors pre-trained on Twitter).
+
+
+                                                          7
+                      1
+
+                     0.8
+
+
+
+
+True Positive Rate
+                     0.6
+
+                     0.4
+
+                     0.2
+
+                      0
+                           0   0.1   0.2   0.3   0.4      0.5      0.6   0.7      0.8      0.9       1
+                                                  False Positive Rate
+
+Figure 6: Performance of URL-wise (blue) and cascade-wise (red) fake news detection using 24hr-
+long diffusion time. Shown are ROC curves averaged on five folds (the shaded areas represent the
+standard deviations). ROC AUC is 92.70 ± 1.80% for URL-wise classification and 88.30 ± 2.74%
+for cascade-wise classification, respectively. Only cascades with at least 6 tweets were considered for
+cascade-wise classification.
+
+
+
+
+all cascades originated by URL u are placed in the same fold as u). Cascades containing less than 6
+tweets were discarded; the reason for the choice of this threshold is motivated below. Full cascade
+duration (24 hr) was used for both settings of this experiment. The training, test, and validation sets
+contained on average 3586, 1195, 1195 cascades, respectively, with 81.73% true and 18.27% false
+labels (± 3.25% and 6.50% for training and validation/test set respectively).
+Our neural network was trained for 25 × 103 and 50 × 103 iterations in the URL- and cascade-wise
+settings, respectively, using AMSGrad [31] with learning rate of 5 × 10−4 and mini-batch of size one.
+Figure 6 depicts the performance of URL- (blue) and cascade-wise (red) fake news classification
+represented as a tradeoff (ROC curve) between false positive rate (fraction of true news wrongly
+classified as fake) and true positive rate (fraction of fake news correctly classified as fake). We
+use area under the ROC curve (ROC AUC) as an aggregate measure of accuracy. On the above
+splits, our method achieved mean ROC AUC of 92.70 ± 1.80% and 88.30 ± 2.74% in the URL- and
+cascade-wise settings, respectively.
+Figure 7 depicts a low-dimensional plot of the last graph convolutional layer vertex-wise features
+obtained using t-SNE embedding. The vertices are colored using the credibility score defined in
+Section 2. We observe clear clusters of reliable (blue) and unreliable (red) users, which is indicative
+of the neural network learning features that are useful for fake news classification.
+Influence of minimum cascade size. One of the characteristics of our dataset (as well as the dataset
+in the study of [42]) is the abundance of small cascades containing just a few users (see Figure 2).
+Since our approach relies on the spreading of news across the Twitter social network, such examples
+may be hard to classify, as too small cascades may manifest no clear diffusion pattern. To identify
+the minimum useful cascade size, we investigated the performance of our model in the cascade-wise
+classification setting using cascades of various minimum sizes (Figure 8). As expected, the model
+performance increases with larger cascades, reaching saturation for cascades of at least 6 tweets
+(leaving a total of 5,976 samples). This experiment motivates our choice of using 6 tweets as the
+minimum cascade size in cascade-wise experiments in our study.
+Ablation study. To further highlight the importance of the different categories of features provided
+as input to the model, we conducted an ablation study by means of backward-feature selection. We
+considered four groups of features defined in Section 2: user profile, user activity, network and
+spreading, and content. The results of ablation experiment are shown in Figure 9 for the URL- (top)
+and cascade-wise (bottom) settings. In both settings, user-profile and network/spreading appear as
+the two most important feature groups, and allow achieving satisfactory classification results (near
+90% ROC AUC) with the proposed model.
+
+
+                                                      8
+Figure 7: T-SNE embedding of the vertex-wise features produced by our neural network at the last
+convolutional layer representing all the users in our study, color-coded according to their credibility
+(blue = reliable, red = unreliable). Clusters of users with different credibility clearly emerge, indicative
+that the neural network learns features useful for fake news detection.
+
+
+
+                0.86
+
+
+
+ Mean ROC AUC
+                0.84
+
+
+                0.82
+
+
+                       3   4           5           6           7             8           9           10
+                                            Min. cascade size threshold
+Figure 8: Performance of cascade-wise fake news detection (mean ROC AUC, averaged on five
+folds) using minimum cascade size threshold. Best performance is obtained by filtering out cascades
+smaller than 6 tweets.
+
+
+Interestingly, in the cascade-wise setting, while all features were positively contributing to the final
+predictions at URL-level, removing tweet content from the provided input improves performance by
+4%. This seemingly contradictory result can be explained by looking at the distribution of cascades
+over all the available URLs (Figure 3): 20% of cascades are associated to the top 15 largest URLs in
+our dataset (∼ 1.5% out of a total of 930). Since tweets citing the same URL typically present similar
+content, it is easy for the model to overfit on this particular feature. Proper regularization (e.g. dropout
+or weight decay) should thus be introduced to avoid overfitting and improve performance at test time.
+We leave this further study for future research. For simplicity, by leveraging the capabilities of our
+model to classify fake news in a content-free scenario, we decided to completely ignore content-based
+descriptors (tweet word embeddings) for cascade-wise classification and let the model exploit only
+user- and propagation-related features.
+
+
+                                                     9
+          0.95
+
+
+
+
+ROC AUC
+           0.9
+
+
+          0.85
+
+
+                 user profile       user profile                user profile                 user profile
+                                 network/spreading           network/spreading            network/spreading
+                                                                  content                      content
+                                                                                             user activity
+
+
+           0.9
+
+
+
+ROC AUC
+          0.88
+
+          0.86
+
+          0.84
+
+          0.82
+                 user profile       user profile                user profile                 user profile
+                                 network/spreading           network/spreading            network/spreading
+                                                                user activity                user activity
+                                                                                               content
+
+
+Figure 9: Ablation study result on URL-wise (top) / cascade-wise (bottom) fake news detection, using
+backward feature selection. Shown is performance (ROC AUC) for our model trained on subsets of
+features, grouped into four categories: user profile, network and spreading, content, and user activity.
+Groups are sorted for importance from left to right.
+
+
+4.2        News spreading over time
+
+One of the key differentiators of propagation-based methods from their content-based counterparts,
+namely relying on the news spreading features, potentially raises the following question: for how
+much time do the news have to spread before we can classify them reliably? We conducted a series
+of experiments to study the extent to which this is the case with our approach.
+For this purpose, we truncated the cascades after time t starting from the first tweet, with t varying
+from 0 (effectively considering only the initial tweet, i.e. the ‘root’ of each cascade) to 24 hours (the
+full cascade duration) with one hour increments. The model was trained separately for each value
+of t. Five-fold cross validation was used to reduce the bias of the estimations while containing the
+overall computational cost.
+Figure 10 depicts the performance of the model (mean ROC AUC) as function of the cascade duration,
+for the URL- (top) and cascade-wise (bottom) settings. As expected, performance increases with
+the cascade duration, saturating roughly after 15 hours in the URL-wise setting and after 7 hours in
+the cascade-wise one, respectively. This different behavior is mainly due to the simpler topological
+patterns and shorter life of individual cascades. Seven hours of spreading encompass on average
+around 91% of the cascade size; for the URL-wise setting, the corresponding value is 68%. A similar
+level of coverage, 86%, is achieved after 15 hours of spreading in the URL-wise setting.
+We also note that remarkably just a few (∼ 2) hours of news spread are sufficient to achieve above
+90% mean ROC AUC in URL-wise fake news classification. Furthermore, we observe a significant
+jump in performance from the 0 hr setting (effectively using only user profile, user activity, and
+
+
+                                                   10
+

@@ -1,0 +1,76 @@
+         claim                      predicted evidence                 label    semantic coher-   redun-    consist-   rele-    pre-        reference evidence
+                                                                       human    cover-   ence     dancy     ency       vance    dicted
+                                                                       eval     age                                             label
+     1   New changes to the         Question: Should drivers give      not      1        5        1         5          5        Not       Question: What is 5 feet in metres? Answer:
+         Highway Code in            five feet when overtaking bicy-    enough                                                   Enough    1.5 metres. Question: What is the new over-
+         Great Britain states       clists? Answer: No answer          infor-                                                   Evi-      taking distance between drivers and cyclists in
+         drivers should give five   could be found. Question: What     mation                                                   dence     the Highway Code? Answer: leave at least 1.5
+         feet when overtaking       is the Highway Code in Great                                                                          metres when overtaking cyclists. Question: At
+         cyclists.                  Britain? Answer: No answer                                                                            what maximum speed is the new 1.5-distance
+                                    could be found.                                                                                       rule applicable? Answer: at speeds of up to
+                                                                                                                                          30mph. Question: Should drivers leave more
+                                                                                                                                          space if driving faster? Answer: Yes. On a PDF
+                                                                                                                                          for the ’Table of Changes to the Highway Code’
+                                                                                                                                          it states, "Give them more space when overtak-
+                                                                                                                                          ing at higher speeds."
+     2   Tweet portrays Ravish      Question: When were the Pun-       not      1        2        5         3          2        Supported Question: What does Ravish Kumar think of
+         Kumar targeting AAP        jab elections? Answer: No an-      enough                                                             the AAP? Answer: No answer could be found.
+         ahead of Punjab elec-      swer could be found. Question:     infor-                                                             Question: Did Ravish Kumar tweet about the
+         tions                      When was the tweet made? An-       mation                                                             AAP? Answer: No answer could be found.
+                                    swer: The tweet was allegedly                                                                         Question: Has Ravish Kumar been misquoted
+                                    made by Ravish Kumar in the                                                                           on political matters? Answer: Senior Congress
+                                    midst of the Punjab election.                                                                         leader Digvijaya Singh apologised to NDTV an-
+25                                  Question: Is Ravish Kumar an                                                                          chor Ravish Kumar today after sharing a video
+                                    AAP supporter? Answer: No                                                                             on Twitter that incorrectly suggested the latter
+                                    answer could be found.                                                                                had abused Prime Minister Narendra Modi in a
+                                                                                                                                          public speech on Wednesday.
+     3   In 2010, a newly quali-    Question: What was the start-      supported 5       4        1         2          4        Supported Question: What was the salary of a newly
+         fied teacher’s salary in   ing salary for a newly qual-                                                                          qualified teacher in the UK in 2010? Answer:
+         the UK was £21,500         ified teacher in 2010? An-                                                                            £21,588. Question: What was the salary of a
+         and in 2018 it was         swer: £21,500. Question: What                                                                         newly qualified teacher in the UK in 2018? An-
+         £22,000.                   was the starting salary for a                                                                         swer: £23,720. Question: What was the salary
+                                    newly qualified teacher in 2018?                                                                      of new teachers outside of London in 2010? An-
+                                    Answer: £22,000. Question:                                                                            swer: £21,588. Question: What was salary of
+                                    What was the starting salary                                                                          new teachers outside of London in 2018? An-
+                                    for a newly qualified teacher in                                                                      swer: Minimum starting salaries for classroom
+                                    2010 in 2018 prices? Answer:                                                                          teachers will increase by between £653 (rest
+                                    £25,400. Question: What was                                                                           of England) and £816 (inner London). This
+                                    the starting salary for a newly                                                                       means the minimum starting salary for a quali-
+                                    qualified teacher in 2018 in                                                                          fied teacher in 2019/20 will rise from £23,720 to
+                                    2010 prices? Answer: £23,000.                                                                         £24,373 outside of London and from £29,664 to
+                                                                                                                                          £30,480 in inner London.
+
+                                                 Table 12: Examples for system predictions which are highly-ranked by the Averitec score.
+         claim                       predicted evidence                  label     semantic coher-   redun-   consist-   rele-   pre-       reference evidence
+                                                                         human     cover-   ence     dancy    ency       vance   dicted
+                                                                         eval      age                                           label
+     1   The reporting environ-      Question: What is the working       refuted   5        5        5        5          5       Refuted    Question: Does the Chinese government place
+         ment for foreign corre-     environment for foreign journal-                                                                       restrictions on journalist content? Answer: Yes.
+         spondents in China is       ists in China? Answer: Foreign                                                                         The Propaganda Department of the Chinese
+         open and free. Com-         correspondents in China have re-                                                                       Communist Party sends a detailed notice to all
+         munication channels be-     ported higher levels of concern                                                                        media every day that includes editorial guide-
+         tween foreign journal-      about surveillance and invasion                                                                        lines and censored topics.
+         ists in China and compe-    of privacy, as well as greater
+         tent Chinese authorities    pressure by overseas Chinese
+         are open and unfettered.    officials on media organization
+                                     headquarters. Nearly half of
+                                     surveyed correspondents said
+                                     they experienced interference,
+                                     harassment, and physical vio-
+26                                   lence. [...]
+     2   Philippines Senator Pan-    Question: What was Philippines      supported 3        5        5        5          4       Supported Question: What was his initial view on the DND
+         filo Lacson changes his     Senator Panfilo Lacson’s previ-                                                                       and University of the Philippines longstanding
+         opinion and says he sees    ous stance on the Department of                                                                       arrangement? Answer: There’s sense in the
+         the sense in the Depart-    National Defense’s (DND) ter-                                                                         move taken by the President and Sec. Loren-
+         ment of National De-        mination of its 1989 accord with                                                                      zana because during our red-tagging hearings
+         fense’s (DND) unilat-       the University of the Philippines                                                                     in the Senate, it was established that—not only
+         eral termination of its     (UP)? Answer: Philippines Sen-                                                                        UP in particular, other universities—talagang
+         1989 accord with the        ator Panfilo Lacson’s previous                                                                        ‘yung recruitment nanggagaling dun sa mga es-
+         University of the Philip-   stance on the Department of Na-                                                                       tudyante up to the point that they’re being killed
+         pines (UP).                 tional Defense’s (DND) termi-                                                                         in encounters, he told ANC’s Headstart.
+                                     nation of its 1989 accord with
+                                     the University of the Philippines
+                                     (UP) was critical. [...]
+
+                                                   Table 13: Examples for system predictions which are low-ranked by the Averitec score.
+

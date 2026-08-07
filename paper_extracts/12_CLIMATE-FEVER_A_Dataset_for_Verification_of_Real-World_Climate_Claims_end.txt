@@ -1,0 +1,108 @@
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                     15
+
+
+Table 2: Shows all 150 terms from the pruned dictionary sorted by document frequency (d.f.) for the 1,535
+climate claims collected after Task-1.
+              token              d.f.   token                d.f.   token               d.f.
+              global             303    datum                 50    u.s.                25
+              climate            303    surface               49    percent             25
+              warming            296    solar                 48    sun                 24
+              temperature        222    weather               45    united              24
+              global_warming     189    energy                45    bad                 24
+              change             189    low                   45    activity            24
+              year               172    decade                45    review              24
+              co2                158    recent                43    sheet               24
+              ice                151    atmospheric           43    ice_sheet           24
+              level              143    long                  42    cycle               24
+              warm               140    degree                41    long_term           24
+              climate_change     136    likely                41    go                  23
+              sea                132    report                41    suggest             23
+              rise               129    cool                  40    peer                23
+              carbon             128    predict               40    scientific          23
+              increase           125    new                   40    accelerate          23
+              cause              118    mean                  39    reduce              23
+              scientist          110    global_temperature    39    lead                23
+              human              105    sea_ice               38    air                 23
+              emission            89    period                37    age                 22
+              earth               82    term                  37    ice_age             22
+              sea_level           82    event                 36    co2_emission        22
+              dioxide             80    impact                36    significant         22
+              carbon_dioxide      80    occur                 34    fast                22
+              ocean               79    cold                  33    like                22
+              record              79    satellite             33    peer_review         22
+              greenhouse          72    extreme               32    continue            22
+              gas                 72    great                 31    cent                22
+              century             69    claim                 31    coral               22
+              time                67    average               31    number              22
+              atmosphere          63    greenland             31    20th                22
+              trend               63    far                   30    20th_century        22
+              past                62    research              29    fact                22
+              arctic              61    measurement           28    million             22
+              effect              60    melt                  28    drive               21
+              model               59    antarctica            28    grow                21
+              ipcc                59    result                28    reef                21
+              study               58    come                  28    ago                 21
+              find                58    today                 27    climate_scientist   21
+              level_rise          57    large                 27    paper               21
+              world               57    climate_model         27    cloud               21
+              high                57    polar                 26    hot                 21
+              say                 55    see                   26    major               21
+              natural             55    rate                  26    early               21
+              water               54    end                   26    antarctic           20
+              heat                54    small                 26    half                20
+              evidence            53    little                26    science             20
+              greenhouse_gas      53    accord                25    publish             20
+              planet              52    decline               25    man                 20
+              show                51    cause_global          25    area                20
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                 16
+
+
+Table 3: Shows an overview about the different clusters found in the 1,535 climate claims. The cluster
+numbers correspond to the cluster numbers in Fig. 2. The first column denotes the cluster, second column
+shows how many documents belong to said cluster. The last column lists the top-5 terms in the cluster as
+measured with respect to term-frequency.
+
+                   cluster   size   top_terms
+                        4    550    co2, temperature, warm, year, increase
+                        2    127    scientist, ipcc, climate, report, new
+                        1    112    global_warming, warming, global, bad, year
+                        3    106    ice, arctic, sea_ice, polar, sea
+                        9    104    climate_change, change, climate, human, cause
+                        6     78    carbon_dioxide, dioxide, carbon, atmosphere, emission
+                        8     72    sea_level, level, sea, level_rise, rise
+                       14     65    carbon, emission, u.s., accord, reduce
+                       10     51    greenhouse_gas, gas, greenhouse, water, emission
+                       16     50    global_warming, global, change, warming, increase
+                       20     32    global_warming, cause_global, warming, global, cause
+                       21     26    term, long_term, long, trend, cool
+                       18     24    ice_sheet, sheet, ice, greenland, antarctica
+                       11     21    extreme, event, weather, bad, change
+                       13     21    review, peer_review, peer, paper, ipcc
+                        7     19    reef, coral, great, world, year
+                       19     19    20th, 20th_century, century, early, temperature
+                        5     19    age, ice_age, ice, little, come
+                        0     14    warming, time, event, trend, ice
+                       12      9    like, temperature, degree, earth, warm
+                       17      9    cloud, sun, predict, likely, global
+                       15      7    large, decline, area, temperature, water
+
+Table 4: Classification report with respect to the performance of the baseline claim validation pipeline
+evaluated on climate-fever. These values are contrasted (in parentheses) with the reported values from the
+evaluation on the original fever dev-set. All values are reported as percentages.
+
+                                    precision               recall            f1-score            support
+    SUPPORTS                   35.04     (81.34)     75.11     (86.32)    47.79      (83.76)   474      (6666)
+    REFUTES                    39.93     (79.2)      43.87     (77.93)    41.81      (78.56)   253      (6666)
+    NOT ENOUGH INFO            78.41     (72.08)     10.53     (68.83)    18.57      (70.42)   655      (6666)
+    weighted avg               56.49     (77.54)     38.78     (77.69)    32.85      (77.58)   1382     (19998)
+    accuracy                                                              38.78      (77.69)   1382     (19998)
+
+Table 5: Normalized confusion matrix comparing classification performance of baseline claim validator
+evaluated on climate-fever and original fever dev-set (in parentheses). Rows correspond to true labels,
+columns correspond to predicted labels. All values are reported as percentages.
+
+                                         SUPPORTS             REFUTES         NOT ENOUGH INFO
+            SUPPORTS                     10.5      (86.3)     9.2     (4.2)   80.3              (9.5)
+            REFUTES                       3.2       (4.9)    43.9    (77.9)   53.0             (17.2)
+            NOT ENOUGH INFO               2.3      (14.9)    22.6    (16.2)   75.1             (68.8)
+

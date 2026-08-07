@@ -1,0 +1,5 @@
+Title: Misinformation Detection with Automatic Fact-based News Verification
+Source: https://www.sciencedirect.com/science/article/pii/S0020025525010047
+DOI: 10.1016/j.ins.2025.122868
+License: CC BY-NC 4.0 (open access according to Crossref), but direct PDF download was blocked (HTTP 403).
+Open via: https://doi.org/10.1016/j.ins.2025.122868

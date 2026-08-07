@@ -1,0 +1,416 @@
+                                        Dataset of Fake News Detection and Fact Verification: A Survey
+
+                                        TAICHI MURAYAMA, NARA Institute of Science and Technology, Japan
+                                        The rapid increase in fake news, which causes signiﬁcant damage to society, triggers many fake news related studies, including the
+                                        development of fake news detection and fact veriﬁcation techniques. The resources for these studies are mainly available as public
+                                        datasets taken from Web data. We surveyed 118 datasets related to fake news research on a large scale from three perspectives: (1) fake
+                                        news detection, (2) fact veriﬁcation, and (3) other tasks; for example, the analysis of fake news and satire detection. We also describe
+                                        in detail their utilization tasks and their characteristics. Finally, we highlight the challenges in the fake news dataset construction
+
+
+
+
+arXiv:2111.03299v1 [cs.LG] 5 Nov 2021
+                                        and some research opportunities that addresses these challenges. Our survey facilitates fake news research by helping researchers
+                                        ﬁnd suitable datasets without reinventing the wheel, and thereby, improves fake news studies in depth.
+
+                                        CCS Concepts: • Applied computing; • Law, social and behavioral sciences;
+
+                                        Additional Key Words and Phrases: fake news, fact veriﬁcation, dataset
+
+                                        ACM Reference Format:
+                                        Taichi Murayama. 2020. Dataset of Fake News Detection and Fact Veriﬁcation: A Survey. ACM Comput. Surv. 1, 1, Article 1 (Janu-
+                                        ary 2020), 33 pages. https://doi.org/10.1145/nnnnnnn.nnnnnnn
+
+
+                                        1 INTRODUCTION
+                                        Fake news has caused signiﬁcant damage to various aspects of society. For example, in stock markets, a false report
+                                        about the bankruptcy of the United Airlines’ parent company in 2008 caused the company’s stock price to drop by
+                                        76% in a few minutes; it closed at 11% below the previous day, with a negative eﬀect persisting for more than six
+                                        days [49]. During the 2016 US presidential election, 529 diﬀerent low-credibility statements [106] were spread on
+                                        Twitter; 25% of the news outlets linked from tweets, which were either fake or extremely biased and supporting Trump
+                                        or Clinton, potentially inﬂuencing the election [43]. Fake news may cause signiﬁcant impact on real events, so much
+                                        so that the “Pizzagate” conspiracy that started on Reddit led to a real shooting [230]. In addition to stock markets and
+                                        political events, it is the same situation in public health. Fake news on infectious diseases, such as Ebola [162], yellow
+                                        fever [160], and Zika [141], appears to be spreading on the Internet. The COVID-19 pandemic from 2020 especially
+                                        continues to produce news from many doubtful sources [118, 192]. The number of English-language fact-check articles
+                                        increased by more than 900% during January to March 2020 [44]. Fake news has had a signiﬁcant impact on events
+                                        in various countries: Brexit in Europe [37, 120], the salt panic in China [86], deadly violence between the two groups,
+                                        ethnic Oromos and ethnic Somalis, in Ethiopia [132], and natural disasters such as the East Japan Great Earthquake of
+                                        2011 [92, 209], and the Chile earthquake in 2010 [140].
+                                           While fake news is not a new phenomenon, it has become a signiﬁcant problem because of social media. Compared
+                                        to traditional news media such as newspapers and television, it is now easy to share sensational news with many
+                                        Author’s address: Taichi Murayama, murayama.taichi.mk1@is.naist.jp, NARA Institute of Science and Technology, Takayamacho 8916-5, Ikoma, Nara,
+                                        Japan, 630-0192.
+
+                                        Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not
+                                        made or distributed for proﬁt or commercial advantage and that copies bear this notice and the full citation on the ﬁrst page. Copyrights for components
+                                        of this work owned by others than ACM must be honored. Abstracting with credit is permitted. To copy otherwise, or republish, to post on servers or
+                                        to redistribute to lists, requires prior speciﬁc permission and/or a fee. Request permissions from permissions@acm.org.
+                                        © 2020 Association for Computing Machinery.
+                                        Manuscript submitted to ACM
+
+
+                                        Manuscript submitted to ACM                                                                                                                           1
+2                                                                                                           T. Murayama
+
+
+people using social media such as Facebook, Twitter, and Weibo [26]. The Pew Research Center reports that about
+a half of the US adults mainly receive news from social media [196]. Social media provides an ideal environment
+for communication and information acquisition, and encourages users to share information without distance being a
+barrier between individuals. Meanwhile, it also becomes the mechanism for accelerated fake news dissemination due
+to the existence of an echo chamber eﬀect [100, 140, 204]. In particular, younger and older people tend to believe in fake
+news, which in turn, becomes an incentive to create, publish, and spread fake news for potentially substantial political
+and economic beneﬁts [69]. The prevalence of fake news in social media has the potential to break the trustworthiness
+of online journalism and cause widespread panic, and poses a major problem in the aforementioned examples.
+    Serious social concern about fake news prompts researchers to combat fake news using methods such as detection,
+veriﬁcation, mitigation, and analysis. In this regard, there have been attempts to survey and summarize the literature
+on fake news research. Many tutorials at international conferences have supported fake news research [78, 151, 152,
+237, 245]. In addition, some workshops (for example, FEVER [55], Fake News Challenge [19], RumorEval [80], Check-
+That! [153], and Constraint [166]) organize competitions to improve the techniques of fake news detection and fact
+veriﬁcation. These attempts have helped researchers, especially those with no previous experience in the area, to work
+in this ﬁeld. Most of existing literature mainly summarizes and introduces methods and technologies for detection and
+veriﬁcation. However, they do not focus much on the dataset used for these methods and technologies.
+    We aim to provide summaries of various datasets related to fake news. This study comprehensively introduces 118
+kinds of datasets related to fake news, signiﬁcantly more than 27 presented in a previous survey paper [68] focusing
+on the dataset. The study can facilitate fake news research by helping researchers ﬁnd the suitable dataset without
+“reinventing the wheel,” and improve fake news studies in depth. Before we provide a summary of our work in Section
+1.3, we describe the deﬁnition of “fake news” in Section 1.1 and related concepts of fake news in Section 1.2.
+
+1.1   Definition of fake news
+Claire Wardle, the co-founder and leader of the First Draft [4], announced that the term fake news is woefully inad-
+equate to describe the issues related to it, and distinguishes between three types of information content problems:
+misinformation, disinformation, and malinformation [18]. Therefore, it is not easy to construct a general deﬁnition of
+“fake news” reﬂecting the current diverse circumstances.
+    “Fake news is false news” is a broad deﬁnition of fake news [244]. Similarly, Lazer et al. [124] describes “fake news
+is fabricated information that mimics news media content in form but not in organizational process or intent.” This
+deﬁnition is a broad deﬁnition that emphasizes only informational authenticity and does not consider informational
+intention. It allows us to cover diﬀerent types of fake news identiﬁed by their motive or intent, such as satire and
+parody [183]. There are few studies [107, 195, 224] leveraging the deﬁnition.
+    Most research emphasizes “intention” in the deﬁnition of fake news, as a narrow deﬁnition. Allcott and Shu et
+al. [26, 199] deﬁne fake news as “a news article that is intentionally and veriﬁably false.” Zhang et al. [241] describes
+that “fake news refers to all kinds of false stories or news that are mainly published and distributed on the Internet, in
+order to purposely mislead, befool or lure readers for ﬁnancial, political or other gains.” Other studies [58, 148, 175]
+have also emphasized the intention in the deﬁnition of fake news. However, we believe that most of these studies
+related to fake news do not completely follow this deﬁnition. Researchers use fake news datasets labeled as either fake
+or not fake based on the judgment of fact-checking sites, most of which do not consider the creator’s intention as it
+is diﬃcult to judge whether each piece of fake news is created with the intention of misleading readers. We refer to
+[211] for a more detailed discussion of the range of meanings.
+Manuscript submitted to ACM
+Dataset of Fake News Detection and Fact Veriﬁcation: A Survey                                                            3
+
+
+1.2    Related concepts of fake news
+Under the common practice of conveying false information, the term “fake news” is closely related to several concepts:
+satire, rumor, clickbait, and so on. There are salient diﬀerences among them in terms of the context of usage and for
+diﬀerent propagation purposes.
+
+      • Misinformation is false information that is inaccurate or misleading in a macro aspect [119, 124]. It spreads
+        unintentionally because of honest mistakes [94] or knowledge updation without the purpose of misleading.
+      • Disinformation is false information that misleads others intentionally for a certain purpose (e.g., to deceive
+        people [122], to promote a biased agenda [223]), which is close to a narrow deﬁnition of fake news. In contrast
+        to misinformation, it spreads because of a deliberate attempt to deceive or mislead others [94]. The survey by
+        Guo et al. [84] divides false news into two categories: misinformation and disinformation. Sometimes, the term
+        “deception” is treated in a similar way to disinformation [244].
+      • Rumor is an unveriﬁed and relevant information being circulated, and it could later be conﬁrmed as true, false,
+        or left unconﬁrmed [47, 169]. It could spread from one user to another. Before the term “fake news” became
+        popular, the task of classifying news as false or not was called “rumor detection,” related to which there has
+        been a lot of research. Zubiaga et al. summary the studies on rumor [248].
+      • Hoaxes are deliberately fabricated information made to masquerade as the truth [122]. It often causes serious
+        material damage to the victim because it includes relatively complex and large-scale fabrications [46, 183].
+      • Satire, which contains a lot of irony and humor, is written with the purpose of entertaining or criticizing
+        the readers [45]. These news articles are frequently published at some sites, such as SatireWire.com [14] and
+        The Onion [10]. It could be harmful if satire news, ignoring the context, is shared by many people. “Parody”
+        is a similar concept to satire, but there are diﬀerences, where parody uses non-factual information to inject
+        humor [211].
+      • Hyperpartisan news is extremely one-sided or biased news in a political context [175]. In itself, biased does
+        not mean being fake; however, some papers [96, 238] report that it has a high possibility of being false in
+        hyperpartisan news networks and that false information is spread widely in the alt-right community, such as
+        4chan’s /pol/ board [1] and Gab [6].
+      • Propaganda is a form of persuasion that attempts to inﬂuence the emotions, attitudes, opinions, and actions of
+        speciﬁed target audiences for political, ideological, and religious purposes through the controlled transmission
+        of one-sided messages [109, 136]. Recently, it has often been used to inﬂuence election results and opinions in
+        a political context.
+      • Spam is fabricated information that ranges from self-promotions to false announcements of the product. In
+        review sites, spam provides positive reviews to unfairly promote products or unjustiﬁed negative reviews to
+        competing products in order to damage their reputation [108]. In the social ecosystem, spam targets users to
+        disseminate malware and commercial spam messages to promote aﬃliate websites [125].
+      • Clickbait is a story with an eye-catching headline that is intended to attract the traﬃc and beneﬁt from adver-
+        tising revenue [52, 223]. Because of the discrepancy between content and headline is the main component in
+        clickbait, it is one of the least severe types of false information.
+
+  These term lists are based on [84, 229, 244] and extended to build upon the existing literature. There are no formal
+deﬁnitions for these terms, similar to the term “fake news.” In addition, the term lists should not be treated as an
+                                                                                                Manuscript submitted to ACM
+4                                                                                                                T. Murayama
+
+                                  !"#$%&'()*+"
+                               !"#$%&'()*+')+,-')$.*/
+
+
+
+
+                                                                                                  324$
+                                                                  !"#$%&$'(
+                                                                                                   -2
+                                                                )$*$+*,-.%/-0$1
+                                  !"#$%&'()*#+,-).&,/01#"
+                                  23#)34(#)/$255555
+                                                                                                 !"#$
+                                  3226-77888
+
+
+                         9,)23#)'#+,):#$;;<)===
+                         3226-77888
+
+                              ,-*)&+%."/)&%0-$($
+
+
+               Fig. 1. Fake news detection task classifies whether each news item is fake, by getting from, as input
+               data, text information such as the news content or social media posts including the news.
+
+                                      !"#$%&
+                        !"#$%"&'%()*#+'%,'&-..-('%('
+                        &#%/%&"0'&",1,'-2'!3456789
+                                                                                                      /'0&
+                        !"#"$%&"'            (%)%'*+,-.'$%*)            !"#$
+                              !"#$%&'(
+                                                     !"#$%&'(        %&'()(#"$(*+                      *'
+                                                                       ,*-&.                          !".1&
+
+
+                                 '($)*+,*-
+
+               Fig. 2. Fact verification task is to make the decision as to whether a claim is correct, based on the
+               explicitly-available evidence, such as Wikipedia articles and research papers.
+
+
+
+exhaustive representation of the false information ecosystem (e.g., half-truth [239] and factoid [233]). In the following
+sections, the usage of these terms in this study complies with reference papers.
+
+1.3   An overview of this survey
+Our survey aims to present a comprehensive summary of existing datasets, that are publicly available or easy to obtain,
+to quantitatively analyze and study fake news. Methods for fake news detection and fact veriﬁcation, which many
+existing surveys comprehensively introduce, are not our target. We expect the summary to be an index for further
+research, quickly identifying previous datasets suitable for their demand or gaps between the existing literature and
+their demand. We present datasets related to fake news from three aspects that are categorized by research content:
+(1) fake news detection, classifying fake news from text and other information, (2) fact veriﬁcation, judging whether
+a claim is true from evidence, and (3) other datasets related to fake news, which are developed neither for fake news
+detection nor for fact veriﬁcation (e.g., fake news analysis, fake media bias analysis, or a novel task for fake news). An
+overview of the fake news detection and fact veriﬁcation task is shown in Figure 1 and Figure 2.
+    Our survey mainly focuses on datasets that include text information in fake news (e.g., misinformation, rumor,
+hoaxes, and satire). It does not cover speciﬁc topics, despite their close relationship to fake news. For example, datasets
+Manuscript submitted to ACM
+Dataset of Fake News Detection and Fact Veriﬁcation: A Survey                                                             5
+
+
+that mainly include videos with false information such as Deepfakes [76, 83, 115], utilizing deep learning models to
+create audio and video of real people saying and doing things they never said or did, are not covered. Refer to [23, 143]
+for more comprehensive information on detecting multimodal fake news and deepfakes. In addition, datasets focusing
+on spam reviews or fake reviews, which are written to promote or demote a few target products or services, are not
+covered. Some studies [95, 164] provides a comprehensive summary of this topic.
+  We ﬁrst review existing survey papers and major fact-checking organizations that are useful in building fake news
+datasets in Section 2. We then present summaries of datasets related to fake news from three aspects: fake news
+detection, fact veriﬁcation, and other datasets related to fake news in Sections 3–5. Section 6 discusses some problems
+in fake news dataset construction that need to be resolved in the future. We conclude the survey in Section 7.
+
+
+2 RELATED WORK
+2.1   Survey of researches about fake news
+There have been many attempts to survey the literature on fake news research. Before the term "fake news" became
+known among researchers, there was a large number of research on rumors and credibility of information [129, 248].
+Shu et al. [199] provide a summary of early fake news research. They present a comprehensive review of detecting fake
+news on social media, including fake news characterizations of psychology and social theories and on existing algo-
+rithms from a data mining perspective, evaluation metrics, and representative datasets. Kumar et al. [121] summarize
+fake news research based on two categories: opinion-based, where a unique ground truth does not exist as in the case
+of product reviews, and fact-based that consists of lies about entities with unique ground truth values. Zannettou et
+al. [239] report a comprehensive overview of existing research from the perspective of the fake news ecosystem, com-
+posed of various types of false information, actors, and their motives. They mainly discuss the relationship between
+fake news and political problems, and fake news mitigation strategies. Zhang et al. [241] categorize fake news detec-
+tion methods based on the features and methods used to detect fake news on a large scale. Zhou et al. [244] provide
+a summary of fake news detection methods from four perspectives: (1) the false knowledge it carries, (2) its writing
+style, (3) its propagation patterns, and (4) the credibility of its source. They also discuss building an explainable fake
+news detection system. Guo et al. [84] focused on a comprehensive review of the new research trends of fake news
+detection; embracing novel machine learning models, aggregation of crowd wisdom, adversarial attack, and defense
+in detection models, and so on. Collins et al. [57] explored various methods of combating fake news on social media
+and discussed how the utility of the application of hybrid-machine learning techniques and the collective eﬀort of
+humans are. In addition, there are surveys of fake news detection methods, mainly based on the perspective of natural
+language processing (NLP) techniques [161, 205], or based on the classiﬁcation results from systematic reviews and
+meta-analysis methods [21, 62, 70]. These reviews mainly summarize fake news detection methods, while there are also
+surveys about fact veriﬁcation methods [116, 212]. Many other surveys on fake news exist [41, 66, 67, 74, 142]. These
+surveys, as well as fake news tutorials [78, 151, 152, 237, 245] and technical books [197, 200], are beneﬁcial resources
+for beginners to start research on fake news.
+  The aforementioned surveys are mainly composed of an introduction to methods related to fake news detection
+and fact veriﬁcation. There are other surveys that introduce fake news datasets as follows, similar to our study: Pierri
+et al. [170] explore the datasets on social media that are used to instruct false news classiﬁcation methods, in addition
+to recent studies that examine detection, characterization, and mitigation of false news. Sharma et al. [195] provide a
+comprehensive summary of 23 datasets related to fake news, along with an introduction to recent fake news detection
+                                                                                                 Manuscript submitted to ACM
+6                                                                                                              T. Murayama
+
+
+and mitigation methods. D’Ulizia et al. [68] provide a comprehensive summary of 27 datasets related to fake news
+and compare between each dataset and discuss their content. Compared to these surveys, our survey provides a large
+volume of summaries and an insightful discussion of future challenges and problems in dataset construction. We expect
+that our survey will help readers to ﬁnd a suitable dataset and construct a useful dataset for their research.
+
+
+2.2    Fact-checking sites
+When building a dataset on fake news research, determining whether news in a dataset is fake, often depends on the
+judgment of existing fact-checking sites. Fact-checking sites provide the original truth-level of a piece of news based
+on investigation by experts. Real-time news is always a mixture of information, and sometimes, a binary classiﬁcation
+result cannot fully explain the overall problem. We can verify the authenticity of the various types of news on the
+Internet, thanks to fact-checking sites that inform users whether each information is true, false, or in-between. In the
+subsection, we introduce useful fact-checking sites, which are also used for dataset construction.
+
+
+      • PolitiFact [12] is an independent, non-partisan site for online fact-checking. It mainly rates the accuracy of
+        claims or statements made by US political news and politicians’ statements using the following classiﬁcation:
+        true, mostly true, half true, mostly false, false, and pants on ﬁre. It is a useful fact-checking site frequently used
+        in the construction of famous datasets such as FakeNewsNet [198] and LIAR [227].
+      • Snopes.com [15] is one of the ﬁrst online fact-checking sites, which was launched in 1994. It handles political
+        and other social and topical issues. It mainly veriﬁes news stories spread on social media. Similar to PolitiFact,
+        Snopes is also a functional fact-checking site frequently used in famous dataset construction such as Twit-
+        ter15 [133] and Twitter16 [138].
+      • Suggest [16], also called as GossipCop, investigates fake news among the US entertainment and celebrity
+        stories published in magazines and web portals. They rate on the basis of a 0–10 scale assigned to each article
+        based on its authenticity, where 0 means the rumor is completely false or ﬁctive, while 10 means the report is
+        100 percent true.
+      • FactCheck.org [3] is a non-proﬁt site for online fact-checking sites, describing itself as a “consumer advocate
+        for voters that aims to reduce the level of deception and confusion in US politics.” It mainly evaluates claims
+        made by politicians in TV advertisements, debates, speeches, and so on.
+      • TruthOrFiction.com [17]is a non-partisan website where online users can quickly and easily get information
+        about fake news and humorous or inspirational stories that are distributed through emails. It mainly rates
+        the accuracy of these rumors based on various criteria: true, ﬁction, unproven, disputed, reported to be truth,
+        reported to be ﬁction, truth and ﬁction, or truth but inaccurate details.
+      • Hoax-Slayer [7] was a privately run website for debunking false stories and internet scams and also hosted
+        a page listing strange but true stories. Various pieces of fake news have been examined, such as fake videos
+        claiming to depict the Malaysia Airlines Flight 37 [154]. It was closed on May 31th, 2021.
+      • The International Fact-Checking Network at Poynter [13] is a unit of the Poynter Institute dedicated to
+        bringing together fact-checkers worldwide. It also sets a code of ethics for fact-checking organizations, reviews
+        fact-checkers for compliance with its code, and then issues certiﬁcation to publishers who pass the audit.
+      • FullFact [5] is a British charity for online fact-checking sites. It checks and corrects the news and claims that
+        circulate on social media in the UK.
+Manuscript submitted to ACM
+Dataset of Fake News Detection and Fact Veriﬁcation: A Survey                                                               7
+
+
+      • Fact Check Initiative Japan [2] is a non-proﬁt organization for the promotion of Japanese fact-checking that
+        is aimed at protecting society from mis/disinformation.
+
+
+3 DATASET OF FAKE NEWS DETECTION
+Existing fact-checking sites and experts are engaged in judging the truthfulness of each piece of news. This is of-
+ten time-consuming and demands large amounts of manual labor. The “Fake News Detection Task,” which assesses
+the truthfulness of a certain piece of news from news content or social media posts, has been performed by many
+researchers to save working hours and make the process automatic. In recent years, with the development of deep
+learning models, many models have been proposed to achieve high detection performance. A classical fake news de-
+tection model learns the textual style of fake news and then classiﬁes them as fake on the basis of input data, such as
+information of the news content or social media posts, including the news [123, 137]. It is diﬃcult to detect fake news
+generated in the last few years using only textual information because the representation of fake news has become
+more diverse and complex. Recent fake news detection models leverage textual information as well as rich contexts
+such as news publishers [236], user information [134], temporal information [146], and network information [201].
+Additionally, international competitions such as CheckThat! [153] and Constraint [166] intensiﬁed the activities in
+proposing a novel fake news detection model. Dataset construction, which provides resources for such research, is
+also an essential step in detecting fake news. This section introduces the fake news detection dataset from the follow-
+ing two perspectives;
+
+      • News articles: We introduce datasets that are utilized to detect fake news mainly from the body of the news
+        article. The style of each news article is an important feature for detection.
+      • Social Media Posts: We introduce datasets that are utilized to detect fake news mainly from social media posts
+        related to each news. User information and network information in social media, in addition to text in social
+        media posts, are important features.
+
+
+3.1    News Articles
+Politifact14 [219] is one of the earliest datasets developed for fake news detection. The paper introducing Politifact14
+is also the ﬁrst to suggest “fact checking” and assesses the truthfulness of news publishers’ statements. The main ele-
+ment of the dataset, with 221 samples, is a statement (also called a headline). Its label has a ﬁve-point scale: true, mostly
+true, half true, mostly false, and false. Horne et al. [97] constructed two types of datasets to analyze the diﬀerences
+between the styles of three news items: fake news, real news, and satire news. One is Buzzfeed_political, whose main
+topic is the 2016 US presidential election, constructed from Buzzfeed’s 2016 article regarding fake election news on
+Facebook [202]. The dataset has 36 real news stories and 35 fake news stories. The other is Random_political, whose
+theme is political news, constructed from a list of Zimdars [246]. It is composed of 75 real news stories, 75 fake news sto-
+ries, and 75 satire news stories. Since fake news on political topics are published more frequently than on other topics,
+a dataset focusing on political events, such as Buzzfeed_political and Random_political, is constructed. For example,
+TSHP-17_politifact [178] is a dataset comprising individual statements made by public political ﬁgures that has been
+labeled according to the ratings used by Politifact (between True to Pants-on-ﬁre (six classes)). Breaking! [165] is a
+dataset comprising news during and before the 2016 US presidential election to implement a classiﬁcation model based
+on linguistic features. Articles in the dataset are divided into three categories: false, partial truth, and opinions, and
+they also label the questionability of each news item.
+                                                                                                   Manuscript submitted to ACM
+8                                                                                                                                                T. Murayama
+
+                                       Table 1. Summary of datasets of fake news detection on news articles
+
+    Dataset                      Instances           Labels              Topic domain                                Raters                 Language       Year
+                                                                                                   Fact-checking sites
+    Politifact14 [219]           221 headlines         5      Politics, Society                                                             English        2014
+                                                                                                   (Politifact, Channel 4)
+    Buzzfeed_political [97]      71 articles           2      the 2016 US election                 Buzzfeed page [202]                      English        2017
+
+    Random_political [97]        225 articles          3      Politics                             List of Zimdars [246]                    English        2017
+                                                                                                   Fact-checking site
+    Ahmed2017 [22]               25,200 articles       2      News in 2016                                                                  English        2017
+                                                                                                   (Politifact)
+                                                                                                   Fact-checking site
+    LIAR [25, 227]               12,836 claims         6      -                                                                             English        2017
+                                                                                                   (Politifact)
+                                                                                                   Fact-checking site
+    TSHP-17_politifact [178]     10,483 statements     6      -                                                                             English        2017
+                                                                                                   (Politifact)
+                                                              Sports, Business, Entertainment,     Generating fake news
+    FakeNewsAMT [168]            480 articles          2                                                                                    English        2018
+                                                              Politics, Technology, Education      by Crowdsourcing
+                                                                                                   Fact-checking site
+    Celebrity [168]              500 articles          2      Celebrity                                                                     English        2018
+                                                                                                   (GossipCop)
+    Kaggle_UTK [56]              25,104 articles       2      -                                    -                                        English        2018
+                                                                                                   Fact-checking site
+    MisInfoText_Buzzfeed [217]   1413 articles         4      -                                                                             English        2019
+                                                                                                   (Buzzfeed)
+                                                                                                   Fact-checking site
+    MisInfoText_Snopes [217]     312 articles          5      -                                                                             English        2019
+                                                                                                   (Snopes)
+    FA-KES [185]                 804 articles          2      Syrian War                           Expert annotators                        English        2019
+                                                              Science, Sport, Politics, Society,   Fact-checking sites
+    Spanish-v1 [174]             971 articles          2                                                                                    Spanish        2019
+                                                              Environment, International           (VeriﬁcadoMX, Maldito Bulo, Caza Hoax)
+                                                                                                   Fact-checking site
+    fauxtography [247]           1,233 articles        2      -                                                                             English        2019
+                                                                                                   (Snopes)
+    Breaking! [165]              679 articles          3      2016 US election                     BS Detector                              English        2019
+                                                                                                   News Sites
+    TDS2020 [77]                 46,700 articles       2      -                                                                             English        2020
+                                                                                                   (BreitBart, The Onion, InfoWars)
+                                                                                                   Fact-checking sites
+    FakeCovid [193]              12,805 articles      2–18    COVID-19                                                                      40 languages   2020
+                                                                                                   (Snopes, Poynter)
+    TrueFact_FND [20]            6,236 articles        2      -                                    -                                        English        2020
+                                                              Science, Sport, Politics, Society,   Fact-checking sites
+    Spanish-v2 [174]             572 articles          2                                                                                    Spanish        2021
+                                                              Environment, International           (VeriﬁcadoMX, Maldito Bulo, Caza Hoax)
+
+
+
+
+     Ahmed2017 [22] consists mainly of news from 2016. The number of samples in the dataset was 12,600 real articles
+obtained from Reuters.com and 12,600 articles judged to be fake based on Politifact. LIAR [227] is a large-scale dataset
+in fake news detection. It is annotated using six ﬁne-grained labels (true, mostly true, half true, mostly false, false, and
+pants on ﬁre) and comprises 12,836 short statement claims from 2007 to 2016 along with information regarding the
+speaker, a label of credibility, the subject, the context of the statement, and so on, related to each claim in the form
+of metadata. Alhindi et al. extend the LIAR dataset by automatically extracting for each claim the justiﬁcation that
+people have provided in the fact-checking article associated with the claim [25]. Pérez-Rosas et al. [168] introduce two
+datasets covering seven diﬀerent news domains for fake news detection and exploratory analysis to identify linguistic
+diﬀerences in fake and legitimate news content. In FakeNewsAMT, one dataset of [168], legitimate news, the number
+of which is 240, is obtained from a variety of mainstream news websites such as ABC News, CNN, USA Today, The
+New York Times, Fox News, Bloomberg, and CNET, among others. They do not utilize the fake news spread on the
+Internet as fake news in the dataset. They asked crowd workers in Amazon Mechanical Turk to generate 240 fake news
+stories based on legitimate news to cover a variety of news domains. In Celebrity, a dataset from [168], legitimate
+news is obtained from online magazines such as Entertainment Weekly, People Magazine, RadarOnline, among other
+tabloid and entertainment-oriented publications. Also, fake news is obtained based on the ratings given by GossipCop.
+It is composed of 250 legitimate news and 250 fake news stories. Torabi Asr et al. [217] built two datasets of news
+article texts that were labeled by fact-checking websites to address the lack of data with reliable labels. Each sample
+Manuscript submitted to ACM
+

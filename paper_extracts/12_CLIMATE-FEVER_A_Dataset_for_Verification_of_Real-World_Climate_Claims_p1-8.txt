@@ -1,0 +1,389 @@
+                                            climate-fever: A Dataset for Verification of Real-World
+                                                                Climate Claims
+                                                                            Preprint, compiled January 5, 2021
+
+                                                Thomas Diggelmann                      Jordan Boyd-Graber                   Jannis Bulian
+                                               Department of Physics              CS, iSchool, LSC, and UMIACS             Google Research
+                                                    ETH Zurich                         University of Maryland             Zurich, Switzerland
+                                                 Zurich, Switzerland                  College Park, MD, USA              jbulian@google.com
+                                            thomasdi@student.ethz.ch                  jbg@umiacs.umd.edu
+
+
+
+
+arXiv:2012.00614v2 [cs.CL] 2 Jan 2021
+                                                      Massimiliano Ciaramita                            Markus Leippold
+                                                         Google Research                         Department of Banking and Finance
+                                                        Zurich, Switzerland                             University of Zurich
+                                                       massi@google.com                                 Zurich, Switzerland
+                                                                                                  markus.leippold@bf.uzh.ch
+
+                                                                                        Abstract
+
+                                                 We introduce climate-fever, a new publicly available dataset for verification of climate
+                                                 change-related claims. By providing a dataset for the research community, we aim to
+                                                 facilitate and encourage work on improving algorithms for retrieving evidential support
+                                                 for climate-specific claims, addressing the underlying language understanding challenges,
+                                                 and ultimately help alleviate the impact of misinformation on climate change. We adapt
+                                                 the methodology of fever [1], the largest dataset of artificially designed claims, to real-
+                                                 life claims collected from the Internet. While during this process, we could rely on the
+                                                 expertise of renowned climate scientists, it turned out to be no easy task. We discuss
+                                                 the surprising, subtle complexity of modeling real-world climate-related claims within
+                                                 the fever framework, which we believe provides a valuable challenge for general natural
+                                                 language understanding. We hope that our work will mark the beginning of a new exciting
+                                                 long-term joint effort by the climate science and ai community.
+
+
+                                        1    Introduction
+
+                                        With the easy availability of information through the Internet and social media, claims of unknown veracity
+                                        manipulate public perception and interpretation. Misinformation and disinformation are particularly pressing
+                                        issues for the climate change debate. They have confused the public, led to political inaction, and stalled
+                                        support for climate-change mitigation measures [2, 3, 4, 5]. To counter the influence of potentially false
+                                        claims on the formation of public opinion on climate change, researchers and experts began to manually
+                                        assess claims’ veracity and publish their assessments on platforms such as climatefeedback.org and
+                                        skepticalscience.com.
+                                        Recently, new literature on algorithmic fact-checking has emerged, using machine learning and natural
+                                        language understanding (nlu) to work on this problem from different angles. One influential framework that
+                                        combines several of these aspects is fever [1]. It consists of a well-vetted dataset of human-generated claims
+                                        and evidence retrieved from Wikipedia and a shared-task for evaluating implementations of claim validators.
+                                        Given that the fever claims are artificially constructed, they may not share the characteristics of real-world
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                   2
+
+
+claims. Consequently, researchers [6] started to collect real-world claims from multiple fact-checking
+organizations along with evidence manually curated by human fact-checkers.
+We believe that technology cannot and will not in the foreseeable future replace human fact-checkers. But it
+can help to provide relevant, reliable evidence for humans to make better decisions about the veracity of a
+claim. In this work, we focus on building a dataset of real-world claims specifically on climate change. We
+collect 1,535 claims on the Internet. For each claim, we algorithmically retrieve the top five relevant evidence
+candidate sentences from Wikipedia by the use of nlu where humans annotate each sentence as supporting,
+refuting, or not giving enough information to validate the claim. We call this database of 7,675 annotated
+claim-evidence pairs the climate-fever dataset.1 .
+
+2       Methodology
+We adopt a pipeline approach for our evidence retrieval and claim validation system similar to the baseline
+system proposed by fever [1] and similar to virtually all competing implementations that followed [7, 8,
+9, 10, 11]. The reason for building this system is two-fold. First, we require an algorithm to automatically
+retrieve evidence candidates from a large Knowledge Document Collection2 (kdc) given a claim to build our
+dataset. Second, we require an end-to-end claim validation algorithm to predict entailment given a claim and
+evidence candidates to form a baseline, i.e., to answer the question if current claim validation approaches are
+up to the task of algorithmically validating real-life claims.
+
+
+
+
+Figure 1: Overview of the claim validation system consisting of the Evidence Candidate Retrieval System
+(ecrs) and Entailment Prediction (ep) stage.
+
+Our architecture consists of two distinct components, the Evidence Candidate Retrieval System (ecrs) and
+the Entailment Prediction (ep) stage (see Fig. 1). For a given claim, the ecrs retrieves sentences as evidence
+candidates from the kdc. A pair of claim and evidence candidate sentences are fed to the ep to predict one
+of the labels SUPPORTS, REFUTES or NOT_ENOUGH_INFO, depending on whether the evidence is supporting,
+refuting, or not giving enough information to validate the given claim. The fever dataset uses a copy of the
+    1
+   We make this dataset publicly available at http://climatefever.ai.
+    2
+   We define kdc as any large document corpus that contains well-founded textual (prose) representations of knowledge.
+Examples for kdc’s are encyclopediae, newspaper archives, scientific publications.
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                         3
+
+
+English Wikipedia containing only the introductory section of all articles as kdc. We also use the English
+Wikipedia as kdc but, given the complexity of real-life climate claims, allow the complete body of Wikipedia
+articles as a source of evidence.3
+
+
+2.1   Retrieving and labeling climate claims (Task-1)
+
+To obtain a set of candidate climate claims from the Internet, we follow an ad-hoc approach and use a set
+of seed keywords in Google searches4 to identify possible sources for such claims. We either retrieved the
+claims manually, or we scraped the pages automatically. We collected an equal number of climate-fever
+claims from both scientifically-informed and climate change skeptics/deniers sources. This procedure resulted
+in a balanced set of more than 3,000 climate claims.
+fever claims were written and curated by annotators, enforcing a rigorous set of requirements for writing
+claims. The resulting claims are self-contained, short, and syntactically simple. For example, one of the rare
+claims related to climate change in fever reads:
+"The Gray wolf is threatened by global warming."
+In contrast, a candidate claim crawled from the wild is, e.g.:
+“The Intergovernmental Panel on Climate Change is misleading humanity about climate change
+and sea levels, and that in fact, a new solar-driven cooling period is not far off.”
+Given the complexity of real claims, we introduce the definition of a verifiable claim as follows.
+
+Definition 1 (Verifiable claims) A claim is potentially verifiable if it is a) well-formed and b) subjectively
+investigable.
+
+      a) A well-formed claim is a single English sentence, consistent, unambiguous, and complete (i.e., not
+         much implicit knowledge is needed for comprehension by the reader).
+      b) A claim is subjectively investigable, if evidence could be retrieved from a knowledge document
+         collection (kdc) that decreases the investigators uncertainty about the truthfulness (or falsehood) of
+         the statement.
+
+
+Equipped with our definition of verifiable claims, we asked climate scientists to label our collected claims
+(Task 1). For each claim, we collected up to five votes. This annotation task resulted in more than 1,535
+verifiable climate claims on which there was a sufficient consensus among the annotators. We give examples
+of verifiable and non-verifiable claims in Appendix A.
+
+
+
+    3
+      This extension introduces a challenge with respect to the retrieval of evidence candidates. In the original setup, the
+number of sentences retrieved after the document retrieval stage is permitting for pairwise ranking against a given claim
+(up to 100 sentences on average in the introductory section). In our case, the number of sentences becomes intractable. We,
+therefore, introduce a novel technique by leveraging learned sentence-embeddings combined with a fast vector similarity
+index, faiss [12], to pre-select the most relevant sentences given a claim prior to the pairwise re-ranking. This can be
+compared to Facebook AI’s Dense Passage Retrieval (dpr) [13] that uses a similar approach for solving Open-Domain
+Question Answering (qa) by using dense embeddings rather than BM25.
+    4
+      For this study we did not automate this step. Instead, we manually searched for seed keywords, identified potential
+targets, and used Python libraries such as requests and BeautifulSoup to download, parse and clean content for
+subsequent processing.
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                              4
+
+
+2.2       Evidence candidate retrieval
+
+To automatically retrieve relevant evidence candidates from Wikipedia for a given claim, we build an ecrs
+pipeline consisting of the following three steps5 :
+1. Document-level retrieval: Given a claim as input, we retrieve the most relevant documents from the kdc.
+We apply an entity-linking approach similar to [8]. We use BM25 [16] to query an inverse document index
+containing all English Wikipedia articles with entity mentions extracted from the claim. We use a dependency
+parser to identify candidates of entity mentions, and we select the top-10 relevant articles.
+2. Sentence-level retrieval: From the selected articles, we retrieve the top-100 most relevant sentences using
+sentence-embeddings trained on the fever dataset. To produce task-specific sentence-embeddings, we adopt a
+pretrained albert (large-v2) model in an average-pooled Siamese-setting [17]. We apply hard positive and
+negative mining [18, 7] to compensate for the large number of possible negative examples.
+3. Sentence re-ranking: Similar to [7] we train a point-wise model to predict a relevance score for pairs of
+claim and evidence. We adopt a pretrained albert (base-v2) model with a binary classifier on the [CLS]
+token. Every evidence is classified as evidence (1) or non-evidence (0). During training, we use claims along
+with supporting and refuting evidence from the fever training split as examples for evidence and we randomly
+sample sentences from the fever Wikipedia dump to provide examples for non-evidence. During inference,
+we sort evidence sentences by the predicted score in descending order and select the top five sentences.
+
+
+2.3       Evidence candidate labelling (Task-2)
+
+In Task-2, the claims together with their top five evidence sentences as retrieved by the ecrs are displayed to
+the annotators to label it as supporting, refuting, or not giving enough information to validate the claim.6 For
+each claim, we collect five individual votes per claim-evidence pair, which allows us to analyze confidence
+and to compute inter-annotator agreement. During post-processing we compute a micro-verdict (for every
+claim-evidence pair) and a macro-label for every claim (aggregated on the five micro-verdicts). The micro-
+verdict is given by the majority-vote for each claim-evidence pair (or it is NOT_ENOUGH_INFO on a tie). The
+claim-label is by default NOT_ENOUGH_INFO unless there is supporting (SUPPORTS) or refuting (REFUTES)
+evidence. If there is both supporting and refuting evidence the claim-label is DISPUTED.
+
+
+2.4       Entailment prediction
+
+For entailment prediction, the top five candidate evidence sentences along with the corresponding Wikipedia
+article titles are jointly compared against the claim to predict one of the labels SUPPORTS, REFUTES, or
+NOT_ENOUGH_INFO. We adopt a pretrained albert (large-v2) with a three-way classifier on the [CLS] token
+of a concatenation of claim and evidence sentences. We train the model by using the ecrs to retrieve the top
+five evidence candidates for each claim from the fever training split and use the gold-labels as ground-truth for
+optimizing the cross-entropy loss. We reach a competitive label-accuracy of 77.68% on the fever dev-set using
+our end-to-end pipeline (sota label-accuracy of 79.16% on the dev-set is reported by [10]). For measuring the
+end-to-end performance of our claim-validation pipeline on the climate-fever dataset, we predict labels for
+all claim and evidence-set pairs and compare against the gold-labels (claim-labels) from Task-2.
+
+
+      5
+     For BM25 in the first step we leverage Apache’s Lucene (https://lucene.apache.org/), while our model
+implementations for steps two and three are both based on Google’s albert model [14] by using HuggingFace’s
+transformers library [15].
+   6
+     Given our 1,535 climate claims and five sentences per claim, we end up with 7,675 annotations.
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                   5
+
+
+Table 1: For evidence candidate labelling (Task-2) the 1,535 claims were split into 10 slices of 770 claims
+each (except for the last slice). Each slice consists of 3,850 (770 × 5) claim-evidence pairs. This table lists for
+each slice the average number of voters, the inter-annotator agreement (αKrippendorff ), the fraction of evidence
+sentences with total agreement and the average entropy with respect to the select class (SUPPORTS, REFUTES
+or NOT_ENOUGH_INFO).
+
+             Slice    Size    Avg. Num. Voters       αKrippendorff   Total Agreement      Avg. Entropy
+                 0    770                  2.227           0.283                0.613             0.266
+                 1    770                  4.019           0.399                0.423             0.380
+                 2    770                  2.000           0.522                0.745             0.176
+                 3    770                  3.001           0.106                0.201             0.544
+                 4    770                  2.000           0.215                0.504             0.344
+                 5    770                  2.000           0.091                0.404             0.413
+                 6    770                  2.000           0.252                0.529             0.327
+                 7    770                  2.825           0.316                0.461             0.371
+                 8    770                  2.000           0.431                0.635             0.253
+                 9    745                  2.000           0.229                0.545             0.315
+
+
+3   Discussion and future work
+To gain insight into the 1,535 climate claims, we collected several statistics about the dataset. By using a
+clustering technique, we identified more than 20 different topics represented by the collected claims, such
+as claims concerning “climate change in the arctic”, “sea-level rise”, and more general ones concerning
+“climate_change and global warming” (see Appendix B).
+The evidence labelling task (Task-2) produced a dataset of 1,535 claims with an annotated set of five evidence
+candidates for each claim. Each evidence sentence is labelled by at least two voters (2.4 ± 0.7 voters per
+evidence on average). The distribution for aggregate claim-labels SUPPORTS, REFUTES, DISPUTED, and
+NOT_ENOUGH_INFO is 655 (42.67%), 253 (16.5%), 153 (9.97%), and 474 (30.88%). While fever only
+contains undisputed claims, we include claims for which both supporting and refuting evidence were found.
+We believe that these examples are especially useful since they appear to be a common feature of real-world
+claims.
+Furthermore, we dealt with the limitation of fever-style majority-vote based aggregation for deciding on
+a claim label. The approach is too naïve as, in many cases, retrieved evidence covers only some facets of
+the claim, in which case not enough evidence is present to form a final opinion. More generally, a claim
+(hypothesis) can at best be refuted by contrarian evidence. Epistemologically, it is impossible to assign a final
+verdict. In our case, the only purpose for assigning a gold-label to each climate-claim is to measure a baseline
+performance of a fever entailment predictor on our dataset. Our dataset provides both the micro-verdict labels
+and the claim-labels for each claim-evidence pair.
+For Task-2 we measured an average inter-annotator agreement (Krippendorff’s alpha) of 0.334. This low level
+of agreement signifies the hardness of the task, i.e., even for human annotators, it is non-trivial to decide if an
+evidence candidate supports or refutes a given claim. Table 1 details the level of disagreement on a per-slice
+basis.7 We observed that training the annotators can help raise the agreement level (e.g. slice 8 was labelled
+by two second-time annotators). Furthermore, we could also see that pairs of annotators that are experts on
+the topic (e.g., climate scientists or ML specialists) tend to have a higher average agreement (cf. slices 0 and
+3).
+   7
+     For Task-2 we split the 1,535 claims into 10 slices of 770 claims each (except for the last slice) such that each
+annotator has to label 3,850 claim-evidence pairs.
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                     6
+
+
+The fever-trained entailment-predictor evaluated on the climate-fever dataset8 yields the following scores
+(cf. table 4): label-accuracy = 38.78%, recall = 38.78%, precision = 56.49%, F1 = 32.85%. We computed
+weighted-averages for the last three metrics to compensate for the unbalanced labels. The real-life nature
+of the climate-fever dataset proves to be a challenge indicated by the low label-accuracy (38.78% — only
+slightly better than chance classification), as compared to the higher and competitive label-accuracy on
+the original fever dev-set (77.69%). As can be seen in table 5, the model particularly struggles to predict
+SUPPORTED claims while it performs slightly better on predicting REFUTED claims. We suspect that this result
+can mainly be attributed to the stark qualitative differences between real-world claims of climate-fever and
+the artificial nature of fever claims. As argued above, real-world claims pose some unique challenges and
+subtleties. For instance, the claim
+“The melting Greenland ice sheet is already a major contributor to rising sea level and
+if it was eventually lost entirely, the oceans would rise by six metres around the world,
+flooding many of the world’s largest cities.”
+includes a statement that the sea level will rise six meters. An ecrs-retrieved evidence sentence may state a
+sea-level rise of x +  meters. Although the numbers differ, the climate scientists labelled the evidence as
+supportive. There are also more demanding cases. For instance, for the claim
+“An article in Science magazine illustrated that a rise in carbon dioxide did not precede a
+rise in temperatures, but actually lagged behind temperature rises by 200 to 1000 years.”
+the ecrs provides both supporting and refuting evidence and labelled as such by the annotators. Such disputed
+claims are absent in the fever dataset.9 To develop new strategies for tackling (climate-related) disinformation,
+we must be able to cope with the complexity of real-life claims in general, and at the same time, account
+for the specific characteristics of claims related to climate change. By further extending climate-fever and
+making it publicly available, we provide a first step in the right direction and hope that our work will stimulate
+a new long-term joint effort by climate science and ai community.
+
+Acknowledgments
+We would like to thank Thomas Hofmann (ETH Zurich) for his helpful contribution to an early draft of this
+paper. We also thank Christian Huggel (University of Zurich) and Reto Knutti (ETH Zurich) for all their
+comments and their climate science expertise. Finally, we are grateful to all climate scientists and annotators
+who were involved in the annotation process to build the climate-fever database. Research supported with
+Cloud tpus from Google’s TensorFlow Research Cloud (tfrc).
+
+References
+ [1] J. Thorne, A. Vlachos, C. Christodoulopoulos, and A. Mittal, “FEVER: a large-scale dataset for fact extraction and
+     verification,” arXiv preprint arXiv:1803.05355, 2018.
+ [2] W. R. Anderegg, J. W. Prall, J. Harold, and S. H. Schneider, “Expert credibility in climate change,” Proceedings of
+     the National Academy of Sciences, vol. 107, no. 27, pp. 12 107–12 109, 2010.
+ [3] D. Ding, E. W. Maibach, X. Zhao, C. Roser-Renouf, and A. Leiserowitz, “Support for climate policy and societal
+     action are linked to perceptions about scientific agreement,” Nature Climate Change, vol. 1, no. 9, pp. 462–466,
+     2011.
+ [4] S. D. Benegal and L. A. Scruggs, “Correcting misinformation about climate change: The impact of partisanship in
+     an experimental setting,” Climatic change, vol. 148, no. 1-2, pp. 61–80, 2018.
+   8
+       To stay compatible with the fever methodology for evaluation we simply excluded disputed claims from our dataset.
+   9
+       We list more examples of our climate-fever dataset in Appendix D.
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                      7
+
+
+ [5] S. Van der Linden, A. Leiserowitz, S. Rosenthal, and E. Maibach, “Inoculating the public against misinformation
+     about climate change,” Global Challenges, vol. 1, no. 2, p. 1600008, 2017.
+ [6] I. Augenstein, C. Lioma, D. Wang, L. C. Lima, C. Hansen, C. Hansen, and J. G. Simonsen, “Multifc: A real-
+     world multi-domain dataset for evidence-based fact checking of claims,” in Proceedings of the 2019 Conference
+     on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural
+     Language Processing (EMNLP-IJCNLP), 2019, pp. 4677–4691.
+ [7] A. Soleimani, C. Monz, and M. Worring, “BERT for evidence retrieval and claim verification,” in European
+     Conference on Information Retrieval. Springer, 2020, pp. 359–366.
+ [8] A. Hanselowski, H. Zhang, Z. Li, D. Sorokin, B. Schiller, C. Schulz, and I. Gurevych, “Ukp-athene: Multi-sentence
+     textual entailment for claim verification,” arXiv preprint arXiv:1809.01479, 2018.
+ [9] Y. Nie, H. Chen, and M. Bansal, “Combining fact extraction and verification with neural semantic matching
+     networks,” in Proceedings of the AAAI Conference on Artificial Intelligence, vol. 33, 2019, pp. 6859–6866.
+[10] W. Zhong, J. Xu, D. Tang, Z. Xu, N. Duan, M. Zhou, J. Wang, and J. Yin, “Reasoning over semantic-level graph for
+     fact checking,” arXiv preprint arXiv:1909.03745, 2019.
+[11] Z. Liu, C. Xiong, M. Sun, and Z. Liu, “Fine-grained fact verification with kernel graph attention network,” in
+     Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics, 2020, pp. 7342–7351.
+[12] J. Johnson, M. Douze, and H. Jégou, “Billion-scale similarity search with gpus,” arXiv preprint arXiv:1702.08734,
+     2017.
+[13] V. Karpukhin, B. Oğuz, S. Min, L. Wu, S. Edunov, D. Chen, and W.-t. Yih, “Dense passage retrieval for open-domain
+     question answering,” arXiv preprint arXiv:2004.04906, 2020.
+[14] Z. Lan, M. Chen, S. Goodman, K. Gimpel, P. Sharma, and R. Soricut, “ALBERT: A lite BERT for self-supervised
+     learning of language representations,” 2019.
+[15] T. Wolf, L. Debut, V. Sanh, J. Chaumond, C. Delangue, A. Moi, P. Cistac, T. Rault, R. Louf, M. Funtowicz, and
+     J. Brew, “Huggingface’s transformers: State-of-the-art natural language processing,” ArXiv, vol. abs/1910.03771,
+     2019.
+[16] S. Robertson and H. Zaragoza, The probabilistic relevance framework: BM25 and beyond.          Now Publishers Inc,
+     2009.
+[17] N. Reimers and I. Gurevych, “Sentence-bert: Sentence embeddings using siamese bert-networks,” arXiv preprint
+     arXiv:1908.10084, 2019.
+[18] A. Hermans, L. Beyer, and B. Leibe, “In defense of the triplet loss for person re-identification,” arXiv preprint
+     arXiv:1703.07737, 2017.
+[19] L. McInnes, J. Healy, and J. Melville, “Umap: Uniform manifold approximation and projection for dimension
+     reduction,” arXiv preprint arXiv:1802.03426, 2018.
+[20] “Using umap for clustering — umap 0.4 documentation,” https://umap-learn.readthedocs.io/en/latest/clustering.html,
+     (Accessed on 09/24/2020).
+[21] S. Louhichi, M. Gzara, and H. B. Abdallah, “A density based algorithm for discovering clusters with varied density,”
+     in 2014 World Congress on Computer Applications and Information Systems (WCCAIS). IEEE, 2014, pp. 1–6.
+Preprint – climate-fever: A Dataset for Verification of Real-World Climate Claims                                           8
+
+
+Appendix
+
+A     Claim Labelling (Task 1)
+In the following, we present examples of verifiable and non-verifiable claims given definition 1.
+Example A.1
+Observe the following three potentially verifiable claims:
+
+          “NASA and NOAA data show that global averages in 2016 were 1.78 degrees F (0.99 degrees C)
+          warmer than the mid-20th century average.”
+
+          “The amount of carbon dioxide absorbed by the upper layer of the oceans is increasing by about 2
+          billion tons per year.”
+
+          “The bushfires in Australia were caused by arsonists and a series of lightning strikes, not ’climate
+          change’.”
+
+The above claims are verifiable (1) because each claim is well-formed and there is a high probability that evidence could
+be retrieved from a kdc either supporting or refuting it.
+Example A.2
+Observe the following claim:
+
+          “Since the beginning of the Industrial Revolution, the acidity of surface ocean waters has increased
+          by about 30 percent.13,14 This increase is the result of humans emitting more carbon dioxide into the
+          atmosphere and hence more being absorbed into the oceans.”
+
+This claim consists of more than a single sentence and therefore does not adhere to definition 1 and, as a consequence of
+this, is not verifiable.
+Example A.3
+Observe the following claim:
+
+          “Unprecedented climate change has caused sea level at Sydney Harbour to rise approximately 0.0 cm
+          over the past 140 years.”
+
+This claim is not verifiable because it contains information that is inconsistent (a sea level rise of 0.0 cm) in violation of
+definition (1).
+Example A.4
+Observe the following claim:
+
+          “CO2 emissions from all commercial operations in 2018 totaled 918 million metric tons—2.4% of
+          global CO2 emissions from fossil fuel use.”
+
+This statement is incomplete because for its comprehension the reader would need to know that ‘commercial operators’ is
+referring to air travel.
+Example A.5
+Observe the following claim:
+
+          “Yet nature-based solutions only receive only 2% of all climate funding.”
+
+The above sentence is ambiguous because it is missing a subject. The collection of real claims sourced from the internet
+contains many examples of this type of non-verifiable claims.
+

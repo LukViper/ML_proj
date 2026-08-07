@@ -1,0 +1,755 @@
+Figure 1: Data Collection flow chart for H OV ER. In the first stage, we create claims from H OTPOT QA, validate
+them and extend to more hops. In the second stage, we apply a variety of mutations to the claims performed by
+crowd-workers and automatic methods. In the final stage, we ask crowd-workers to label the resulting claims.
+
+stream neural document and sentence retrieval mod-        a state-of-the-art system for both retrieval and veri-
+els also degrades significantly as the number of sup-     fication. We hope that the introduction of H OV ER
+porting documents increases. These results suggest        and the accompanying evaluation task will encour-
+that the possibility of a word-matching shortcut is       age research in complex many-hop reasoning for
+reduced significantly in 3/4-hop claims. Because          fact extraction and claim verification.
+the complete set of evidence cannot be retrieved
+for most claims, the claim verification model only        2       Data Collection
+achieves 73.7% accuracy in classifying the claims
+as S UPPORTED or N OT-S UPPORTED, while the              The many-hop fact verification dataset, H OV ER, is
+model given all evidence predicts 81.2% of the           a collection of human-written claims about facts
+claims correctly under this oracle setting. We fur-      in English Wikipedia articles created in three main
+ther provide a sanity check to show that the model       stages (shown in Fig. 1). In the Claim Creation
+can only correctly predict the labels for 63.7% of       stage (Sec. 2.1), we ask trained annotators on Ap-
+claims without any evidence. This suggests that          pen3 to create claims by rewriting question-answer
+the claims contain limited clues that can be ex-         pairs (Sec. 2.1.1) from the H OTPOT QA dataset4
+ploited independently of the evidence during the         (Yang et al., 2018). The validated 2-hop claims
+verification, and a strong retrieval method capa-        are then extended to (Sec. 2.1.2) include facts from
+ble of many-hop reasoning can improve the claim          more Wikipedia articles. In the Claim Mutation
+verification accuracy. In terms of H OV ER as an         stage (Sec. 2.2), claims generated from the above
+integrated task, the best pipeline can only retrieve     two processes are mutated with human editing
+the complete set of evidence and correctly verify        and automatic word substitution. Finally, in the
+the claim for 14.9% of dev set examples, falling         Claim Labeling stage (Sec. 2.3), trained crowd-
+behind the 81% human performance significantly.          workers classify the original and mutated claims as
+                                                         either S UPPORTED, R EFUTED or N OT E NOUGH -
+   Overall, we provide the community with a novel,       I NFO. We merge the latter two labels into a single
+challenging and large many-hop fact extraction           N OT-S UPPORTED class, owing to ambiguity ex-
+and claim verification dataset with over 26k claims      plained in Sec. 2.3. The guidelines and design for
+that can be comprised of multiple sentences con-
+                                                              3
+nected by coreference, and require evidence from                Previously known as Figure-Eight and CrowdFlower:
+as many as four Wikipedia articles. We verify that        https://www.appen.com/
+                                                              4
+                                                                Because of the complexity and costs (Sec. 2.4) of the data
+the claims are challenging, especially in the 3/4-        collection pipeline, we only use the H OTPOT QA dev set and
+hop cases, by showing the limited performance of          5000 examples from the training set.
+
+                                                     3443
+every task are shown in the appendix.                    and the entity e is “NASCAR”. The remaining
+                                                         efforts are the same as Method 1 as we search for
+2.1     Claim Creation                                   English Wikipedia articles â ∈
+                                                                                       / A whose text body
+The goal is to create claims by rewriting question-      mentions e’s hyperlink and ask crowd-workers to
+answer pairs from H OTPOT QA (Yang et al., 2018)         replace e with information from a3 .
+and extend these claims to include facts from more
+documents (shown in the left box in Fig. 1).             Task Setup. We employ Method 1 to extend
+                                                         the collected 2-hop claims, for which we can
+2.1.1   Creating 2-Hop Claims from                       find at least one â. Then we use both Method
+         H OTPOT QA                                      1 and Method 2 to extend the 3-hop claims to 4-
+To begin with, crowd-workers are asked to com-           hop claims of various reasoning graphs. In a 3-
+bine question-answer pairs to write claims. These        document reasoning graph (a chain), the title of
+claims require information from two Wikipedia ar-        the middle document is substituted out during the
+ticles. Based on the guidelines, the annotators can      extension from the 2-hop claim and thus does not
+neither exclude any information from the original        exist in the 3-hop claim. Therefore, Method 1,
+QA pairs nor introduce any new information.              which replaces the title of one of the three docu-
+Validating Created Claims. We then train an-             ments in the claim, can only be applied to either the
+other group of crowd-workers to validate the claims      leftmost or the rightmost document. In order to ap-
+created from Sec. 2.1.1. To ensure the quality of the    pend the fourth document to the middle document
+claims, we only keep those where at least two out        in the 3-hop reasoning chain, we have to substitute
+of three annotators agree that it is a valid statement   a non-title entity in the 3-hop claim, which can be
+and covers the same information from the origi-          achieved by Method 2. In Table 1, the last 4-hop
+nal question-answer pair. These validated 2-hop          claim with a star-shape reasoning graph is the re-
+claims are automatically labeled as S UPPORTED.          sult of applying Method 1 for 3-hop extension and
+                                                         Method 2 for the 4-hop extension, while the first
+2.1.2 Extending to 3-Hop and 4-Hop Claims                two 4-hop claims are created by applying Method
+Consider a valid 2-hop claim c from Sec. 2.1.1           1 twice. We ask the crowd-workers to submit the
+that includes facts from 2 supporting documents          index of the sentence and add this sentence to the
+A = {a1 , a2 }. We extend c to a new, 3-hop claim        supporting facts of the 2-hop claim to form the
+ĉ by substituting a named entity e in c with infor-     supporting facts of this new, 3-hop claim.
+mation from another English Wikipedia article a3
+that describes e. The resulting 3-hop claim ĉ hence     2.2   Claim Mutation
+has 3 supporting document {a1 , a2 , a3 }. We then       We mutate the claims created in Sec. 2.1 to collect
+repeat this process to extend the 3-hop claims to        new claims that are not necessarily supported by the
+include facts from the forth documents. We use two       facts. We employ four types of mutation methods
+methods to substitute different entities e, leading      (shown in the middle column of Fig. 1) that are
+to 4-hop claims with various reasoning graphs.           explained in the following sections.
+Method 1. We consider the entity e to be the ti-
+                                                         Making a Claim More Specific or General. A
+tle of a document ak ∈ A. We search for English
+                                                         more specific claim contains information that is
+Wikipedia articles â ∈/ A whose text body men-
+                                                         not in the original claim. A more general claim
+tions e’s hyperlink. We exclude the â whose title is
+                                                         contains less information than the original one.
+mentioned in the text body of one of the document
+                                                         We design guidelines (shown in the appendix) and
+in A. We then ask crowd-workers to select a3 from
+                                                         quizzes to train the annotators to use natural logic.
+a candidate group of â and write the 3-hop claim ĉ
+                                                         We constrain the annotators from replacing the sup-
+by replacing e in c with a relative clause or phrase
+                                                         porting document titles in a claim to ensure that ver-
+using information from a sentence s ∈ a3 .
+                                                         ifying this claim requires the same set of evidence
+Method 2. In this method, we consider e to be            as the original claims. We also forbid mutating
+any other entity in the claim, which is not the title    location entities (e.g., Manhattan −
+                                                                                            → New York) as
+of a document ak ∈ A but exists as a Wiki hyper-         this may introduce external evidence (“Manhattan
+link in the text body of one document in A. The last     is in New York”) that is not in the original set of
+4-hop claim in Table 1 is created via this method        evidence.
+
+                                                    3444
+Automatic Word Substitution. In this mutation                    knowledge and perspective of annotators. Consider
+process, we first sample a word from the claim that              the claim “Christian Bale starred in a 2010 movie
+is neither a named entity nor a stopword. We then                directed by an American director” and the fact “En-
+use a BERT-large model (Devlin et al., 2019) to                  glish director Christopher Nolan directed the Dark
+predict this masked token, as we found that human                Knight in 2010”. Although the “American” in the
+annotators usually fall into a small, fixed vocab-               claim directly contradicts the word “English” in the
+ulary when thinking of the new word. We ask 3                    fact, this claim should still be classified as N OT E-
+annotators to validate whether each claim mutated                NOUGH I NFO as Bale could have starred in another
+by BERT is logical and grammatical to further en-                2010 film by an American director. More of such
+sure the quality and keep the claims where at least              examples are provided in the appendix. In this case,
+2 workers decide it suffices our criteria. 500 BERT-             a piece of evidence contradicts a relative clause in
+mutated claims passed the validation and labeling.               the claim but does not refute the entire claim. Simi-
+                                                                 lar problems regarding the uncertainty of NLI tasks
+Automatic Entity Substitution. We design a                       have been pointed out in previous works (Zaenen
+separate mutation process to substitute named en-                et al., 2005; Pavlick and Kwiatkowski, 2019; Chen
+tities in the claims. First, we perform Named En-                et al., 2020a).
+tity Recognition on the claims. We then randomly
+                                                                    We design an exhaustive list of rules with abun-
+select a named entity that is not the title of any
+                                                                 dant examples, trying to standardize the decision
+supporting document, and replace it with an entity
+                                                                 process for the labeling task. We acknowledge the
+of the same type sampled from the context.5
+                                                                 difficulty and cognitive load it sometimes bears on
+Claim Negation. Understanding negation cues                      well-informed annotators to think of corner cases
+and their scope is of significant importance to                  like the example shown above. The final anno-
+NLP models. Hence, we ask crowd-workers to                       tated data revealed the ambiguity between N OT E-
+negate the claims by removing or adding negation                 NOUGH I NFO and R EFUTED labels, as in a 100-
+words (e.g., not), or substituting a phrase with its             sample human validation, only 63% of the labels
+antonyms. However, it is shown in Schuster et al.                assigned by another annotator match the majority
+(2019) that models can exploit this bias as most                 labels collected. Hence we combine the R EFUTED
+claims containing a negation word have the label                 and N OT E NOUGH I NFO into a single class, namely
+R EFUTED. To mitigate this bias, we only include a               N OT-S UPPORTED. 90% of the validation labels
+subset of negated 2-hop claims where 60% of them                 match the annotated labels under this binary classi-
+don’t include any explicit negation word.                        fication setting.
+
+2.3    Claim Labeling                                            2.4   Annotator Details
+In this stage (the right column in Fig. 1), we
+                                                                 Most annotators are native English speakers from
+ask annotators to assign one of the three labels
+                                                                 the UK, US, and Canada. For all tasks, we first
+(S UPPORTED, R EFUTED, or N OT E NOUGH I NFO)
+                                                                 launch small-scale pilots to train annotators and
+to all 3/4-hop claims (original and mutated) as well
+                                                                 incorporate their feedback for at least two rounds.
+as 2-hop mutated claims. The workers are asked
+                                                                 Then for claim creation and extension tasks, we
+to make judgments based on the given supporting
+                                                                 manually evaluate the claims they created and only
+facts solely without using any external knowledge.
+                                                                 keep those workers who can write claims of high
+Each claim is annotated by five crowd-workers and
+                                                                 quality. For claim validation (Sec. 2.1.1) and label-
+we only keep those claims where at least three
+                                                                 ing (Sec. 2.3) tasks, we additionally launch quizzes
+agree on the same label, resulting in a fleiss-kappa
+                                                                 and annotators scoring 80% accuracy in the quiz
+inter-annotator agreement score of 0.63.6
+                                                                 are then admitted to the job. During the job, we
+N OT-S UPPORTED Claims. The demarcation be-                      use test questions to ensure their consistent perfor-
+tween N OT E NOUGH I NFO or R EFUTED is subjec-                  mance. Crowd-workers whose test-question accu-
+tive and the threshold could vary based on the world             racy drops below 82% are rejected from the tasks
+                                                                 and all his/her annotations are re-annotated by other
+   5
+     The eight distracting documents selected by TF-IDF.         qualified workers. As suggested in Ramı́rez et al.
+   6
+     We discarded a total of 2222 claims that received a vote
+of 2 vs 2 vs 1. They only account for less than 10% of all the   (2019), we highlight the mutated words during the
+claims that we have kept in the dataset.                         labeling tasks to reduce the mental workload on
+
+                                                             3445
+    Split   #Hops   S UPPORTED    N OT-S UP    T OTAL       3-hop reasoning graph by appending the 4th node
+             2        6496          2556        9052        to one of the existing nodes in the graph.
+             3        3271          2813        6084
+    Train
+             4        1256          1779        3035        Qualitative Analysis. The process of removing
+            Total     11023         7148       18171
+                                                            a bridge entity and replacing it with a relative
+             2          521          605       1126         clause or phrase adds a lot of information to a single
+             3          968          867       1835
+    Dev                                                     hypothesis. Therefore, some of the 3/4-hop claims
+             4          511          528       1039
+            Total      2000         2000       4000         are of relatively longer length and have complex
+    Test      -        2000         2000       4000         syntactic and reasoning structure. In systematic
+    Total     -       15023         11148      26171        aptitude tests as well, humans are assessed on syn-
+                                                            thetically designed complex logical puzzles. These
+Table 2: The sizes of the Train-Dev-Test split for S UP -   tests require critical problem solving abilities and
+PORTED and N OT-S UPPORTED classes and different
+                                                            are effective in evaluating logical reasoning capa-
+number of hops.
+                                                            bilities of humans and AI models. Overly compli-
+workers and speed up the jobs. The crowd-workers            cated claims are discarded in our labeling stage if
+are paid an average of 12 cents (the pay varies with        they are reported as ungrammatical or incompre-
+the number of hops of a claim) per hit; and for             hensible by the annotators. The resulting examples
+the hop extension job, they are paid as much as             form a challenging task of evidence retrieval and
+40 cents per hit since the task is time-consuming           multi-hop reasoning.
+and demands the annotators to rewrite the claims
+after incorporating information from the extra doc-         4    Baseline System
+ument.                                                      Following a state-of-the-art system (Nie et al.,
+                                                            2019a) on FEVER (Thorne et al., 2018), we build a
+3     Dataset Analysis
+                                                            pipeline system of fact extraction and claim verifi-
+Dataset Statistics. We partitioned the annotated            cation.7 This provides an initial baseline for future
+claims and evidence into training, development,             works and its performance indicates the many-hop
+and test sets. The detailed statistics are shown            challenge posed by H OV ER.
+in Table 2. Because of the job complexity, judg-
+ment time, and the difficulty of quality control (de-       Rule-based Document Retrieval. We use the
+scribed in Sec. 2.4) increase drastically along with        document retrieval component from Chen et al.
+the number of hops of the claim, the first version          (2017) that returns the k closest Wikipedia doc-
+of H OV ER only uses 12k examples from the H OT-            uments for a query using cosine similarity between
+POT QA (Yang et al., 2018). The 2-hop, 3-hop and            binned uni-gram and bi-gram TF-IDF vectors. This
+4-hop claims have a mean length of 19.0, 24.2, and          step outputs a set Pr of kr document that are pro-
+31.6 tokens respectively as compared to a mean              cessed by downstream neural models.
+length of 9.4 tokens in Thorne et al. (2018).
+                                                            Neural-based Document Retrieval. Similar to
+Diverse Many-Hop Reasoning Graphs. As                       the retrieval model in Nie et al. (2019a), the BERT-
+questions from H OTPOT QA (Yang et al., 2018) re-           base model (Devlin et al., 2019) takes a single doc-
+quire two supporting documents, our 2-hop claims            ument p ∈ Pr and the claim c as the input, and
+created from H OTPOT QA question-answer pairs               outputs a score that reflects the relatedness between
+inherit the same 2-node reasoning graph as shown            p and c. We select a set Pn of top kp documents
+in the first row in Table 1. However, as we extend          having relatedness scores higher than a threshold
+the original 2-hop claims to more hops using ap-            of κp .
+proaches described in Sec. 2.1.2, we achieve many-
+hop claims with diverse reasoning graphs. Every             Neural-based Sentence Selection. We fine-tune
+node in a reasoning graph is a unique document              another BERT-base model that encodes the claim c
+that contains evidence, and an edge that connects           and all sentences from a single document p ∈ Pn ,
+two nodes represents a hyperlink from the original          and predicts the sentence relatedness scores using
+Wikipedia document or a comparison between two              the first token of every sentence. We select a set
+titles. As shown in Table 1, we have three unique               7
+                                                                  We provide a simple visualization of the entire pipeline
+4-hop reasoning graphs that are derived from the            in the appendix.
+
+                                                        3446
+                           #Hops                                                                  #Hops
+                                                   Overall                                                                   Overall
+         Hit@         2      3          4                                  Models       2           3               4
+         5         42.10    9.97       0.38         16.53                  BERT      13.6/57.2   1.9/49.8        0.2/45.0    4.8/50.6
+         10        53.37   15.91        2.89        23.08                  BERT?      9.1/52.0   1.3/45.4        0.3/41.2    3.2/46.2
+         25        66.16   24.90        6.83        31.83                  Oracle    25.0/68.3   18.4/71.5    17.1/76.4     19.9/71.9
+         100       80.02   39.18       15.59        44.55                  Human     75.0/86.5   73.5/93.1    42.1/87.3     56.0/88.7
+Table 3: The performance of the TF-IDF Document Re-                    Table 5: The EM/F1 scores of the sentence retrieval
+trieval, evaluated on the dev set.                                     methods, evaluated on the dev set.
+                            #Hops
+                                                        Overall
+    Models        2           3                4                                                        #Hops
+                                                                                                                            Overall
+                                                                            Models                 2      3             4
+    BERT       30.1/69.5   5.6/57.6      0.6/52.6       11.2/59.1
+    BERT?      34.0/69.9   5.8/58.2      1.0/53.4       12.5/60.2           BERT + O RACLE       79.8     83.5      78.6     81.2
+    Oracle     50.9/81.7   28.1/79.1     26.2/82.2      34.0/80.6           Claim-only           57.5     67.7      63.6     63.7
+    Human      85.0/92.5   82.4/95.3     65.8/91.4      77.0/93.5           Human + O RACLE      92.6     88.4      87.2     90.0
+
+Table 4: The EM/F1 scores of the document retrieval                    Table 6: The claim verification accuracy of the NLI
+methods, evaluated on the dev set.                                     models, evaluated on the dev set.
+
+
+Sn of top sentences from the entire Pn having                          BERT-base model (1st row in Table 4) to re-rank
+relatedness scores higher than a threshold of κs .                     the top-20 documents returned by the TF-IDF. The
+                                                                       “BERT? ” (2nd row) is trained with an oracle train-
+Claim Verification Model. We fine-tune a
+                                                                       ing set containing all golden documents. Overall,
+BERT-base model for recognizing textual entail-
+                                                                       the performances of the neural models are limited
+ment between the claim c and the retrieved evi-
+                                                                       by the low recall of the 20 input documents and
+dence Sn . We feed the claim and retrieved evi-
+                                                                       the F1 scores degrade as the number of hops in-
+dence, separated by a [SEP] token, as the input to
+                                                                       crease. The oracle model (3rd row) is the same
+the model and perform a binary classification based
+                                                                       as “BERT? ” but evaluated on the oracle data. It
+on the output representation of the [CLS] token at
+                                                                       indicates an upper bound of the BERT retrieval
+the first position.
+                                                                       model given a perfect rule-based retrieval method.
+5     Experiments and Results                                          These findings again demonstrate the high quality
+                                                                       of the many-hop claims we collected, for which
+We explain the evaluation metrics we use and report                    the reasoning shortcuts are significantly reduced
+the results of the baseline in three evaluation tasks.                 because of the approach described in Sec. 2.1.2.
+5.1     Evaluation Metrics
+                                                                       5.3      Sentence Selection Results
+We evaluate the final accuracy of the claim veri-
+fication task to predict a claim as S UPPORTED or                      We evaluate the neural-based sentence selection
+N OT-S UPPORTED. The document and sentence                             models by re-ranking the sentences within the top-
+retrieval are evaluated by the exact-match and F1                      5 documents returned by the best neural document
+scores between the predicted document/sentence-                        retrieval method. For “BERT? ” (2nd row in Ta-
+level evidence and the ground-truth evidence for                       ble 5), we again ensured that all golden documents
+the claim. We refer to the appendix for the detailed                   are contained within the 5 input documents dur-
+experimental setups and hyper-parameters.                              ing the training. We then measure the oracle re-
+                                                                       sult by evaluating “BERT? ” on the dev set with
+5.2     Document Retrieval Results
+                                                                       all golden documents presented. This suggests an
+The results in Table 3 show the task becomes sig-                      upper bound of the sentence retrieval model given a
+nificantly harder for the bi-gram TF-IDF when the                      perfect document retrieval method. The same trend
+number of supporting documents increases. This                         holds as the F1 scores decrease significantly as the
+decline in single-hop word-matching retrieval rate                     number of hops increases.8
+suggests that the method to extend the reasoning
+hops (Sec. 2.1.2) is effective in terms of promot-                          8
+                                                                            The only exception is in the oracle setting because select-
+ing multi-hop document retrieval and minimizing                        ing sentences from 4 out of 5 documents is actually easier than
+word-matching reasoning shortcuts. We then use a                       selecting from 2 out of 5 documents.
+
+                                                                    3447
+ Models            Accuracy(%)     H OV ER Score (%)       line respectively. In the oracle claim verification
+ BERT + G OLD          67.6               14.9             (Table 6), the human accuracy is 90%, i.e., 8.8%
+ BERT + R ETR          73.7               14.5             higher than BERT’s accuracy. Comparing on the
+ Human                 88.0               81.0
+                                                           full pipeline (Table 7), the human accuracy and
+Table 7: The claim verification accuracy and H OV ER       human H OV ER score are 88% and 81%, while the
+scores of the entire pipeline, evaluated on the dev set.   best BERT model only obtains 67.6% accuracy and
+                                                           14.9% H OV ER score respectively on the dev set.
+      Model    Evidence F1    H OV ER Score (%)
+                                                           Human evaluation setup is explained in appendix.
+      BERT         49.5              15.32
+
+Table 8: The evidence F1 score and H OV ER score of        6   Related Work
+the best model, evaluated on the test set.                 Natural Language Inference and Fact Verifica-
+                                                           tion. Textual Entailment and natural language
+5.4   Claim Verification Results                           inference (NLI) datasets like RTE (Dagan et al.,
+In an oracle (1st row in Table 6) setting where the        2010), SNLI (Bowman et al., 2015) or MNLI
+complete set of evidence is provided, the model            (Williams et al., 2018) consist of single sentence
+achieves 81.2% accuracy in verifying the claims.           premise. In this task, every premise-hypothesis pair
+We also conduct a sanity check in a claim-only             is labeled as E NTAILMENT, C ONTRADICTION, or
+environment (2nd row) where the model can only             N EUTRAL. Another related task is fact verification,
+exploit the bias in the claims without any evidence,       where claims (hypothesis) are checked against facts
+in which the model achieves 63.7% accuracy. Al-            (premise). Vlachos and Riedel (2014) and Ferreira
+though the model can exploit limited biases within         and Vlachos (2016) collected statements from Poli-
+the claims to achieve higher-than-random accuracy          tiFact, a Pulitzer Prize-winning fact-checking web-
+without any evidence, it is still 17.5% worse than         site that covers political topics. The veracity of
+the model given the complete evidence. This sug-           these facts is crowd-sourced from journalists, pub-
+gests the NLI model can benefit from an accurate           lic figures and ordinary citizens. However, develop-
+evidence retrieval model significantly.                    ing machine learning based assessments on datasets
+                                                           with less than five hundred datapoints is not fea-
+5.5   Full Pipeline Results                                sible. Wang (2017) introduced L IAR which in-
+                                                           cludes 12,832 labeled claims from PolitiFact. The
+The full pipeline (“BERT+Retr” in Table 7) uses
+                                                           dataset is based on the metadata of the speaker and
+the sentence-level evidence retrieved by the best
+                                                           their judgments. However, the evidence supporting
+document/sentence retrieval models as the input to
+                                                           the statements are not provided. A recent work in
+the NLI model, while the “BERT+Gold” is the ora-
+                                                           Table-based fact verification (Chen et al., 2020b)
+cle in Table 6 but evaluated with retrieved evidence
+                                                           points out the difficulty of collecting accurate neu-
+instead. We further propose the H OV ER Score,
+                                                           tral labels and leaves out those neutral claims at
+which is the percentage of the examples where the
+                                                           the claim creation phase. We instead merge neutral
+the model must retrieve at least one supporting fact
+                                                           (N OT E NOUGH I NFO) claims with R EFUTED claims
+from every supporting document and predict the
+                                                           into a single class.
+correct label. We show the performance of the best
+model (BERT+Gold in Table 7) on the test set in            Fact Extraction and Verification. Thorne et al.
+Table 8. Overall, the best pipeline can only retrieve      (2018) introduced FEVER, a fact extraction and
+the complete set of evidence and predict the cor-          verification dataset. It consists of single sentence
+rect label for 14.9% of examples on the dev set            claims that are verified against the pieces of evi-
+and 15.32% of examples on the test set, suggesting         dence retrieved from at most two documents. In
+that our task is indeed more challenging than the          our dataset, the claims vary in size from one sen-
+previous work of this kind.                                tence to one paragraph and the pieces of evidence
+                                                           are derived from information ranging from one doc-
+5.6   Human Performance                                    ument to four documents. More recently, Thorne
+We measure the human performance on 100 sam-               et al. (2019) introduced the FEVER2.0 shared task
+pled claims. In the document (Table 4) and sen-            which challenge participants to fact verify claims
+tence retrieval (Table 5) tasks, the human F1 score        using evidence from Wikipedia and to attack other
+is 37.9% and 33.1% higher than the best base-              participant’s system with adversarial models. In
+
+                                                       3448
+H OV ER, the claim needs verification from multi-       mance (e.g., 99% in RuleTaker) on these synthetic
+ple documents. Prior to verification, the relevant      datasets.
+documents and the context inside these documents
+must also be retrieved accurately. More recently,       7   Conclusion
+Chen et al. (2019) enriched the claim with multiple     We present H OV ER, a fact extraction and verifi-
+perspectives that support or oppose the claim in        cation dataset requiring evidence retrieval from as
+different scale. Each perspective can also be veri-     many as four Wikipedia articles that form reason-
+fied by existing facts. MultiFC (Augenstein et al.,     ing graphs of diverse shapes. We show that the
+2019) is a dataset of naturally occurred claims from    performance of existing state-of-the-art models de-
+multiple domains. The contribution of these two         grades significantly on our dataset as the number of
+fact-checking dataset is orthogonal to ours.            reasoning hops increases, hence demonstrating the
+                                                        necessity of robust many-hop reasoning in achiev-
+Multi-Hop Reasoning Datasets. Many recently             ing strong results. We hope that H OV ER will en-
+proposed datasets are created to challenge mod-         courage the development of models capable of per-
+els’ ability to reason across multiple sentences        forming complex many-hop reasoning in the tasks
+or documents. Khashabi et al. (2018) introduced         of information retrieval and verification.
+Multi-Sentence Reading Comprehension (Mul-
+tiRC) which is composed of 6k multi-sentence            Acknowledgments
+questions. Mihaylov et al. (2018) introduced Open       We thank the reviewers for their helpful com-
+Book Question Answering composed of 6000 ques-          ments and the annotators for their time and ef-
+tions created upon 1326 science facts. It requires      fort. This work was supported by DARPA MCS
+combining an open book fact with broad common           Grant N66001-19-2-4031, DARPA KAIROS Grant
+knowledge in a multi-hop reasoning process. Welbl       FA8750-19-2-1004, and Verisk. The views are
+et al. (2018) constructed a multi-hop QA dataset,       those of the authors and not of the funding agency.
+QAngaroo, whose queries are automatically gen-
+erated upon an external knowledge base. Yang
+et al. (2018) introduced the H OTPOT QA dataset         References
+which does not rely on an external knowledge base       Akari Asai, Kazuma Hashimoto, Hannaneh Hajishirzi,
+and provides sentence-level evidence to explain           Richard Socher, and Caiming Xiong. 2020. Learn-
+the answer. Recent state of the art models on the         ing to retrieve reasoning paths over wikipedia graph
+open-domain setting of H OTPOT QA include Nie             for question answering. In ICLR.
+et al. (2019b); Qi et al. (2019); Asai et al. (2020);   Isabelle Augenstein, Christina Lioma, Dongsheng
+Fang et al. (2019); Zhao et al. (2020). The dataset        Wang, Lucas Chaves Lima, Casper Hansen, Chris-
+is diverse and natural as it is created by human an-       tian Hansen, and Jakob Grue Simonsen. 2019. Mul-
+notators. These datasets are mostly presented in           tifc: A real-world multi-domain dataset for evidence-
+                                                           based fact checking of claims. In EMNLP.
+the question answering format, while H OV ER is
+instead created for the task of claim verification.     Samuel R. Bowman, Gabor Angeli, Christopher Potts,
+                                                          and Christopher D. Manning. 2015. A large anno-
+Synthetic Datasets. Winograd Schema Chal-                 tated corpus for learning natural language inference.
+                                                          In Proceedings of the 2015 Conference on Empiri-
+lenge (Sakaguchi et al., 2020), Winogender                cal Methods in Natural Language Processing, Lis-
+schema(Rudinger et al., 2018), and RuleTaker              bon, Portugal. Association for Computational Lin-
+(Clark et al., 2020) are synthetic datasets created       guistics.
+to challenge models’ ability to understand the com-     Danqi Chen, Adam Fisch, Jason Weston, and Antoine
+plex reasoning in natural language. With the same         Bordes. 2017. Reading wikipedia to answer open-
+motive, H OV ER is created by humans following            domain questions. In ACL.
+the guidelines and rules designed to enforce a multi-
+                                                        Jifan Chen and Greg Durrett. 2019. Understanding
+hop structure within the claim. Compared to syn-           dataset design choices for multi-hop reasoning. In
+thetic datasets like RuleTaker, H OV ER’s examples         NAACL.
+are more natural as they are created and verified by
+                                                        Sihao Chen, Daniel Khashabi, Wenpeng Yin, Chris
+humans and cover a wider range of vocabulary and           Callison-Burch, and Dan Roth. 2019. Seeing things
+linguistic variations. This is extremely important         from a different angle: Discovering diverse perspec-
+because models usually get close-to-perfect perfor-        tives about claims. In NAACL.
+
+                                                   3449
+Tongfei Chen, Zhengping Jiang, Adam Poliak, Keisuke       Yixin Nie, Haonan Chen, and Mohit Bansal. 2019a.
+  Sakaguchi, and Benjamin Van Durme. 2020a. Un-             Combining fact extraction and verification with neu-
+  certain natural language inference. In ACL.               ral semantic matching networks. In Proceedings of
+                                                            the AAAI Conference on Artificial Intelligence, vol-
+Wenhu Chen, Hongmin Wang, Jianshu Chen, Yunkai              ume 33, pages 6859–6866.
+  Zhang, Hong Wang, Shiyang Li, Xiyou Zhou, and
+ William Yang Wang. 2020b. Tabfact: A large-scale         Yixin Nie, Songhe Wang, and Mohit Bansal. 2019b.
+  dataset for table-based fact verification. In ICLR.       Revealing the importance of semantic retrieval for
+                                                            machine reading at scale. In 2019 Conference on
+P. Clark, Oyvind Tafjord, and Kyle Richardson. 2020.        Empirical Methods in Natural Language Processing
+   Transformers as soft reasoners over language. In IJ-     and 9th International Joint Conference on Natural
+   CAI.                                                     Language Processing (EMNLP-IJCNLP).
+
+Ido Dagan, Bill Dolan, Bernardo Magnini, and Dan          Ellie Pavlick and Tom Kwiatkowski. 2019. Inherent
+   Roth. 2010. Recognizing textual entailment: Ra-           disagreements in human textual inferences. Transac-
+   tional, evaluation and approaches–erratum. Natural        tions of the Association for Computational Linguis-
+  Language Engineering, 16(1):105–105.                       tics, 7:677–694.
+
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and             Ethan Perez, Patrick Lewis, Wen-tau Yih, Kyunghyun
+   Kristina Toutanova. 2019. BERT: Pre-training of          Cho, and Douwe Kiela. 2020. Unsupervised ques-
+   deep bidirectional transformers for language under-      tion decomposition for question answering. In
+   standing. In Proceedings of the 2019 Conference          AAAI.
+   of the North American Chapter of the Association
+   for Computational Linguistics: Human Language          Peng Qi, Xiaowen Lin, Leo Mehr, Zijian Wang, and
+  Technologies, Volume 1 (Long and Short Papers),           Christopher D Manning. 2019. Answering complex
+   pages 4171–4186, Minneapolis, Minnesota. Associ-         open-domain questions through iterative query gen-
+   ation for Computational Linguistics.                     eration. In EMNLP.
+
+Yuwei Fang, Siqi Sun, Zhe Gan, Rohit Pillai, Shuohang     Jorge Ramı́rez, Marcos Baez, Fabio Casati, and
+  Wang, and Jingjing Liu. 2019. Hierarchical graph           Boualem Benatallah. 2019. Understanding the im-
+  network for multi-hop question answering. CoRR,            pact of text highlighting in crowdsourcing tasks.
+  abs/1911.03631.                                            In Proceedings of the AAAI Conference on Human
+                                                             Computation and Crowdsourcing, volume 7, pages
+William Ferreira and Andreas Vlachos. 2016. Emer-           144–152.
+  gent: a novel data-set for stance classification. In
+                                                          Rachel Rudinger, Jason Naradowsky, Brian Leonard,
+  Proceedings of the 2016 conference of the North
+                                                            and Benjamin Van Durme. 2018. Gender bias in
+ American chapter of the association for computa-
+                                                            coreference resolution. In Proceedings of the 2018
+  tional linguistics: Human language technologies,
+                                                            Conference of the North American Chapter of the
+  pages 1163–1168.
+                                                            Association for Computational Linguistics: Human
+                                                            Language Technologies, New Orleans, Louisiana.
+Yichen Jiang and Mohit Bansal. 2019. Avoiding rea-
+                                                            Association for Computational Linguistics.
+  soning shortcuts: Adversarial evaluation, training,
+  and model development for multi-hop qa. In Pro-         Keisuke Sakaguchi, Ronan Le Bras, Chandra Bhagavat-
+  ceedings of the 57th Annual Meeting of the Associa-       ula, and Yejin Choi. 2020. Winogrande: An adver-
+  tion for Computational Linguistics.                       sarial winograd schema challenge at scale. In AAAI.
+Daniel Khashabi, Snigdha Chaturvedi, Michael Roth,        Tal Schuster, Darsh J. Shah, Yun Jie Serene Yeo,
+  Shyam Upadhyay, and Dan Roth. 2018. Looking be-           Daniel Filizzola, Enrico Santus, and Regina Barzi-
+  yond the surface: A challenge set for reading com-        lay. 2019. Towards debiasing fact verification mod-
+  prehension over multiple sentences. In Proceedings        els. In EMNLP/IJCNLP.
+  of the 2018 Conference of the North American Chap-
+  ter of the Association for Computational Linguistics:   James Thorne,        Andreas Vlachos,         Christos
+  Human Language Technologies, Volume 1 (Long Pa-           Christodoulopoulos, and Arpit Mittal. 2018.
+  pers), pages 252–262.                                     Fever: a large-scale dataset for fact extraction and
+                                                            verification. In NAACL-HLT.
+Todor Mihaylov, Peter Clark, Tushar Khot, and Ashish
+  Sabharwal. 2018. Can a suit of armor conduct elec-      James Thorne, Andreas Vlachos, Oana Cocarascu,
+  tricity? a new dataset for open book question answer-     Christos Christodoulopoulos, and Arpit Mittal. 2019.
+  ing. In EMNLP.                                            The fever2. 0 shared task. In Proceedings of the Sec-
+                                                            ond Workshop on Fact Extraction and VERification
+Sewon Min, Eric Wallace, Sameer Singh, Matt Gard-           (FEVER), pages 1–6.
+  ner, Hannaneh Hajishirzi, and Luke Zettlemoyer.
+  2019. Compositional questions do not necessitate        Andreas Vlachos and Sebastian Riedel. 2014. Fact
+  multi-hop reasoning. In ACL.                              checking: Task definition and dataset construction.
+
+                                                     3450
+                                                                                   40
+
+
+                                                                                   30
+
+
+
+                                                                    Token Length
+                                                                                   20
+
+
+                                                                                   10
+
+
+                                                                                   0
+                                                                                        2         3          4
+                                                                                            Number of Hops
+Figure 2: Baseline system with the 4-stage architecture.
+                                                           Figure 3: The average token length of our 2, 3, 4-hop
+    In Proceedings of the ACL 2014 Workshop on Lan-        claims.
+    guage Technologies and Computational Social Sci-
+    ence, pages 18–22, Baltimore, MD, USA. Associa-
+    tion for Computational Linguistics.                    document retrieval, sentence selection, and claim
+                                                           verification. The fine-tuning is done with a batch
+William Yang Wang. 2017. “liar, liar pants on fire”: A     size of 16 and the default learning rate of 5e-5 with-
+  new benchmark dataset for fake news detection. In
+  Proceedings of the 55th Annual Meeting of the As-        out warmup. We set kr = 20, kp = 5, κp = 0.5,
+  sociation for Computational Linguistics (Volume 2:       and κs = 0.3 based on the memory limit and the
+  Short Papers), pages 422–426, Vancouver, Canada.         dev set performance. We select our system with
+  Association for Computational Linguistics.               the best dev-set verification accuracy and report its
+Johannes Welbl, Pontus Stenetorp, and Sebastian            scores on the hidden test set. The entire pipeline
+  Riedel. 2018. Constructing datasets for multi-hop        is visualized in Fig. 2. For document retrieval and
+  reading comprehension across documents. Transac-         sentence selection tasks, we fine-tune the BERT on
+  tions of the Association for Computational Linguis-
+                                                           4 Nvidia V100 GPUs for 3 epochs. The training
+  tics, 6:287–302.
+                                                           of both tasks takes around 1 hour. For claim ver-
+Adina Williams, Nikita Nangia, and Samuel Bowman.          ification task, we fine-tune the BERT on a single
+  2018. A broad-coverage challenge corpus for sen-         Nvidia V100 for 3 epochs. The training finishes in
+  tence understanding through inference. In Proceed-
+  ings of the 2018 Conference of the North American        30 minutes.
+  Chapter of the Association for Computational Lin-
+  guistics: Human Language Technologies, Volume            Human Evaluation We measure the human per-
+  1 (Long Papers), pages 1112–1122. Association for        formance in all three evaluation tasks on 100 sam-
+  Computational Linguistics.                               pled claims. To perform the open-domain docu-
+                                                           ment retrieval task, the testee is given a claim and
+Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Ben-
+  gio, William W. Cohen, Ruslan Salakhutdinov, and         a python program that can retrieve the Wikipedia
+  Christopher D. Manning. 2018. HotpotQA: A                document from the database by its title. The tes-
+  dataset for diverse, explainable multi-hop question      tee is additionally allowed to search in the official
+  answering. In Conference on Empirical Methods in         Wikipedia web page as retrieving some documents
+  Natural Language Processing (EMNLP).
+                                                           requires matching the claim against the document
+Annie Zaenen, Lauri Karttunen, and Richard Crouch.         content. To select the sentence-level evidence from
+  2005. Local textual inference: can it be defined or      the retrieved documents, the testee uses the docu-
+  circumscribed? In Proceedings of the ACL work-
+  shop on empirical modeling of semantic equivalence       ments, tokenized by sentence, returned from the
+  and entailment, pages 31–36.                             python program. To verify the claim in the oracle
+                                                           setting, the testee is given all golden supporting
+Chen Zhao, Chenyan Xiong, Corby Rosset, Xia
+  Song, Paul Bennett, and Saurabh Tiwary. 2020.
+                                                           documents. The testee is given infinite amounts of
+  Transformer-xh: Multi-evidence reasoning with ex-        time for each example. Only 2 out of 100 claims
+  tra hop attention. In International Conference on        are labeled as not grammatical/logical during the
+  Learning Representations.                                human evaluation.
+Appendix                                                   B     Annotation Guidelines
+A     Experimental Setup                                   B.1    Claim Creation Guidelines
+We use the pre-trained BERT-base uncased model             Claim. A claim is written in single or multiple
+(with 110M parameters) for the tasks of neural             sentences that has information (true or mutated)
+
+                                                       3451
+about single or multiple entities.
+                                                         Question: Telos was an album by a band who
+B.1.1 Simple Claim Creation                              formed in what city?
+The objective of this task is to generate single-        Answer: Indianapolis
+sentence claims using QA pairs from H OTPOT QA           Claim Created: Telos was an album by a
+dataset as shown in Fig. 4                               band formed in Indianapolis
+
+Instructions                                          Figure 4: A 2-hop Simple Claim Creation example us-
+                                                      ing H OTPOT QA pair.
+  • Given the question and answer pair , rate the
+    clarity of the question on a scale of 1 (very
+    confusing) to 3 (very clear)                      B.1.3 Extending to 3-hop and 4-hop
+                                                      The objective of this task is to substitute an entity
+  • Extract as much information as possible from
+                                                      in the claim with the information provided in the
+    the Question and Answer and rewrite them as
+                                                      given English Wikipedia article.
+    sentences to create claims.
+                                                      Overview
+  • Avoid including any extra information or un-
+    common words that are not part of the original       • Review the original claim and the given entity
+    Question and Answer
+                                                         • Select a paragraph from 1 to 5 candidate para-
+  • Claims must not exclude any information or             graphs (Every paragraph mentions the entity
+    uncommon words from the original Question              at least once)
+    and Answer
+                                                         • Replace the entity with the information from
+  • Claims must not include any information be-            your selected paragraph that describes the en-
+    yond the question and answer                           tity and rewrite the claim
+
+  • Claims should be grammatically correct and        Instructions
+    in formal English                                    • The rewritten claim must contain the title of
+  • Correct capitalization and spelling of entities        the selected paragraph (unless the title con-
+    should be followed                                     tains the entity to be replaced.)
+
+  • Claims must not contain speculative language         • Do not fact check the information or use any
+    (e.g. probably, might be, maybe, etc.)                 external knowledge for this task
+
+  • Some claims might not be true                        • The claim should be broken into multiple sen-
+                                                           tences to form a coherent paragraph
+  • Claim should be a single-sentence statement
+    and must not contain a question mark                 • In order to write coherent sentences, use
+                                                           proper pronoun/coreference in the latter sen-
+B.1.2 Claim Validation                                     tence to properly refer to the entities men-
+The objective of this task is to validate whether          tioned in previous sentences
+the generated claims from Simple Claim Creation
+                                                         • The claim must not contain the entity that
+meet the requirements
+                                                           need to be replaced
+Instructions
+                                                         • The claim should preserve other information
+  • Indicate whether the claim meets the criteria          from the original claim except for the entity
+    mentioned in Section Sec. B.1.1                        to be replaced
+
+  • Rate the clarity of question answer pair on a        • Write concise claims. Use the shortest chunk
+    scale of 1 to 5                                        of words from one selected sentence to accu-
+                                                           rately describe the entity to be replaced
+  We collect three judgments per claim and keep
+those claims where at least two annotators decide        • When necessary, rephrase the claim to make
+that it is validated.                                      it fluent and grammatically correct
+
+                                                  3452
+Example of hop-extended claims                        B.2.3 Specifically Implied Claims
+                                                      The objective of this task is to create specifically
+2-hop: Skagen Painter Peder Severin Kroyer
+                                                      implied claims from the claims created in Sec. B.1
+favored naturalism along with Theodor Esbern
+                                                      such that the mutated claim implies the original
+Philipsen and Kristian Zahrtmann.
+                                                      claim.
+3-hop: Skagen Painter Peder Severin Kroyer            B.2.4 Instructions
+favored naturalism along with Theodor Esbern
+                                                        • Make the claim more specific by adding in-
+Philipsen and the artist Ossian Elgstrom studied
+                                                           formation about target entities so that the mu-
+with in 1907.
+                                                           tated claim implies the original claim.
+B.2     Claim Mutation                                   • Information must be added that is directly re-
+B.2.1    Automatic Word Substitution using                 lated to the target entities.
+         BERT
+                                                         • Annotators are discouraged to verify the
+In this mutation process, we first sample a word           added information from Wikipedia or other
+from the claim that is not a named entity nor a            external sources.
+stopword. We then use a pre-trained BERT-large
+model (Devlin et al., 2019) to predict this masked       • Target entity must not be added to the mutated
+token. We only keep the claims where (1) the new           claim if it was not originally in the claim as it
+word predicted by BERT and the masked word do              would decrease the number of hops in a claim.
+not have a common lemma and where (2) the co-            • An entity name that is explained in a relative
+sine similarity of the BERT encoding between the           clause or phrase in the original claim must not
+masked word and the predicted word lie between             be added as it would decrease the number of
+0.7 and 0.8. The entire procedure is visualized in         hops in a claim.
+Fig. 5.
+                                                      Examples of specifically implied claims
+B.2.2    Claim Negation                               Claim: Skagen Painter Peder Severin Kroyer
+Instructions                                          favored naturalism along with Theodor Esbern
+                                                      Philipsen and the artist Ossian Elgstrom studied
+  • Negate the original claim even if it is inaccu-   with in 1907.
+    rate
+                                                      Specifically Implied Claim: Skagen Painter
+  • Negated claim must not include any extra in-      Peder Severin Kroyer favored naturalism along
+    formation or uncommon words that are not          with Theodor Esbern Philipsen and the muralist
+    part of the original claim                        Ossian Elgström studied with in 1907.
+
+  • Negated claim MUST include all key words,         B.2.5 Generally Implied Claims
+    have no question mark, and must end in a          The objective of this task is to create generally
+    period                                            implied claims from the claims created in Sec. B.1
+                                                      such that the original claim implies the mutated
+  • Negated claim should match the capitalization     claim.
+    and spelling of the original claim
+                                                      Instructions
+  • Negated claim should not include extra infor-        • Make the claim more general by deleting in-
+    mation that is not part of the original claim          formation about target entities so that the orig-
+                                                           inal claim implies the mutated claim.
+Examples of Negated Claims
+                                                         • Pick an entity and consider the less spe-
+Original: The scientific name of the true crea-
+                                                           cific/more generic term
+ture featured in “Creature from the Black Lagoon”
+is Eucritta melanolimnetes.                              • if defender then swap for player; if goalie then
+                                                           player; if 1963, then 1960’s . . . etc.
+Negated: The scientific name of the imaginary
+creature featured in “Creature from the Black La-        • Removing information - Never remove the
+goon” is Eucritta melanolimnetes.                          entire clause
+
+                                                  3453
+   Original Claim: This Maroon 5 song, is one of the songs that Zaedan is best known for remixing.
+   He is a Swedish songwriter who worked with Taylor Swift.
+   Choices: [song, one, songs, best, known, remixing, songwriter, worked]
+   Random Picks: [songs, songwriter]
+   BERT Mutated Claim: This Maroon 5 song, is one of the tracks that Zaedan is best known for
+   remixing. He is a Swedish producer who worked with Taylor Swift.
+
+
+Figure 5: Bert Mutation Procedure. We first randomly select 1-2 non-entity words from a range of Choices and
+mask them. Then the BERT model predict the masked token and provides the mutated claim.
+
+
+Examples of generally implied claims                      To address this, we distinguish linguistic knowl-
+Claim: Skagen Painter Peder Severin Kroyer                edge and commonsense from external, encyclope-
+favored naturalism along with Theodor Esbern              dia knowledge, as additional information that they
+Philipsen and the artist Ossian Elgstrom studied          are allowed to use in the task.
+with in 1907.                                                Linguistic knowledge can be defined as vocab-
+                                                          ulary and syntax of an English speaker. It is in-
+Generally Implied Claim: Skagen Painter                   variant to most of the English speakers and can
+Peder Severin Krøyer favored naturalism along             play a crucial role in this task. For example, given
+with Theodor Esbern Philipsen and the artist Ossian       the supporting facts Messi is the captain of the Ar-
+Elgström studied with in the early 1900s.                gentina national team., the claim was generated by
+                                                          substituting captain to leader. From our linguis-
+B.3   Claim Labeling                                      tic knowledge, captain and leader are synonyms,
+The objective of this task is to identify the claims to   hence the mutated claim conveys the same idea as
+be S UPPORTED, R EFUTED, or N OT E NOUGH I NFO            the provided supporting facts, and therefore should
+given the supporting facts.                               be annotated as S UPPORTED. On the other hand,
+                                                          if captain is replaced by goalkeeper, an English
+Supported You have strong reasons from the                speaker can easily tell they are words of different
+supporting documents, or based on your linguistic         meanings. Hence, additional information such as
+knowledge, to justify this claim is true.                 Messi’s position should be provided in order to
+                                                          justify this claim. This type of information is be-
+Refuted Based on the supporting documents, it’s           yond the supporting facts and should be considered
+impossible for this claim to be true. You can find        as external information, and therefore the mutated
+information contradicts the supporting documents          claim should be annotated as N OT E NOUGH I NFO.
+in R EFUTED claims.                                       In addition to linguistic knowledge, commonsense
+                                                          should also be taken into account. Few examples
+NotEnoughInfo Any claim that doesn’t fall into            of commonsense would be: a person can only have
+one of the two categories above should be la-             one birth place, a person cannot perform actions
+beled as N OT E NOUGH I NFO. This usually suggests        after their death, etc. Hence, claims which are
+you need ADDITIONAL information to validate               found to not respect commonsense are labeled as
+whether the claim is TRUE or FALSE after review-          R EFUTED.
+ing the paragraphs. Whenever you are not sure
+whether a claim is Refuted or N OT E NOUGH I NFO,         Instructions
+ask yourself ”Is it possible for this claim to be true      • Review the claim. Then review the support-
+based on the information from paragraphs?” If yes,             ing documents, especially the highlighted sen-
+select N OT E NOUGH I NFO.                                     tences.
+
+External Knowledge. The concept of external                  • Extract information from the supporting doc-
+knowledge is ambiguous and hard to define pre-                 uments, to justify the given claim is S UP -
+cisely, and the failure to address this issue could            PORTED or R EFUTED . If you are not certain
+confuse workers regarding what information they                and need additional information, please select
+are allowed to use when making their judgments.                N OT E NOUGH I NFO.
+
+                                                      3454
+

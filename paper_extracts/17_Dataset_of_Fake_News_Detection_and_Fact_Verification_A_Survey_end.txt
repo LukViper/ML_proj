@@ -1,0 +1,96 @@
+32                                                                                                                                     T. Murayama
+
+
+[212] James Thorne and Andreas Vlachos. 2018. Automated fact checking: Task formulations, methods and future directions. arXiv preprint
+      arXiv:1806.07687 (2018).
+[213] James Thorne, Andreas Vlachos, Christos Christodoulopoulos, and Arpit Mittal. 2018. FEVER: a Large-scale Dataset for Fact Extraction and
+      VERiﬁcation. In Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language
+      Technologies, Volume 1 (Long Papers). 809–819.
+[214] James Thorne, Andreas Vlachos, Oana Cocarascu, Christos Christodoulopoulos, and Arpit Mittal. 2019. The FEVER2.0 Shared Task. In Proceedings
+      of the Second Workshop on Fact Extraction and VERiﬁcation (FEVER). 1–6.
+[215] Erik F. Tjong Kim Sang and Fien De Meulder. 2003.                      Introduction to the CoNLL-2003 Shared Task: Language-Independent
+      Named Entity Recognition. In Proceedings of the Seventh Conference on Natural Language Learning at HLT-NAACL 2003. 142–147.
+      https://www.aclweb.org/anthology/W03-0419
+[216] Tre Tomaszewski, Alex Morales, Ismini Lourentzou, Rachel Caskey, Bing Liu, Alan Schwartz, Jessie Chin, et al. 2021. Identifying False Human
+      Papillomavirus (HPV) Vaccine Information and Corresponding Risk Perceptions From Twitter: Advanced Predictive Models. Journal of medical
+      Internet research 23, 9 (2021), e30451.
+[217] Fatemeh Torabi Asr and Maite Taboada. 2019. Big Data and quality data for fake news and misinformation detection. Big Data & Society 6, 1
+      (2019), 2053951719843310.
+[218] Dave VanZandt. [n. d.]. Media Bias/Fact Check. https://mediabiasfactcheck.com/.
+[219] Andreas Vlachos and Sebastian Riedel. 2014. Fact checking: Task deﬁnition and dataset construction. In Proceedings of the ACL 2014 Workshop on
+      Language Technologies and Computational Social Science. 18–22.
+[220] Andreas Vlachos and Sebastian Riedel. 2015. Identiﬁcation and veriﬁcation of simple claims about statistical properties. In Proceedings of the 2015
+      Conference on Empirical Methods in Natural Language Processing. Association for Computational Linguistics, 2596–2601.
+[221] Nguyen Vo and Kyumin Lee. 2018. The rise of guardians: Fact-checking url recommendation to combat fake news. In The 41st International ACM
+      SIGIR Conference on Research & Development in Information Retrieval. 275–284.
+[222] Nguyen Vo and Kyumin Lee. 2020. Where Are the Facts? Searching for Fact-checked Information to Alleviate the Spread of Fake News. In
+      Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP). 7717–7731.
+[223] Svitlana Volkova, Kyle Shaﬀer, Jin Yea Jang, and Nathan Hodas. 2017. Separating facts from ﬁction: Linguistic models to classify suspicious and
+      trusted news posts on twitter. In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers).
+      647–653.
+[224] Soroush Vosoughi, Deb Roy, and Sinan Aral. 2018. The spread of true and false news online. Science 359, 6380 (2018), 1146–1151.
+[225] David Wadden, Shanchuan Lin, Kyle Lo, Lucy Lu Wang, Madeleine van Zuylen, Arman Cohan, and Hannaneh Hajishirzi. 2020. Fact or Fiction:
+      Verifying Scientiﬁc Claims. In EMNLP.
+[226] Lucy Lu Wang, Kyle Lo, Yoganand Chandrasekhar, Russell Reas, Jiangjiang Yang, Darrin Eide, Kathryn Funk, Rodney Kinney, Ziyang Liu, William
+      Merrill, et al. 2020. CORD-19: The Covid-19 Open Research Dataset. ArXiv (2020).
+[227] William Yang Wang. 2017. “Liar, Liar Pants on Fire”: A New Benchmark Dataset for Fake News Detection. In Proceedings of the 55th Annual
+      Meeting of the Association for Computational Linguistics (Volume 2: Short Papers). 422–426.
+[228] Yaqing Wang, Weifeng Yang, Fenglong Ma, Jin Xu, Bin Zhong, Qiang Deng, and Jing Gao. 2020. Weak supervision for fake news detection via
+      reinforcement learning. In Proceedings of the AAAI Conference on Artiﬁcial Intelligence, Vol. 34. 516–523.
+[229] Claire Wardle. [n. d.]. Fake news. It’s complicated. https://ﬁrstdraftnews.org/articles/fake-news-complicated/. [accessed on November 9th, 2021].
+[230] Mike Wendling. 2016.                 The saga of ’Pizzagate’: The fake story that shows how conspiracy theories spread.
+      https://www.bbc.com/news/blogs-trending-38156985. [accessed on November 9th, 2021].
+[231] Maximilian Wich, Jan Bauer, and Georg Groh. 2020. Impact of politically biased data on hate speech classiﬁcation. In Proc. of the Fourth Workshop
+      on Online Abuse and Harms. 54–64.
+[232] Michael Wiegand, Josef Ruppenhofer, and Thomas Kleinbauer. 2019. Detection of Abusive Language: the Problem of Biased Datasets. In Proc. of
+      NAACL. 602–608.
+[233] Zhijing Wu, Mark Sanderson, B Barla Cambazoglu, W Bruce Croft, and Falk Scholer. 2020. Providing Direct Answers in Search Results: A Study
+      of User Behavior. In Proceedings of the 29th ACM International Conference on Information & Knowledge Management. 1635–1644.
+[234] Chen Yang, Xinyi Zhou, and Reza Zafarani. 2021. CHECKED: Chinese COVID-19 fake news dataset. Social Network Analysis and Mining 11, 1
+      (2021), 1–8.
+[235] Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Bengio, William Cohen, Ruslan Salakhutdinov, and Christopher D Manning. 2018. HotpotQA: A
+      Dataset for Diverse, Explainable Multi-hop Question Answering. In Proceedings of the 2018 Conference on Empirical Methods in Natural Language
+      Processing. 2369–2380.
+[236] Chunyuan Yuan, Qianwen Ma, Wei Zhou, Jizhong Han, and Songlin Hu. 2020. Early Detection of Fake News by Utilizing the Credibility of News,
+      Publishers, and Users based on Weakly Supervised Learning. In Proceedings of the 28th International Conference on Computational Linguistics.
+      5444–5454.
+[237] Reza Zafarani, Xinyi Zhou, Kai Shu, and Huan Liu. 2019. Fake news research: Theories, detection strategies, and open problems. In Proceedings
+      of the 25th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 3207–3208.
+
+
+Manuscript submitted to ACM
+Dataset of Fake News Detection and Fact Veriﬁcation: A Survey                                                                                        33
+
+
+[238] Savvas Zannettou, Barry Bradlyn, Emiliano De Cristofaro, Haewoon Kwak, Michael Sirivianos, Gianluca Stringini, and Jeremy Blackburn. 2018.
+      What is gab: A bastion of free speech or an alt-right echo chamber. In Companion Proceedings of the The Web Conference 2018. 1007–1014.
+[239] Savvas Zannettou, Michael Sirivianos, Jeremy Blackburn, and Nicolas Kourtellis. 2019. The web of false information: Rumors, fake news, hoaxes,
+      clickbait, and various other shenanigans. Journal of Data and Information Quality (JDIQ) 11, 3 (2019), 1–37.
+[240] Amy X Zhang, Aditya Ranganathan, Sarah Emlen Metz, Scott Appling, Connie Moon Sehat, Norman Gilmore, Nick B Adams, Emmanuel Vincent,
+      Jennifer Lee, Martin Robbins, et al. 2018. A structured response to misinformation: Deﬁning and annotating credibility indicators in news articles.
+      In Companion Proceedings of the The Web Conference 2018. 603–612.
+[241] Xichen Zhang and Ali A Ghorbani. 2020. An overview of online fake news: Characterization, detection, and discussion. Information Processing &
+      Management 57, 2 (2020), 102025.
+[242] Zhe Zhao, Paul Resnick, and Qiaozhu Mei. 2015. Enquiring minds: Early detection of rumors in social media from enquiry posts. In Proceedings
+      of the 24th international conference on world wide web. 1395–1405.
+[243] Xinyi Zhou, Apurva Mulay, Emilio Ferrara, and Reza Zafarani. 2020. Recovery: A multimodal repository for covid-19 news credibility research.
+      In Proceedings of the 29th ACM International Conference on Information and Knowledge Management. 3205–3212.
+[244] Xinyi Zhou and Reza Zafarani. 2020. A survey of fake news: Fundamental theories, detection methods, and opportunities. ACM Computing
+      Surveys (CSUR) 53, 5 (2020), 1–40.
+[245] Xinyi Zhou, Reza Zafarani, Kai Shu, and Huan Liu. 2019. Fake news: Fundamental theories, detection strategies and challenges. In Proceedings of
+      the twelfth ACM international conference on web search and data mining. 836–837.
+[246] Melissa Zimdars. 2016. False, misleading, clickbait-y, and satirical “news” sources. https://d279m997dpfwgl.cloudfront.net/wp/2016/11/Resource-
+      False-Misleading-Clickbait-y-and-Satirical-“News”-Sources-1.pdf.
+[247] Dimitrina Zlatkova, Preslav Nakov, and Ivan Koychev. 2019. Fact-Checking Meets Fauxtography: Verifying Claims About Images. In Proceedings of
+      the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing
+      (EMNLP-IJCNLP). Association for Computational Linguistics, 2099–2108.
+[248] Arkaitz Zubiaga, Ahmet Aker, Kalina Bontcheva, Maria Liakata, and Rob Procter. 2018. Detection and resolution of rumours in social media: A
+      survey. ACM Computing Surveys (CSUR) 51, 2 (2018), 1–36.
+[249] Arkaitz Zubiaga, Maria Liakata, Rob Procter, Geraldine Wong Sak Hoi, and Peter Tolmie. 2016. Analysing how people orient to and spread
+      rumours in social media by looking at conversational threads. PloS one 11, 3 (2016), e0150989.
+
+
+
+
+                                                                                                                         Manuscript submitted to ACM
+

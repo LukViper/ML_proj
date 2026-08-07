@@ -1,0 +1,755 @@
+about one aspect of a scientific entity or process,                            N=601             Corpus
+which can be verified from a single source.2 For                                                          Citing
+instance, “The R0 of the novel coronavirus is 2.5”
+                                                                                  Seed
+is valid, but opinion-based statements like “The
+government should require people to stand six feet
+                                                                               N=140
+apart to stop coronavirus” are not. Compound
+claims like “Aerosolized coronavirus droplets can
+                                                                                   Co-
+travel at least 6 feet and can remain in the air for 3                            cited
+hours” should be split into two atomic claims.
+                                                                              N=4,259
+                                                                                                            Claim
+   Claims in S CI FACT are natural – they are de-
+                                                                                                   Cardiac injury is
+rived from citation sentences, or citances (Nakov                                                  common in critical
+et al., 2004), that occur naturally in scientific ar-                              Dis-            cases of COVID-19.
+                                                                                 tractor
+ticles. This is similar to political fact-checking
+datasets such as UKP Snopes (Hanselowski et al.,
+2019), which use political fact-checking websites                     Figure 2: Corpus construction. Citing abstracts are
+as a source of natural claims. On the other hand,                     identified for each seed document. A claim is written
+claims in the popular F EVER dataset (Thorne et al.,                  based on the source citance in the citing abstract.
+2018) are synthetic, since they are created by anno-
+tators by mutating sentences from the Wikipedia
+                                                                      Abstracts that support or refute each claim are an-
+articles that will serve as evidence.
+                                                                      notated with rationales. We describe our corpus
+Supporting and refuting evidence In most fact-                        creation and annotation process.
+checking work, claims are assigned a global truth
+label based on the entirety of the available evidence.                3.1   Data source and corpus construction
+For example in F EVER, the claim “Barack Obama                        To construct S CI FACT, we use S2ORC (Lo et al.,
+was the 44th President of the United States” can be                   2020), a publicly-available corpus of millions of
+verified using Wikipedia as an evidence source.                       scientific articles. To ensure that documents in our
+   While S CI FACT claims are indeed verifiable as-                   dataset are of high quality, we randomly sample
+sertions about scientific findings, accurately assign-                articles from a manually curated collection of well-
+ing a global truth label to a scientific claim (given a               regarded journals spanning domains from basic sci-
+fixed scientific corpus) requires a systematic review                 ence (e.g., Cell, Nature) to clinical medicine (e.g.,
+by a team of experts. In this work we focus on the                    JAMA, BMJ). The full list of journals is included in
+simpler task of assigning S UPPORTS or R EFUTES                       Appendix C.1. We restrict to articles with at least
+relations to individual claim-abstract pairs.                         10 citations. The resulting collection is referred
+   Each S UPPORTS or R EFUTES relation between                        to as our seed set. We use the S2ORC citation
+claim and abstract must be justified by at least one                  graph to sample source citances from citing arti-
+rationale. A rationale is a minimal collection of                     cles which cite these seed articles. If a citance cites
+sentences which, taken together as premises in the                    other articles not in the seed set, we refer to these
+context of the abstract, can reasonably be judged by                  as co-cited articles and add them to the corpus, as
+a domain expert as implying the claim. Rationales                     depicted in Figure 2. The content of the cited ab-
+facilitate the development of interpretable models                    stracts encompasses a diverse array of topics within
+which not only have the ability to make label pre-                    biomedicine, as shown in Figure 3. The majority
+dictions, but can also identify the exact sentences                   of citances used for S CI FACT cite only the seed
+that are necessary for their decisions.                               article (no co-cited articles), as we found in initial
+                                                                      annotation experiments that these citances tended
+3    The S CI FACT dataset                                            to yield specific, easy-to-verify claims.
+The S CI FACT dataset consists of 1,409 scientific                       To expand the corpus, we identify five papers
+claims3 verified against a corpus of 5,183 abstracts.                 cited in the same paper as each source citance but
+                                                                      in a different paragraph, and add these to the cor-
+    2
+      Requiring annotators to search multiple sources increases       pus as distractor abstracts. These abstracts often
+cognitive burden and decreases annotation quality.
+    3
+      S CI FACT is comparable in size to recent scientific datasets   has 1,000 questions), and information extraction (e.g. Sci-
+for tasks such as QA (e.g. PubMedQA (Jin et al., 2019)                ERC (Luan et al., 2018) has 500 annotated abstracts).
+
+                                                                  7536
+                     Humans                                            cation model performs poorly, suggesting that the
+                         Mice                                          negation process did not introduce severe artifacts.
+                     Animals
+                      Female
+                        Male
+                Middle Aged                                            3.3    Claim verification
+                        Aged
+                        Adult                                          Annotation For each claim, all of the claim’s cited
+                    Cell Line
+        Signal Transduction                                            abstracts are annotated for evidence. Annotators
+                         RNA
+                   Receptors                                           are shown a single claim - cited abstract pair, and
+ Gene Expression Regulation
+                      Models                                           asked to label the pair as S UPPORTS, R EFUTES, or
+                Risk Factors
+                        Cells                                          N O I NFO. Although our task definition allows for a
+         Cell Differentiation
+                    Mutation                                           single claim to be both supported and refuted (by
+                  Microscopy
+                       Infant                                          different abstracts) – an occurrence we observe on
+                             0.0     0.2 0.4 0.6 0.8 1.0               real-world COVID-19 claims (§6.3) – this never
+                                   Fraction of evidence abstracts
+                                                                       occurs in our dataset. Each claim has a single label.
+Figure 3: Most frequently occurring Medical Subject                    Counts for each label are shown in Table 2a. Over-
+Headings (MeSH) terms (y-axis) among cited abstracts.                  all, the annotators found evidence in 63% of cited
+MeSH is a controlled vocabulary used for indexing ar-                  abstracts. If the annotator assigns a S UPPORTS or
+ticles in PubMed. Topics range from clinical trial re-                 R EFUTES label, they must also identify all ratio-
+ports (“Humans”, “Risk Factors”) to molecular biology                  nales as defined in §2. Table 2b provides statistics
+(“Cell Line”, “RNA”).                                                  on the number of sentences per rationale, the num-
+                                                                       ber of rationales per claim / abstract pair, and the
+discuss similar topics to the evidence documents,                      number of evidence abstracts per claim. No ab-
+increasing the difficulty of abstract retrieval and                    stract has more than 3 rationales for a given claim,
+making our metrics more accurately reflect the sys-                    and all rationales consist of at most three sentences.
+tem’s performance on a large research corpus.                          Rationales in S CI FACT are mutually exclusive. 28
+                                                                       rationales contain non-contiguous sentences.
+3.2   Claim writing                                                       The verifiers included three NLP experts, five
+                                                                       life science undergraduates, and five graduate stu-
+Annotation Annotators are shown a source citance
+                                                                       dents studying life sciences. Annotators verified
+in the context of an article, and are asked to write up
+                                                                       claims that they did not write themselves. Annota-
+to three claims based on the content of the citance;
+                                                                       tion guidelines are provided in Appendix D.
+see Appendix C.2 for an example. This results in
+                                                                          S CI FACT claims are verified against abstracts
+natural claims because the annotator does not see
+                                                                       rather than full articles since (1) abstracts can be
+the cited article’s abstract – the cited abstract – at
+                                                                       annotated more scalably, (2) evidence is found in
+the time of claim writing. Annotators are asked
+                                                                       the abstract in more than 60% of cases, and (3) pre-
+to skip citances that do not make statements about
+                                                                       vious attempts at full-document annotation suffered
+specific scientific findings.
+                                                                       from low annotator agreement (§7).
+   The claim writers included four experts with
+background in scientific NLP, fifteen undergradu-                      Quality We assign 232 claim-abstract pairs for in-
+ates studying the life sciences, and four graduate                     dependent re-annotation. The label agreement is
+students (doctoral or medical) in the life sciences.                   0.75 Cohen’s κ, comparable with the 0.68 Fleiss’
+Detailed information on the annotator training pro-                    κ reported in Thorne et al. (2018), and 0.70 Co-
+cess can be found in Appendix C.3. The claim-                          hen’s κ reported in Hanselowski et al. (2019). To
+writing interface is shown in Appendix D.                              measure rationale agreement, we treat each sen-
+                                                                       tence as either classified as “part of a rationale” or
+Claim negation Unless the authors of the source
+                                                                       “not part of a rationale” and compute sentence-level
+citance were mistaken, cited articles should pro-
+                                                                       agreement. The resulting Cohen’s κ is 0.71.
+vide supporting evidence for the claims made in
+a citance. To obtain examples where an abstract                        4     The S CI FACT task
+R EFUTES a claim, an NLP expert wrote negations
+of existing claims, taking precautions not to bias                     Task Formulation The inputs to our task are a sci-
+the negations by using obvious keywords like “not”                     entific claim c and a corpus of abstracts A. All ab-
+(Schuster et al., 2019; Gururangan et al., 2018). In                   stracts a ∈ A are labeled as y(c, a) ∈ {S UPPORTS,
+§6.1, we demonstrate that a “claim-only” verifi-                       R EFUTES, N O I NFO } with respect to a claim c.
+
+                                                                    7537
+Fold      S UPPORTS       N O I NFO       R EFUTES         All            gold evidence abstract for c, and (2) The predicted
+Train         332           304             173           809             label is correct: yb(c, a) = y(c, a). It is correctly
+Dev           124           112             64            300             rationalized if, in addition, the predicted rationale
+Test          100           100             100           300
+                                                                          sentences contain a gold rationale, i.e., there exists
+All           556           516             337           1409            some gold rationale Ri (c, a) ⊆ b   S(c, a).
+         (a) Distribution of claim labels in S CI FACT.                      Like F EVER, which limits the maximum number
+                                                                          of predicted rationale sentences to five, S CI FACT
+                                      0      1        2          3+
+                                                                          limits to three predicted rationale sentences. Over-
+Cited abstracts per claim           -       1278      86          45
+Evidence abstracts per claim       516       830      37          26
+                                                                          all performance is measured by the micro-F1 of
+Rationales per abstract             -        552     290         153      the precision and recall over the correctly-labeled
+Sentences per rationale             -       1542     92           11      and correctly-rationalized evidence abstracts. We
+(b) Evidence counts at various levels of granularity. For exam-           refer to these evaluations as AbstractLabel-Only and
+ple, Column 2 of the row “Rationales / abstract” indicates that           AbstractLabel+Rationale , respectively.
+290 claim / abstract pairs are supported by 2 distinct rationales.
+                                                                          Sentence-level evaluation measures performance
+Table 2: Statistics on claim labels, and the number of                    in identifying individual rationale sentences. Un-
+evidence abstracts and rationales per claim.                              like the abstract-level metrics, this evaluation pe-
+                                                                          nalizes the prediction of extra rationale sentences.
+                                                                             A predicted rationale sentence sb(c, a) is cor-
+The abstracts that either S UPPORT or R EFUTE c                           rectly selected if (1) It is a member of some gold
+are referred to as evidence abstracts for c, denoted                      rationale Ri (c, a), (2) all other sentences from the
+as E(c). Each evidence abstract a ∈ E(c) is an-                           same gold rationale Ri (c, a) are among the pre-
+notated with rationales. A single rationale Ri is                                 b a), and (3) yb(c, a) 6= N O I NFO4 . It is
+                                                                          dicted S(c,
+a collection of sentences {r1 (c, a), . . . , rm (c, a)},                 correctly labeled if, in addition, the abstract a is
+where m is the number of sentences in rationale Ri .                      correctly labeled: yb(c, a) = y(c, a).
+We denote the set of all rationales as R(c, a) =                             Overall performance is measured by the micro-
+{R1 (c, a), . . . , Rn (c, a)}.                                           F1 of the precision and recall of correctly-selected
+   Given a claim c and a corpus A, the system                             and correctly-labeled rationale sentences, denoted
+must predict a set of evidence abstracts E(c).    b     For               SentenceSelection-Only and SentenceSelection+Label .
+each abstract a ∈ b      E(c), it must predict a label                    For sentence-level evaluation, we do not limit the
+yb(c, a), and a collection of rationale sentences                         number of predicted rationale sentences, since the
+ b a) = {b
+S(c,           s1 (c, a), . . . , sb` (c, a)}. Note that al-              evaluation penalizes models that over-predict.
+though the gold annotations may contain multiple
+separate rationales, to simplify the prediction task                      5       V ERI S CI: Baseline model
+we only require the model to predict a single col-
+lection of rationale sentences; these sentences may                       We develop a baseline (referred to as V ERI S CI) that
+encompass multiple gold rationales.                                       takes a claim c and corpus A as input, identifies
+                                                                          evidence abstracts b E(c), and predicts a label yb(c, a)
+Task Evaluation We evaluate the task at two levels                                                   b a) for each a ∈ E(c).
+                                                                          and rationale sentences S(c,                       b
+of granularity. For abstract-level evaluation, we                         Following the “BERT-to-BERT” model presented
+assess the model’s ability to identify the abstracts                      in DeYoung et al. (2020a); Soleimani et al. (2019),
+that support or refute the claim. For sentence-level                      V ERI S CI is a pipeline of three components:
+evaluation, we evaluate the model’s performance                           1. A BSTRACT R ETRIEVAL retrieves k abstracts
+at identifying the sentences sufficient to justify the                       with highest TF-IDF similarity to the claim.
+abstract-level predictions. We conduct evaluations                        2. R ATIONALE S ELECTION identifies rationale
+in both the “Open” F EVER-style (Thorne et al.,                              sentences b S(c, a) for each abstract.
+2018) setting where the evidence abstracts must                           3. L ABEL P REDICTION makes the final label pre-
+be retrieved, and the “Oracle abstract” ERASER-                              diction yb(c, a).
+style (DeYoung et al., 2020a) setting where the                           Rationale selection Given a claim c and ab-
+gold evidence abstracts E(c) are provided.                                stract a, we train a model to predict zi ,
+Abstract-level evaluation is inspired by the                                  4
+                                                                               Condition (3) eliminates rationale sentences which were
+F EVER score. Given a claim c, a predicted evidence                       identified by the rationale selector, but proved insufficient to
+abstract a ∈ b
+             E(c) is correctly labeled if (1) a is a                      justify a final S UPPORTS / R EFUTES decision
+
+                                                                       7538
+1[ai is a rationale sentence] for each sentence ai                                   R ATIONAL -S ELECT.     L ABEL -P RED .
+in a. For each sentence, we encode the concate-                 Training data         P      R       F1           ACC .
+nated sequence wi = [ai , SEP, c] using a BERT-                 F EVER               41.5 57.9      48.4          67.6
+style language model and predict a score z̃i =                  UKP Snopes           42.5 62.3      50.5          71.3
+σ[f (CLS(wi ))], where σ is the sigmoid function,               S CI FACT            73.7 70.5      72.1          75.7
+                                                                F EVER + S CI FACT   72.4 67.2      69.7          81.9
+f is a linear layer and CLS(wi ) is the CLS token
+                                                                Sentence encoder      P      R       F1           ACC .
+from the encoding of wi . We train the model on
+pairs of claims and their cited abstracts and min-              S CI BERT            74.5 74.3      74.4          69.2
+                                                                BioMedRoBERTa        75.3 69.9      72.5          71.7
+imize cross-entropy loss between zi and z̃i . For               RoBERTa-base         76.1 66.1      70.8          62.9
+each claim, we use cited abstracts labeled N O I NFO,           RoBERTa-large        73.7 70.5      72.1          75.7
+as well as non-rationale sentences from abstracts               Model inputs          P      R       F1           ACC .
+labeled S UPPORTS and R EFUTES as negative ex-                  Claim-only            -      -       -            44.5
+amples. To make predictions, we select all sen-                 Abstract-only        60.1   60.9    60.5          53.3
+tences ai with z˜i > t as rationale sentences, where
+t ∈ [0, 1] is tuned on the dev set (Appendix A.1).            Table 3: Comparison of different training datasets, en-
+                                                              coders, and model inputs for R ATIONALE S ELECTION
+Label prediction Sentences identified by the ra-              and L ABEL P REDICTION, evaluated on the S CI FACT
+tionale selector are passed to a separate BERT-               dev set. The claim-only model cannot select rationales.
+based model to make the final labeling decision.
+Given a claim c and abstract a, we concatenate
+the claim and the predicted rationale sentences               V ERI S CI, and (4) discuss some modeling chal-
+u = [b  s1 (c, a), . . . sb` (c, a), SEP, c]5 , and predict   lenges presented by the dataset.
+ỹ(c, a) = φ[f (CLS(u))], where φ is the softmax
+                                                              6.1     Pipeline components
+function, and f is a linear layer with three outputs
+representing the {S UPPORTS, R EFUTES, N O I NFO              We examine the effects of different training
+} labels. We minimize the cross-entropy loss be-              datasets, sentence encoders, and model inputs on
+tween ỹ(c, a) and the true label y(c, a).                    the performance of the R ATIONALE S ELECTION
+   We train the model on pairs of claims and their            and L ABEL P REDICTION modules. The R ATIO -
+cited abstracts using gold rationales as input. For           NALE S ELECTION module is evaluated on its ability
+cited abstracts labeled N O I NFO, we choose the              to select rationale sentences given gold abstracts6 .
+k sentences from the cited abstract with high-                The L ABEL P REDICTION module is evaluated on its
+est TF-IDF similarity to the claim as input ra-               3-way label classification accuracy given gold ratio-
+tionales. For prediction, we use the predicted                nales from cited abstracts. Cited abstracts labeled
+rationale sentences S(c,    b a) as input and predict         N O I NFO are included in the evaluation. These ab-
+ŷ(c, a) = argmax ỹ(c, a). N O I NFO is predicted            stracts have no gold rationale sentences; as in §5,
+for abstracts with no rationale sentences.                    we provide the k most similar sentences from the
+   We experimented with a label prediction model              abstract as input (more details in Appendix A).
+which encodes entire abstracts via the Longformer             Training Data We train on (1) F EVER, (2) UKP
+(Beltagy et al., 2020), and makes predictions us-             Snopes, (3) S CI FACT, and (4) F EVER pretraining
+ing the document-level CLS token. Performance                 followed by S CI FACT fine-tuning. RoBERTa-large
+was not competitive with our pipeline setup, likely           (Liu et al., 2019) is used as the sentence encoder.
+because the label predictor struggles to identify             Sentence encoder We fine-tune S CI BERT (Belt-
+relevant information when given full abstracts.               agy et al., 2019), BioMedRoBERTa (Gururangan
+                                                              et al., 2020), RoBERTa-base, and RoBERTa-large.
+6       Experiments
+                                                              S CI FACT is used as training data.
+In our experiments, we (1) analyze the performance            Model Inputs We examine the performance of
+of each individual component of V ERI S CI, (2) eval-         “claim-only” and “abstract-only” models trained
+uate full task performance in both the “Oracle ab-            on S CI FACT, using RoBERTa-large as the sentence
+stract” and “Open” settings, (3) present promising            encoder. The claim-only model makes label predic-
+results verifying claims about COVID-19 using
+                                                                  6
+                                                                   Our F EVER-trained R ATIONALE S ELECTION module
+    5
+    We truncate the rationale input if it exceeds the BERT    achieves 79.9 sentence-level F1 on the F EVER test set, virtu-
+token limit. c is never truncated.                            ally identical to 79.6 reported in DeYoung et al. (2020a).
+
+                                                         7539
+                                             Sentence-level                               Abstract-level
+                                  Selection-Only       Selection+Label            Label-Only       Label+Rationale
+ Retrieval Model                 P      R     F1      P      R     F1         P      R     F1     P     R     F1
+            Oracle rationale 1 100.0 80.5 89.22.1 89.6 72.2      79.93.0     90.1 77.5 83.32.4 90.1 77.5    83.32.4
+ Oracle
+ abstract   Zero-shot       2   42.5   45.1 43.82.0 36.1 38.4 37.22.3        86.9 53.6 66.33.1 67.9 41.9 51.83.4
+            V ERI S CI      3   76.1   63.8 69.42.6 66.5 55.7 60.63.1        87.3 65.3 74.72.8 84.9 63.5 72.72.9
+            Oracle rationale 4 100.0 56.5 72.23.3 87.6 49.5      63.23.7     88.9 54.1 67.23.2 88.9 54.1    67.23.2
+ Open       Zero-shot       5   28.7   37.6 32.52.3 23.7 31.1 26.92.3        56.0 42.3 48.23.3 42.3 32.0 36.43.3
+            V ERI S CI      6   45.0   47.3 46.13.0 38.6 40.5 39.53.0        47.5 47.3 47.43.1 46.6 46.4 46.53.1
+
+Table 4: Test set performance on S CI FACT, according to the metrics from §4. For the “Oracle abstract” rows,
+the system is provided with gold evidence abstracts. “Oracle rationale” rows indicate that the gold rationales are
+provided as input. “Zero-shot” indicates zero-shot performance of a verification system trained on F EVER. Addi-
+tionally, standard deviations are reported as subscripts for all F1 scores. See Appendix B for standard deviations
+on all reported metrics.
+
+
+tions based on the claim text alone, without access        in order to identify relevant evidence.
+to evidence abstracts. The abstract-only model
+selects rationale sentences and makes label predic-        6.2   Full task
+tions without access to the claim.
+                                                           Experimental setup Based on the results from
+Results The results are shown in Table 3. For L A -        §6.1, we use the R ATIONALE S ELECTION module
+BEL P REDICTION, the best performance is achieved          trained on S CI FACT only, and the L ABEL P REDIC -
+by training first on the large F EVER dataset and          TION module trained on F EVER + S CI FACT for our
+then fine-tuning on the smaller in-domain S CI FACT        final end-to-end system V ERI S CI. Although S CI B-
+training set. To understand the benefits of F EVER         ERT performs slightly better on rationale selection,
+pretraining, we examined the claim / evidence pairs        using RoBERTa-large for both R ATIONALE S ELEC -
+where the F EVER + S CI FACT- trained model made           TION and L ABEL P REDICTION gave the best full-
+correct predictions but the S CI FACT- trained model       pipeline performance on the dev set, so we use
+did not. In 36 / 44 of these cases, the S CI FACT-         RoBERTa-large for both components. For the A B -
+trained model predicts N O I NFO. Thus pretraining         STRACT R ETRIEVAL module, the best dev set full-
+on F EVER appears to improve the model’s abil-             pipeline performance was achieved by retrieving
+ity to recognize textual entailment relationships          the top k = 3 documents.
+between evidence and claim – particularly relation-        Model comparisons We report performance of
+ships indicated by non-domain-specific cues like           three model variants. For the “Oracle rationale”
+“is associated with” or “has an important role in”.        setting, the R ATIONALE S ELECTION module is re-
+   For R ATIONALE S ELECTION, training on S CI -           placed by an oracle which outputs gold rationales
+FACT alone produces the best results. We exam-             for correctly retrieved documents, and no rationales
+ined the rationales that the S CI FACT- trained model      for incorrect retrievals. The “Zero-shot” setting re-
+identified but the F EVER- trained model missed,           ports the zero-shot generalization performance of
+and found that they generally contain science-             a model trained on F EVER (the results on UKP
+specific vocabulary. Thus, training on additional          Snopes were slightly worse). V ERI S CI reports the
+out-of-domain data provides little benefit.                performance of our best system.
+   RoBERTa-large exhibits the strongest perfor-            Results The results are shown in Table 4. In the
+mance on label prediction, while S CI BERT has             oracle abstract setting, the abstract-level F1 scores
+a slight edge on rationale selection. The “claim-          are roughly comparable to label classification accu-
+only” model exhibits very poor performance, which          racies, and the AbstractLabel+Rationale score in Row
+provides some reassurance that the claim negation          3 implies an end-to-end classification accuracy of
+procedure described in §3.2 does not introduce ob-         roughly 70%, given gold abstracts.
+vious statistical artifacts. Similarly, the poor perfor-      Access to in-domain data during training
+mance of the “abstract-only” model indicates that          clearly improves performance.            Despite the
+the model needs access to the claim being verified         small size of S CI FACT, training on these data
+
+                                                      7540
+Reasoning type    Example
+                  Claim:          Rapamycin slows aging in fruit flies.
+Science           Evidence:       . . . feeding rapamycin to adult Drosophila produces life span extension . . .
+background        Gold Verdict:   S UPPORTS
+                  Reasoning:      Drosophila is a type of fruit fly.
+                  Claim:        Inhibiting glucose-6-phospate dehydrogenase impairs lipogenesis
+                  Evidence:     . . . suppression of 6PGD increased lipogenesis
+Directionality
+                  Gold Verdict: R EFUTES
+                  Reasoning:    A decrease (not increase) in lipogenesis would indicate lipogenesis impairment.
+                  Claim:        Bariatric surgery improves resolution of diabetes.
+                  Evidence:     Strong associations were found between bariatric surgery and the resolution of T2DM,
+Numerical
+reasoning                       with a HR of 9.29 (95% CI 6.84-12.62)...
+                  Gold Verdict: S UPPORTS
+                  Reasoning:    A HR (hazard ratio) that is greater than 1 with 95% confidence indicates improvement.
+                  Claim:        Major vault protein (MVP) functions to decrease tumor aggression.
+                  Evidence:     Knockout of MVP leads to miR-193a accumulation...inhibiting tumor progression
+Cause and
+effect            Gold Verdict: R EFUTES
+                  Reasoning:    Knocking out (removing) MVP inhibits tumor progression → MVP increases tumor
+                                aggression.
+                  Claim:        Low saturated fat diets have adverse effects on the development of infants
+                  Evidence:     Neurological development of children in the intervention group was at least as good as ...
+Coreference                     the control group
+                  Gold Verdict: R EFUTES
+                  Reasoning:    The intervention group in this study was placed on a low saturated fat diet.
+
+Table 5: Reasoning types required to verify S CI FACT claims which are classified incorrectly by our modeling
+baseline. Words crucial for correct verification are highlighted.
+
+
+leads to relative improvements of 47% on                       sults indicate that the observed differences in model
+open SentenceSelection+Label , and 28% on open                 performance are statistically robust and cannot be
+AbstractLabel+Rationale over F EVER alone (Row 6 vs.           attributed to random variation in the dataset.
+Row 5). The three pipeline components make simi-
+lar contributions to the overall model error. Replac-          6.3     Verifying claims about COVID-19
+ing R ATIONALE S ELECTION with an oracle leads                 We conduct exploratory experiments using our sys-
+to a roughly 20-point rise in SentenceSelection+Label          tem to verify claims concerning COVID-19. We
+F1 (Row 6 vs. Row 4). Replacing A BSTRACT R E -                tasked a medical student to write 36 COVID-related
+TRIEVAL with an oracle as well leads to a gain of              claims. For each claim c, we used V ERI S CI to
+roughly 20 more points (Row 4 vs. Row 1).                      predict evidence abstracts bE(c). The annotator ex-
+   Nearly all correctly-labeled abstracts are sup-             amined each (c, E(c)) pair. A pair was labeled
+                                                                                  b
+ported by at least one rationale. There is only a two-         plausible if E(c)
+                                                                            b was nonempty, and at least half of
+point difference in F1 between AbstractLabel-Only                                        E(c) were judged to have
+                                                               the evidence abstracts in b
+and AbstractLabel+Rationale in the oracle setting              reasonable rationales and labels. For 23 / 36 claims,
+(Row 3), and a one-point difference in the                     the response of V ERI S CI was deemed plausible by
+open setting (Row 6). The differences between                  our annotator, demonstrating that V ERI S CI is able
+SentenceSelection-Only and SentenceSelection+Label are         to successfully retrieve and classify evidence in
+larger, caused by examples where the model finds               many cases. Two examples are shown in Table 1.
+the evidence but fails to predict its relationship to          In both cases, our system identifies both supporting
+the claim. We examine these in §6.4.                           and refuting evidence.
+   We evaluate the statistical robustness of our re-
+sults by generating 10,000 bootstrap-resampled ver-            6.4     Error analysis
+sions of the test set (Dror et al., 2018) and com-             To better understand the errors made by V ERI S CI,
+puting the standard deviation of all performance               we conduct a manual analysis of test set predictions
+metrics. Table 4 shows the standard deviations in              where an evidence abstract was correctly retrieved,
+F1 score. Uncertainties on all metrics for both the            but where the model failed to identify any relevant
+dev and test set can be found in Appendix B. The re-           rationales or predicted an incorrect label. We iden-
+
+                                                          7541
+tify five modeling capabilities required to correct      knowledge intensive tasks which require an under-
+these mistakes (Table 5 provides examples):              standing of the relationship between an input query
+Science background includes knowledge of                 and relevant supporting text.
+domain-specific lexical relationships.                      Automated evidence synthesis (Marshall and
+Directionality requires understanding increases or       Wallace, 2019; Beller et al., 2018; Tsafnat et al.,
+decreases in scientific quantities.                      2014; Marshall et al., 2017) seeks to automate the
+Numerical reasoning involves interpreting numer-         process of creating systematic reviews of the med-
+ical or statistical findings.                            ical literature7 – for instance, by extracting PICO
+Cause and effect requires reasoning about coun-          snippets (Nye et al., 2018) and inferring the out-
+terfactuals.                                             comes of clinical trials (Lehman et al., 2019; DeY-
+Coreference involves drawing conclusions using           oung et al., 2020b). We hope that systems for claim
+context stated outside of a rationale sentence.          verification will serve as components in future evi-
+                                                         dence synthesis frameworks.
+7   Related work
+                                                         8   Conclusion and future work
+Fact checking and rationalized NLP models
+Fact-checking datasets include PolitiFact (Vla-          Claim verification allows us to trace the sources
+chos and Riedel, 2014), Emergent (Ferreira and           and measure the veracity of scientific claims. These
+Vlachos, 2016), LIAR (Wang, 2017), SemEval               abilities have emerged as particularly important
+2017 Task 8 RumorEval (Derczynski et al., 2017),         in the context of the current pandemic, and the
+Snopes (Popat et al., 2017), CLEF-2018 Check-            broader reproducibility crisis in science. In this
+That! (Barrón-Cedeño et al., 2018), Verify (Baly       article, we formalize the task of scientific claim
+et al., 2018), Perspectrum (Chen et al., 2019),          verification, and release a dataset (S CI FACT) and
+F EVER (Thorne et al., 2018), and UKP Snopes             models (V ERI S CI) to support work on this task.
+(Hanselowski et al., 2019). Hanselowski et al.           Our results indicate that it is possible to train mod-
+(2019) provides a thorough review. To our knowl-         els for scientific fact-checking and deploy them
+edge, there are no existing data sets for scientific     with reasonable efficacy on real-world claims re-
+claim verification. We refer to our task as “claim       lated to COVID-19.
+verification” rather than “fact-checking” to empha-         Scientific claim verification presents a number
+size that our focus is to help researchers make sense    of promising avenues for research on models capa-
+of scientific findings, not to counter disinformation.   ble of incorporating background information, rea-
+   Fact-checking is one of a number of tasks where       soning about scientific processes, and assessing
+a model is required to justify a prediction via ra-      the strength and provenance of various evidence
+tionales from the source document. The ERASER            sources. This last challenge will be especially cru-
+dataset (DeYoung et al., 2020a) provides a suite         cial for future work that seeks to verify scientific
+of benchmark datasets (including S CI FACT) for          claims against sources other than the research lit-
+evaluating rationalized NLP models.                      erature – for instance, social media and the news.
+                                                         We hope that the resources presented in this pa-
+Related scientific NLP tasks The citation contex-
+                                                         per encourage future research on these important
+tualization task (Cohan et al., 2015; Jaidka et al.,
+                                                         challenges, and help facilitate progress toward the
+2017) is to identify spans in a cited document that
+                                                         broader goal of scientific document understanding.
+are relevant to a particular citation in a citing doc-
+ument. Unlike S CI FACT, these citations are not         Acknowledgments
+re-written into atomic claims and are therefore
+more difficult to verify. Expert annotators achieved     This research was supported by the ONR MURI
+very low (21.7%) inter-annotator agreement on the        N00014-18-1-2670, ONR N00014-18-1-2826,
+BioMedSumm dataset (Cohen et al., 2014), which           DARPA N66001-19-2-4031, NSF (IIS 1616112),
+contains 314 citations referencing 20 papers.            Allen Distinguished Investigator Award, and the
+   Biomedical question answering datasets include        Sloan fellowship. We thank the Semantic Scholar
+BioASQ (Tsatsaronis et al., 2015) and PubMedQA           team at AI2, UW-NLP, and H2lab at UW for help-
+(Jin et al., 2019), which contain 855 and 1,000          ful comments and feedback.
+“yes / no” questions respectively (Gu et al., 2020).       7
+                                                             https://www.cochranelibrary.com/
+Claim verification and question answering are both-      about/about-cochrane-reviews
+
+                                                    7542
+References                                                 Jay DeYoung, Eric Lehman, Ben Nye, Iain James
+                                                              Marshall, and Byron C. Wallace. 2020b. Evi-
+Ramy Baly, Mitra Mohtarami, James Glass, Lluı́s               dence inference 2.0: More data, better models. In
+  Màrquez, Alessandro Moschitti, and Preslav Nakov.         BioNLP@ACL.
+  2018. Integrating stance detection and fact checking
+  in a unified corpus. In NAACL.                           Rotem Dror, Gili Baumer, Segev Shlomov, and Roi Re-
+                                                             ichart. 2018. The hitchhiker’s guide to testing statis-
+Alberto Barrón-Cedeño, Tamer Elsayed, Reem                 tical significance in natural language processing. In
+  Suwaileh, Lluı́s Màrquez i Villodre, Pepa                 ACL.
+  Atanasova, Wajdi Zaghouani, Spas Kyuchukov,
+  Giovanni Da San Martino, and Preslav Nakov.              Bradley Efron and Robert Tibshirani. 1993. An intro-
+  2018. Overview of the clef-2018 checkthat! lab on          duction to the bootstrap.
+  automatic identification and verification of political
+  claims. task 2: Factuality. In CLEF.                     William Ferreira and Andreas Vlachos. 2016. Emer-
+                                                             gent: a novel data-set for stance classification. In
+Elaine Beller, Justin Clark, Guy Tsafnat, Clive Elliott      NAACL.
+  Adams, Heinz Diehl, Hans Lund, Mourad Ouzzani,
+  Kristina Thayer, James Thomas, Tari Turner, J. S.        Yu Gu, Robert Tinn, Hao Cheng, M. Lucas,
+  Xia, Karen A. Robinson, and Paul P Glasziou. 2018.         Naoto Usuyama, Xiaodong Liu, Tristan Nau-
+  Making progress with the automation of systematic          mann, Jianfeng Gao, and Hoifung Poon. 2020.
+  reviews: principles of the international collabora-        Domain-specific language model pretraining for
+  tion for the automation of systematic reviews (icasr).     biomedical natural language processing. ArXiv,
+  Systematic Reviews, 7.                                     abs/2007.15779.
+
+Iz Beltagy, Kyle Lo, and Arman Cohan. 2019. Scibert:       Suchin Gururangan, Ana Marasovic, Swabha
+   A pretrained language model for scientific text. In       Swayamdipta, Kyle Lo, Iz Beltagy, Doug Downey,
+   EMNLP.                                                    and Noah A. Smith. 2020. Don’t stop pretraining:
+                                                             Adapt language models to domains and tasks. In
+Iz Beltagy, Matthew E. Peters, and Arman Cohan.              ACL.
+   2020. Longformer: The long-document transformer.
+  ArXiv, abs/2004.05150.                                   Suchin Gururangan, Swabha Swayamdipta, Omer
+                                                             Levy, Roy Schwartz, Samuel R. Bowman, and
+Taylor Berg-Kirkpatrick, David Burkett, and Dan              Noah A. Smith. 2018. Annotation artifacts in nat-
+  Klein. 2012. An empirical investigation of statisti-       ural language inference data. In NAACL.
+  cal significance in nlp. In EMNLP.
+                                                           Andreas Hanselowski, Christian Stab, Claudia Schulz,
+Sihao Chen, Daniel Khashabi, Wenpeng Yin, Chris              Zile Li, and Iryna Gurevych. 2019. A richly anno-
+   Callison-Burch, and Dan Roth. 2019. Seeing things         tated corpus for different tasks in automated fact-
+   from a different angle: Discovering diverse perspec-      checking. In CoNLL.
+   tives about claims. In NAACL.                           Kokil Jaidka, Muthu Kumar Chandrasekaran, Devan-
+Arman Cohan, Luca Soldaini, and Nazli Goharian.              shu Jain, and Min-Yen Kan. 2017. The cl-scisumm
+  2015. Matching citation text and cited spans in            shared task 2017: Results and key insights. In
+  biomedical literature: a search-oriented approach.         BIRNDL@JCDL.
+  In NAACL.                                                Qiao Jin, Bhuwan Dhingra, Zhengping Liu, William W.
+                                                             Cohen, and Xinghua Lu. 2019. Pubmedqa: A
+Kevin Bretonnel Cohen, Hoa Trang Dang, Anita
+                                                             dataset for biomedical research question answering.
+  de Waard, Prabha Yadav, and Lucy Vanderwende.
+                                                             In EMNLP.
+  2014. Tac 2014 biomedical summarization track.
+  https://tac.nist.gov/2014/BiomedSumm/.                   Eric Lehman, Jay DeYoung, Regina Barzilay, and By-
+                                                              ron C. Wallace. 2019. Inferring which medical
+Leon Derczynski, Kalina Bontcheva, Maria Liakata,             treatments work from reports of clinical trials. In
+  Rob Procter, Geraldine Wong Sak Hoi, and Arkaitz           NAACL.
+  Zubiaga. 2017. SemEval-2017 task 8: RumourEval:
+  Determining rumour veracity and support for ru-          Tao Lei, Regina Barzilay, and Tommi S. Jaakkola.
+  mours. In SemEval.                                         2016. Rationalizing neural predictions. In ACL.
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and              Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Man-
+   Kristina Toutanova. 2019. Bert: Pre-training of deep      dar Joshi, Danqi Chen, Omer Levy, Mike Lewis,
+   bidirectional transformers for language understand-       Luke Zettlemoyer, and Veselin Stoyanov. 2019.
+   ing. In NAACL.                                            Roberta: A robustly optimized bert pretraining ap-
+                                                             proach. ArXiv, abs/1907.11692.
+Jay DeYoung, Sarthak Jain, Nazneen Fatema Rajani,
+   Eric Lehman, Caiming Xiong, Richard Socher, and         Kyle Lo, Lucy Lu Wang, Mark Neumann, Rodney Kin-
+   Byron C. Wallace. 2020a. Eraser: A benchmark to           ney, and Daniel S. Weld. 2020. S2ORC: The Seman-
+   evaluate rationalized nlp models. In ACL.                 tic Scholar Open Research Corpus. In ACL.
+
+                                                      7543
+Yi Luan, Luheng He, Mari Ostendorf, and Hannaneh           Andreas Vlachos and Sebastian Riedel. 2014. Fact
+  Hajishirzi. 2018. Multi-task identification of enti-       checking: Task definition and dataset construction.
+  ties, relations, and coreference for scientific knowl-     In ACL Workshop on Language Technologies and
+  edge graph construction. In EMNLP.                         Computational Social Science.
+
+Iain James Marshall, Joël Kuiper, Edward Banner, and      Lucy Lu Wang, Kyle Lo, Yoganand Chandrasekhar,
+   Byron C. Wallace. 2017. Automating biomedical ev-         Russell Reas, Jiangjiang Yang, Darrin Eide, Kathryn
+   idence synthesis: Robotreviewer. ACL.                     Funk, Rodney Kinney, Ziyang Liu, William. Mer-
+                                                             rill, Paul Mooney, Dewey A. Murdick, Devvret
+Iain James Marshall and Byron C. Wallace. 2019.              Rishi, Jerry Sheehan, Zhihong Shen, Brandon Stil-
+   Toward systematic review automation: a practical          son, Alex D. Wade, Kuansan Wang, Christopher Wil-
+   guide to using machine learning tools in research         helm, Boya Xie, Douglas M. Raymond, Daniel S.
+   synthesis. Systematic Reviews, 8.                         Weld, Oren Etzioni, and Sebastian Kohlmeier. 2020.
+                                                             Cord-19: The covid-19 open research dataset.
+Preslav I Nakov, Ariel S Schwartz, and Marti Hearst.         ArXiv, abs/2004.10706.
+  2004. Citances: Citation sentences for semantic          William Yang Wang. 2017. “liar, liar pants on fire”: A
+  analysis of bioscience text. In SIGIR workshop on          new benchmark dataset for fake news detection. In
+  Search and Discovery in Bioinformatics.                   ACL.
+Benjamin Nye, Junyi Jessy Li, Roma Patel, Yinfei           Thomas Wolf, Lysandre Debut, Victor Sanh, Julien
+  Yang, Iain James Marshall, Ani Nenkova, and By-            Chaumond, Clement Delangue, Anthony Moi, Pier-
+  ron C. Wallace. 2018. A corpus with multi-level an-        ric Cistac, Tim Rault, R’emi Louf, Morgan Funtow-
+  notations of patients, interventions and outcomes to       icz, and Jamie Brew. 2019. Huggingface’s trans-
+  support language processing for medical literature.        formers: State-of-the-art natural language process-
+  In ACL.                                                    ing. ArXiv, abs/1910.03771.
+
+Kashyap Popat, Subhabrata Mukherjee, Jannik
+  Strötgen, and Gerhard Weikum. 2017. Where the
+  truth lies: Explaining the credibility of emerging
+  claims on the web and social media. In WWW.
+
+Tal Schuster, Darsh J. Shah, Yun Jie Serene Yeo,
+  Daniel Filizzola, Enrico Santus, and Regina Barzi-
+  lay. 2019. Towards debiasing fact verification mod-
+  els. In EMNLP.
+
+Amir Soleimani, Christof Monz, and Marcel Worring.
+ 2019. Bert for evidence retrieval and claim verifi-
+ cation. In European Conference on Information Re-
+ trieval.
+
+James Thorne,        Andreas Vlachos,         Christos
+  Christodoulopoulos, and Arpit Mittal. 2018.
+  Fever: a large-scale dataset for fact extraction and
+  verification. In NAACL.
+
+Guy Tsafnat, Paul P Glasziou, Miew Keen Choong,
+  Adam G. Dunn, Filippo Galgani, and Enrico W.
+  Coiera. 2014. Systematic review automation tech-
+  nologies. Systematic Reviews, 3:74 – 74.
+
+George Tsatsaronis, Georgios Balikas, Prodromos
+  Malakasiotis, Ioannis Partalas, Matthias Zschunke,
+  Michael R. Alvers, Dirk Weissenborn, Anastasia
+  Krithara, Sergios Petridis, Dimitris Polychronopou-
+  los, Yannis Almirantis, John Pavlopoulos, Nico-
+  las Baskiotis, Patrick Gallinari, Thierry Artières,
+  Axel-Cyrille Ngonga Ngomo, Norman Heino, Éric
+  Gaussier, Liliana Barrio-Alvers, Michael Schroeder,
+  Ion Androutsopoulos, and Georgios Paliouras. 2015.
+  An overview of the bioasq large-scale biomedical
+  semantic indexing and question answering competi-
+  tion. In BMC Bioinformatics.
+
+                                                      7544
+A     Model implementation details                      A.3       Training the L ABEL P REDICTION
+                                                                  module
+All models are implemented using the Huggingface        We adopt similar settings as we used for the R A -
+Transformers package (Wolf et al., 2019).               TIONALE S ELECTION module and only change the
+                                                        learning rate to 1e-5 for the transformer base and
+                                                        1e-4 for the linear layer for models trained on S CI -
+A.1    Parameters for the final V ERI S CI system
+                                                        FACT, F EVER, and UKP Snopes. When training on
+For the A BSTRACT R ETRIEVAL module, V ERI S CI         claim / cited abstract pairs labeled N O I NFO, we use
+retrieves the top k = 3 documents ranked by TF-         the k sentences in the abstract with greatest simi-
+IDF similarity using unigram + bigram features.         larity to the claim as rationales (§5). k is sampled
+These parameters are tuned on the S CI FACT devel-      from {0, 1} with uniform probability.
+opment set.                                             A.4       Additional training details
+    When making predictions using the R ATIO -          All models are trained using a single Nvidia P100
+NALE S ELECTION module described in §5, we find
+                                                        GPU on Google Colabortoary Pro platform.8 For
+that the usual decision rule of predicting ẑi = 1      the R ATIONALE S ELECTION module, it takes about
+when z̃i ≥ 0.5 works well for models trained on         150 minutes to train on S CI FACT for 20 epochs.
+S CI FACT. However, for models trained on F EVER        120 minutes on UKP Snopes for 5 epochs, and 700
+and UKP Snopes, we achieve better performance           minutes on F EVER for 3 epochs. For the L ABEL -
+by tuning the classification threshold t, such that     P REDICTION module, it takes about 130 minutes
+ẑi = 1 when z̃i ≥ t, on the S CI FACT dev set.         to train on S CI FACT for 20 epochs, 160 minutes
+The best threshold was t = 0.025 when training          on UKP Snopes for 5 epochs, and 640 minutes on
+on F EVER, and t = 0.75 when training on UKP            F EVER for 3 epochs.
+Snopes.
+                                                        A.5       Hyperparameter search
+
+A.2    Training the R ATIONALE S ELECTION               The learning rate, batch size, and number of epochs
+       module                                           are the most important hyperparameters. We per-
+                                                        form manual tuning and select the hyperparameters
+We experiment with various learning rates when          that produce the highest F1 on the development
+training S CI BERT, BioMedRoBERTa, RoBERTa-             set. For the learning rate, we experiment with 1e-3,
+base, and RoBERTa-large. Below we describe the          1e-4, 5e-5, 1e-5, and 5e-6. For batch size, we ex-
+setting for training RoBERTa-large.                     periment with 64 and 256. The number of epochs
+                                                        are cutoff after the model converges.
+   For models trained on S CI FACT, we use an ini-
+tial learning rate of 1e-5 on the transformer base      B       Statistical analysis
+and 1e-3 on the linear layer. For F EVER + S CI -
+FACT, the learning rate is set to 1e-5 for the entire   We assess the uncertainty in the results reported
+model for pre-training on F EVER and fine-tuning        in the main results (Table 4) using a simple boot-
+on S CI FACT. We use a batch size of 256 through        strap approach (Dror et al., 2018; Berg-Kirkpatrick
+gradient accumulation and apply cosine learning         et al., 2012; Efron and Tibshirani, 1993). Given
+rate decay over 20 epochs to find the best perform-     our test set with ntest = 300 claims, we gener-
+ing model on the dev set.                               ate nboot = 10, 000 bootstrap-resampled test sets
+   For models trained on F EVER, we set the learn-      by resampling (uniformly, with replacement) ntest
+ing rate to 5e-6 for the transformer base and 5e-5      claims from the test set. For each resampled test set,
+for the linear layer. For models trained on UKP         we compute the metrics in Table 4. Table 6 reports
+Snopes, we set the learning rate 1e-5 for the trans-    the mean and standard deviation of these metrics,
+former base and 1e-4 for the linear layer. We find      computed over the bootstrap samples. Table 7 re-
+that these learning rates help the models converge.     ports dev set metrics. Our conclusion that training
+We only train the model for 3 epochs on F EVER          on S CI FACT improves performance is robust to the
+and 5 epochs on UKP Snopes because they are             uncertainties presented in these tables.
+larger datasets and the models converged within
+                                                            8
+early epochs.                                                   https://colab.research.google.com/
+
+                                                   7545
+                                                                       Sentence-level
+                                                         Selection-Only             Selection+Label
+            Retrieval   Model              Row       P          R          F1          P          R         F1
+                        Oracle rationale   1     100.00.0     80.53.3    89.22.1    89.62.7    72.23.7    79.93.0
+             Oracle
+            abstract    Zero-shot          2      42.62.2     45.23.2    43.82.0    36.22.5    38.43.0    37.22.3
+                        V ERI S CI         3      76.22.9     63.93.6    69.42.6    66.53.4    55.73.7    60.63.1
+                        Oracle rationale   4     100.00.0     56.64.0    72.23.3    87.63.5    49.53.9    63.23.7
+            Open        Zero-shot          5      28.72.3     37.63.4    32.52.3    23.82.3    31.13.1    26.92.3
+                        V ERI S CI         6      45.03.0     47.43.8    46.13.0    38.53.0    40.63.6    39.53.0
+                                                 (a) Sentence-level results.
+                                                                         Abstract-level
+                                                           Label-Only                Label+Rationale
+            Retrieval   Model              Row       P         R          F1         P          R          F1
+                        Oracle rationale   1     90.12.2    77.52.8     83.32.4    90.12.2    77.52.8    83.32.4
+             Oracle
+            abstract    Zero-shot          2     86.92.9    53.63.4     66.33.1    67.93.9    41.93.2    51.83.4
+                        V ERI S CI         3     87.32.6    65.33.2     74.72.8    84.92.8    63.53.2    72.62.9
+                        Oracle rationale   4     88.92.7    54.13.5     67.23.2    88.92.7    54.13.5    67.23.2
+            Open        Zero-shot          5     56.03.9    42.33.4     48.23.3    42.34.0    32.03.2    36.43.3
+                        V ERI S CI         6     47.53.3    47.33.5     47.43.1    46.63.3    46.43.5    46.43.1
+
+                                                 (b) Abstract-level results
+
+Table 6: Test set results as in Table 4, reporting mean and standard deviation over 10,000 bootstrap samples.
+Standard deviations are reported as subscripts. Some means reported here are slightly different from Table 4 due
+to sampling variability.
+
+
+
+
+                                                                       Sentence-level
+                                                         Selection-Only             Selection+Label
+            Retrieval   Model              Row       P          R          F1          P          R         F1
+                        Oracle rationale   1     100.00.0     81.93.2    90.01.9    91.42.5    74.93.6    82.32.9
+             Oracle
+            abstract    Zero-shot          2      40.72.1     48.13.4    44.02.1    36.12.5    42.63.4    39.02.5
+                        V ERI S CI         3      79.42.7     59.03.6    67.72.8    71.43.5    53.03.6    60.83.3
+                        Oracle rationale   4     100.00.0     58.44.3    73.73.4    90.23.3    52.74.3    66.43.9
+            Open        Zero-shot          5      28.62.0     38.53.6    32.82.3    24.82.2    33.43.4    28.42.4
+                        V ERI S CI         6      52.53.5     43.83.7    47.73.2    46.93.7    39.23.6    42.63.2
+                                                 (a) Sentence-level results.
+                                                                         Abstract-level
+                                                           Label-Only                Label+Rationale
+            Retrieval   Model              Row       P         R          F1         P          R          F1
+                        Oracle rationale   1     91.42.2    76.13.0     83.02.5    91.42.2    76.13.0    83.02.5
+             Oracle
+            abstract    Zero-shot          2     88.92.8    58.33.7     70.43.2    69.23.9    45.43.5    54.83.5
+                        V ERI S CI         3     91.02.3    67.43.3     77.42.7    85.22.9    63.23.5    72.53.1
+                        Oracle rationale   4     91.02.6    53.13.8     67.03.4    91.02.6    53.13.8    67.03.4
+            Open        Zero-shot          5     52.73.7    41.63.7     46.53.4    43.63.7    34.43.5    38.43.3
+                        V ERI S CI         6     55.43.7    47.53.6     51.03.3    52.63.7    45.13.6    48.53.3
+
+                                                 (b) Abstract-level results
+
+  Table 7: Dev set results as in Table 4, reporting mean and standard deviation over 10,000 bootstrap samples.
+
+
+
+                                                            7546
+      Journal                             Count              Source citance
+      BMJ                                     60             "Future studies are also warranted to evaluate
+                                                             the potential association between WNT5A/PCP
+      Blood                                    8             signaling in adipose tissue and
+                                                             atherosclerotic CVD, given the major role that
+      Cancer Cell                              8             IL-6 signaling plays in this condition as
+      Cell                                    51             revealed by large Mendelian randomization
+                                                             studies 44, 45 ."
+      Cell Metabolism                         10
+      Cell Stem Cell                          41             Claim
+      Circulation                             12             IL-6 signaling plays a major role in
+      Immunity                                33             atherosclerotic cardiovascular disease.
+
+      JAMA                                    79
+      Molecular Cell                          27          Figure 4: A claim written based on a citance. Mate-
+      Molecular Systems Biology                5          rial unrelated to the citation is removed. The acronym
+      Nature                                  29          “CVD” is expanded to “cardiovascular disease”.
+      Nature Cell Biology                     26
+      Nature Communications                   19          ten. These retrievals would be incorrectly marked
+      Nature Genetics                          8          wrong by our evaluation metrics.
+      Nature Medicine                         89             Distractor abstracts as defined in §3.1 have two
+      Nature Methods                           1          qualities that make them a good addition to the
+      Nucleic Acids Research                  10          S CI FACT corpus: (1) They are cited in the same
+      Plos Biology                            36          articles as our evidence abstracts, meaning that
+      Plos Medicine                           38          they often discuss similar topics and increase the
+      Science                                  7          difficulty of abstract retrieval methods based on
+      Science Translational Medicine           2          lexical similarity. (2) The authors of our citances
+      The Lancet                              22          were aware of the distractor abstracts, and chose
+      Other                                  120          not to mention them in the citances used to generate
+                                                          claims. This makes them unlikely to be a source of
+      Total                                  741
+                                                          false negative retrievals.
+Table 8: Number of cited documents by journal. Some
+                                                          C.2    Annotation examples
+co-cited articles (§3.1) come from journals outside our
+curated set; these are indicated by “Other”.              Converting citances to claims Figure 4 shows
+                                                          an example of a citance re-written as a claim.
+                                                          The citance discusses the relationship between
+C     Dataset collection and corpus statistics
+                                                          “atherosclerotic CVD” and “IL-6”, and cites two pa-
+C.1    Corpus                                             pers (44 and 45) as evidence. To convert to a claim,
+Source journals Table 8 shows the number of               the acronym “CVD” is expanded to “cardiovascu-
+cited abstracts from each of our selected journals.       lar disease”, irrelevant information is removed, and
+The “Other” category includes “co-cited” (§3.1)           the claim is written as an atomic factual statement.
+abstracts that came from journals not among our           Multiple rationales Figure 5 shows a claim sup-
+pre-defined set.                                          ported by two rationales from the same abstract.
+Distractor abstracts In §3.1, we mention how              The text of each rationale on its own is sufficient to
+we increase the size of the corpus by adding dis-         entail the claim.
+tractor abstracts. The reason why we do not use
+the entirety of a large research corpus like S2ORC        C.3    Annotators and quality control
+as our fact-checking corpus is that doing so would        Claim writing Student claim writers attended an
+introduce many false negative retrievals: abstracts       in-person training session where they were intro-
+containing evidence relevant to a given claim, but        duced to the task and received in-person feedback
+not mentioned in the claim’s source citance. This         from the four experts. Following training, student
+can occur either because the citance authors simply       annotators continued writing claims remotely. The
+were not aware of these abstracts, or because the         expert annotators monitored claims for quality dur-
+abstracts were published after the citance was writ-      ing the remote annotation process, and provided
+
+                                                      7547
+

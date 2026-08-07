@@ -1,0 +1,320 @@
+prove (3) holds between the support functions ρ(`|E(Q)) and
+ρ(`|H). We first define a positive coefficient pij between the
+shape matrices Qi and Qj and in order to avoid redundancy
+assume i < j, which constructs the set I. Given a unit vector
+`, we start with the following sum of squares which is always
+nonnegative
+     X √                   1  √                 1
+                                                   2
+              pij h`, Qi `i 2 − pij −1 h`, Qj `i 2 ≥ 0.   (16)
+        i,j∈I
+
+Expanding this series results in
+X                                    X            1           1                     Fig. 2: There are an infinite number of ellipsoids that are a
+     pij h`, Qi `i + p−1
+                                  
+                      ij h`, Qj `i ≥   2h`, Qi `i 2 h`, Qj `i 2 .                   tight outer bound of a convex set H, each tangent to H at
+i,j∈I                                                  i,j∈I
+                                                                                    different points (corresponding to different choices of the unit
+                     Pk                                                             vector `). Since many of these tight ellipsoids can actually be
+Now we add        i=1 h`, Qi `i to both sides and add h`, Q0 `i
+to the left side of the inequality. Since Q0 satisfies the two                      quite misleading, we assert that the minimum trace ellipsoid
+conditions presented in the theorem, the inequality still holds,                    produces the most representative outer bound.
+                    k
+                    X                     X
+   h`, Q0 `i +            h`, Qi `i +             pij h`, Qi `i + p−1
+                                                                   ij h`, Qj `i     show that the one-step approach provided by Theorems 1 and
+                    i=1                   i,j∈I
+                                                                                    2 enable a more general formulation of the family of tangent
+         k
+         X                    X                    1               1                ellipsoid outer bounds than is provided in (19).
+   ≥            h`, Qi `i +           2h`, Qi `i 2 h`, Qj `i 2 .             (17)
+         i=1                  i,j∈I                                                 Corollary 3. Consider the set of k ellipsoids characterized by
+This allows us to complete the square on the right hand side of                     the positive definite matrices Qi ∈ Vn×n , i ∈ 1, k. Given a
+the inequality. The left hand side, then, becomes the definition                    unit vector ` ∈ Rn the ellipsoids E(Q) with
+of Q in (15), such that it          is equal to h`, Q`i. Therefore,                        Q = Q0 + Q` ,
+            Pk                1 2
+h`, Q`i ≥       i=1 h`, Qi `i 2   ,  which means,                                                 k
+                                                                                                                  !    k
+                                                                                                                                           !
+                                                                                                  X           1
+                                                                                                                       X            1              (20)
+                                            k                                             Q` =      h`, Qi `i 2          h`, Qi `i− 2 Qi       ,
+                                      1                        1
+                                            X
+                           h`, Q`i 2 ≥             h`, Qi `i 2 ,             (18)                  i=1                 i=1
+                           | {z }
+                                            i=1                                     provide all possible ellipsoidal
+                                                                                                                 Lkbounds that touch the boundary
+                          ρ ` | E(Q)        |          {z      }
+                                                   ρ(`|H)                           of the geometric sum H = i=1 E(Qi ), i.e., H ⊆ E(Q), and
+and the underbrace definitions come from (6) and (7). We                            are tangent at the respective points
+conclude then that H ⊆ E(Q) from (3).                                                                        k
+                                                                                                              X            1
+   Although it is written in several terms in (15), the shape                                            x=     h`, Qi `i− 2 Qi `.                 (21)
+matrix Q is a linear combination
+                           Pk            of the individual shape                                              i=1
+matrices Qi , Q = Q0 + i=1 αi Qi , with coefficients αi that                        and where Q0 satisfies the following characteristics:
+are the combination of pij and p−1  ij . If the coefficients of the                   1) Q0 + Q` > 0,
+Qi are too large or if Q0 is positive definite, then it makes
+                                                                                      2) ` ∈ ker(Q0 ),
+E(Q) a loose outer bound on H. The former occurs when pij                                              ˜ 12 ≥ Pk h`,
+                                                                                          ˜ (Q0 + Q` )`i                  ˜ 12 , ∀`˜ ∈ B1 (0).
+                                                                                                                     ˜ Qi `i
+                                                                                      3) h`,
+is either very large or very small (so p−1   ij is large). Thus to
+                                                                                                                 i=1
+
+have a tight outer bound, which is tangent to the exact sum H,                         Proof: This corollary can be derived either from Theorem
+the challenge is to select the definition of pij appropriately.                     1 or 2. For completeness we provide both as they provide
+This insight is largely already captured in analogous results                       different insight.
+that exist in the literature [13]. What is novel here, is the                          Based on Theorem 2, the outer bound is tangent to the exact
+additional degree of freedom provided by Q0 . A tempting                            geometric sum if (18) holds with equality for some `, which in
+trivial solution is to select Q0 = 0, however, we will show                         turn requires (16) and (17) to hold with equality. The former
+in Section II-C that this choice prohibits the minimum trace                        occurs when the pij > 0 coefficients are selected as
+bounding ellipsoid from being a tight outer bound on the exact                                                                1
+
+geometric sum.                                                                                                      h`, Qj `i 2
+                                                                                                           pij =             1    .                (22)
+   In the current literature, the family of tight (tangent) outer                                                   h`, Qi `i 2
+ellipsoidal bounds on the geometric sum is parameterized by                         Substituting (22) into (15) results in (20). For (17) to hold
+a choice of ` [14],                                                                 with equality, we also require h`, Q0 `i = 0, which leads to
+                                                                                    the new condition on Q0 , ` ∈ ker(Q0 ).
+                   k
+                                 ! k                   !
+                               1                   1
+                 X                  X
+                                                 −
+          Q=         h`, Qi `i 2        h`, Qi `i 2 Qi .       (19)                   Based on Theorem 1, given a unit vector ` the corresponding
+                      i=1                         i=1                               point on the boundary of the geometric sum is given by
+The choice of ` changes where the outer bound is tangent to                         (21). For the ellipsoid E(Q) to touch the boundary of the
+the actual geometric sum (see Fig. 2). Here, in Corollary 3 we                      geometric sum at this point we equate the support function
+of the outerbounding ellipsoid (6) with the support function               making tr(Q) a function of pij , (i, j) ∈ I. To find the minima,
+of the geometric sum (7),                                                  we find the stationary points of tr(Q) with respect to pij ,
+                                      k
+                               1
+                                      X                 1                                 ∂tr(Q)             tr(Qj )
+                     h`, Q`i 2 =            h`, Qi `i 2 .           (23)                         = tr(Qi ) −         = 0.               (27)
+                                                                                           ∂pij                p2ij
+                                      i=1
+Using the same approach as in Theorem 1 (see (14)), we                     The Laplacian is strictly positive due to the positive definite-
+find the relationship between the tight ellipsoidal bound shape            ness of Q1 , . . . , Qk ,
+matrix, Q, the point of tangency x, and the direction ` as,
+                                                                                                      n           o       
+                                                                                     2                    2tr(Qj )
+                                       1                                           ∇ tr(Q) = diag           p3
+                                                                                                                             > 0,     (28)
+                     ` = h`, Q`i 2 Q−1 |{z}
+                                        x .                         (24)                                      ij    (i,j)∈I
+                         | {z }
+                               (23)              (21)                      where the pairs (i, j) are ordered first by i and then by j.
+Making the substitutions in the underbraces, multiplying both              Hence the solution of (27) is a unique global minimum,
+sides by Q, and factoring out ` yields
+                                                                                                        q
+                                                                                                           tr(Q )
+            " k                ! k                !#                                              p∗ij = tr(Qji ) .                (29)
+                             1
+                                             − 12
+               X                 X
+      Q` =         h`, Qi `i 2      h`, Qi `i Qi      `.                   Substituting this choice of pij into (15) completes the proof.
+                   i=1                     i=1                                                                                          
+As a positive definite shape matrix, Q is invertible, which leads             The result of Lemma 4, namely (25), is a well-known result
+to the definition of Q in (20), where Q0 satisfies the proposed            [13]. What we have shown in Lemma 4 is that this formula
+conditions.                                                               explicitly requires Q0 = 0 in Theorem 2. A smaller trace is
+   Like Theorem 2, Corollary 3 establishes the existence of a              achievable by introducing a nonzero Q0 term. This has two
+set of symmetric matrices Q0 that modify the shape matrices                implications: (a) that (25) does not find the true minimum
+provided in (19), with the trivial choice Q0 = 0 resulting                 trace when Q0 is nonzero, and (b) that (25) is not necessarily
+directly to (19). While in this work we do not specify Q0 any              tangent to the exact geometric sum. If it was tangent, then the
+further than the conditions listed in Theorem 2 or Corollary 3,            trace could not be reduced further.
+it clarifies that the existing characterization of shape matrices             Another observation, which for space we do not prove
+omit the additional degree of freedom provided by Q0 .                     explicitly here, is that in the first proof of Corollary 3, the
+                                                                           coefficients pij were shown to follow (22) if the ellipsoidal
+C. Minimum Trace Ellipsoidal Outer Bound                                   bound was to be a tight outer bound. In contrast, the Lemma
+   Figure 2 easily demonstrates that a tight ellipsoidal bound             4 claims that (29) specifies the same coefficients. It can be
+does not necessarily provide a representative outer bound for              shown that the n-dimensional unit vector (which has n − 1
+a convex set. Even ellipsoids that minimize volume can lead                degrees of freedom) cannot be selected to reconcile the two
+to highly eccentric bounding ellipsoids. The minimum trace                 equations for pij over all (i, j) ∈ I.
+ellipsoid tends to produce a more representative outer bound.
+The trace of the shape matrix is the sum of the eigenvalues                   III. A PPLICATION IN C OMPUTING R EACHABLE S ETS
+and the lengths of the principal axes of the ellipsoid are the               Consider the dynamics of a linear time varying (LTV)
+singular values. Thus, by minimizing the trace it penalizes                system with r independent inputs,
+long principal axes. We denote this minimum trace ellipsoid
+by E(Q∗ ). A further benefit of this choice is that facilitates             sk+1 = Ak sk + B1,k u1,k + B2,k u2,k + · · · + Br,k ur,k , (30)
+an analytic expression for its shape matrix, which is derived              where sk ∈ Rn represents the state and ui,k ∈ E(Ri,k ),
+in Lemma 4.                                                                Ri,k ∈ Rn×mi , i = 1, r are ellipsoidally bounded (inde-
+Lemma 4. Consider the set of k ellipsoids characterized by                 pendent) inputs. The previous sections of this paper provide
+the positive definite matrices Qi ∈ Vn×n , i ∈ 1, k. The                   tools to compute the exact boundary of the reachable states
+              ∗                                                            of this dynamical system and a practical outer bound. We use
+      Lk E(Q ) is an outer bound
+ellipsoid                            of their geometric sum
+H = i=1 E(Qi ), i.e., H ⊆ E(Q∗ ), where                                    the geometric sum to explore all states sk that are reachable
+                  k
+                               ! k              !                          through the different realizations of ui,j over j ∈ 1, k − 1.
+                 Xp              X       Q i                                  To compute the reachable set, we express sk as a function of
+          Q∗ =         tr(Qi )       p            .     (25)
+                                        tr(Qi )                            the prior inputs. For simplicity, we assume the initial state s1 =
+                 i=1             i=1
+                                                                           0, however, incorporating an ellipsoidally bounded set of initial
+Specifically, of all the shape matrices that correspond to
+                                                                           conditions would be a simple extension of this framework.
+ellipsoid outer bounds of H using Theorem 2 with Q0 = 0,                                                   
+Q∗ has the minimum trace.                                                           X k−1
+                                                                                      r    X                               k−1
+                                                                                                                            Y
+                                                                              sk =            Dj Bi,j ui,j  ,     Dj =         Aκ . (31)
+  Proof: Taking Q0 = 0 and starting from the general
+                                                                                    i=1   j=1                             κ=j+1
+condition on pij for E(Q) to be an outer bound, (15) of
+Theorem 2, we take the trace operation of both sides                       Equation (31) shows that the reachable set, the union of all
+             k                                                             possible state values under any combination of admissible
+                                                                           inputs, can be expressed as the geometric sum of transformed,
+             X                 X
+   tr(Q) =         tr(Qi ) +           pij tr(Qi ) + p−1
+                                                      ij tr(Qj ),   (26)
+             i=1               i,j∈I
+                                                                           independent, and ellipsoidally bounded inputs ui,j .
+Lemma 5. [14] Given vector x ∈ E(Q, c), with shape matrix
+Q ∈ Vn×n and mean value c ∈ Rn , then for any linear
+mapping T (x) = M x with A ∈ Rn×n the vector ξ = T (x) =
+M x lies within an ellipsoid with shape matrix M QM T and
+mean value M c, i.e., ξ ∈ E(M QM T , M c).
+   Using Lemma 5 to compute the transformed shape matrices
+of the input ellipsoids, the geometric sum based on (31) that
+is the reachable set is given by
+                            r M
+                            M k−1
+                     Rk =             E (Σi,j ) ,               (32)
+                            i=1 j=1                                    Fig. 3: Exact boundary of geometric sum and a comparison
+                          T
+with Σi,j = Dj Bi,j Ri,j Bi,j DjT .                                    between different ellipsoidal bounds.
+
+
+A. Ellipsoidal Bound on the Reachable Set
+   The expression of the reachable set in (32) indicates that the
+reachable set of the system state is a function of time, k, and
+composed of contributions from ellipsoidally bounded inputs,
+which are characterized with shape matrices, Σij . Using the
+framework provided by this paper, the reachable set is bounded
+by a minimum trace ellipsoid Rk ⊆ E(Q∗k ), where E(Q∗k ) is
+given by Lemma 4,
+                                                        
+               r   k−1                   r k−1
+                   X q                             Σ
+                                                p ij  ,
+             X                         X    X
+  Q∗k,κ =                 tr(Σij )                                  Fig. 4: Selection of a nonzero Q0 reduces the trace and
+             i=1 j=κ+1                  i=1 j=1
+                                                  tr(Σij )
+                                                                       produces a tangent ellipsoidal bound.
+                                                             (33)
+and we omit the second subscript, Q∗k , when κ = 0.
+   It is intuitive that as the time horizon grows (k becomes                              IV. N UMERICAL E XAMPLES
+large), that the stability of the system matrices Ak is required
+for the reachable set and the ellipsoidal bound to be bounded.           In this section we employ the developed tools to compute
+                                                                       the minimum trace ellipsoidal bound over both a geometric
+Lemma 6. If the state matrix (Ak ) is stable for all k ∈ N and         sum and the reachable set of a dynamical system.
+inputs ui,k are bounded, then the minimum trace ellipsoidal              Consider the geometric sum of 4 ellipsoids with dimension
+bound E(Q∗k ), is bounded.                                             2 and shape matrices,
+                                                                                                                       
+  Proof: Since the system is time-varying, the reachable set                              0.41
+                                                                                           0.33              0.23    0.11
+                                                                               Q1 =              ,     Q2 =                 ,
+can potentially change dramatically from k to k + 1. Thus                                 0.33
+                                                                                           0.31              0.11    0.06
+                                                                                                                       
+we fix k and show that the sequence of historical ellipsoids                          0.17 −0.1              0.01       0
+                                                                               Q3 =                ,   Q4 =                 .
+{Q∗k,k−κ } as κ approaches k is Cauchy. As the limit of this                          −0.1 0.15                 0    0.65
+sequence, Q∗k is then bounded. To do this we define the scalar
+sequence Sκ                                                              We apply Theorem 1 to compute for the exact boundary
+                                                                       of the geometric sum, plotted in blue in Fig. 3. We then
+             q                    r
+                                  X     k−1
+                                        X       q                      compute two tight outer ellipsoidal bounds using Corollary
+     Sκ :=       tr(Q∗k,k−κ ) =                     tr(Σij ).   (34)                                                      
+                                                                       3 corresponding to the standard unit vectors `1 = 1 0
+                                                                                                                               T
+                                  i=1 j=k−κ+1                                          T
+                                                                       and `2 = 0 1 , producing E(Q`1 ) and E(Q`2 ) (red and
+Based on equation (31), for δκ = Sκ+1 − Sκ ,                           green, respectively in Fig. 3),
+                         r
+                                                                                                                      
+                         X           q                                                 2.68 0.81               4.22 1.57
+              lim δκ =         lim    tr(Σi,k−κ ) = 0           (35)          Q`1 =                   , Q`2 =              .
+             κ→k               κ→k                                                     0.81 12.49              1.57 4.07
+                         i=1
+                                                                       These ellipsoids are tangent to the exact boundary of the
+and according to the ratio test,
+                                                                       geometric sum. Lemma 4 returns the (black) minimum trace
+     δκ+1
+                  Pr p
+                           tr(Σi,k−κ−1 )                               ellipsoid, E(Q∗ ),
+                    i=1
+ lim      = lim P     r   p              = max (ρ[Aj ]) < 1,
+κ→k δκ
+                                                                                                           
+             κ→k
+                      i=1    tr(Σi,k−κ )   j∈1,k                                            ∗    3.41 1.17
+                                                                                          Q =                 .
+                                                                                                 1.17 4.34
+where ρ[.] denotes the maximum eigenvalue. This implies Sκ
+is Cauchy and convergent. Therefore, tr(Q∗κ ) = Sκ2 is Cauchy          As computed, E(Q∗ ) is not tangent to the geometric sum,
+and convergent, which concludes Q∗k is bounded.                       however, it is visually the most representative ellipsoidal
+ Fig. 5: Exact boundary of the reachable set of a dynamical system and a comparison between different ellipsoidal bounds.
+
+
+bound. We can numerically calculate a symmetric matrix Q0                                        R EFERENCES
+that reduces the value of the trace such that the resulting         [1] E. Lutwak, “The brunn-minkowski-firey theory. i. mixed volumes and
+ellipsoidal bound becomes tangent to the exact geometric sum.           the minkowski problem,” Journal of Differential Geometry, vol. 38,
+For example,                                                            no. 1, pp. 131–150, 1993.
+                                                                    [2] ——, “The brunn–minkowski–firey theory ii: affine and geominimal
+                                                                      surface areas,” Advances in Mathematics, vol. 118, no. 2, pp. 244–294,
+                       −0.1193 −0.0412                                  1996.
+                 Q0 =
+                       −0.0412 −0.1521                              [3] E. Behar and J.-M. Lien, “Dynamic minkowski sum of convex shapes,”
+                                                                        in 2011 IEEE International Conference on Robotics and Automation.
+                                                                        IEEE, 2011, pp. 3463–3468.
+satisfies the conditions of Theorem 2. The trace of E(Q∗ +          [4] L. Guibas, L. Ramshaw, and J. Stolfi, “A kinetic framework for com-
+Q0 ) is smaller than the trace of E(Q∗ ) and is tangent to the          putational geometry,” in 24th Annual Symposium on Foundations of
+                                                                        Computer Science (sfcs 1983). IEEE Computer Society, 1983, pp.
+geometric sum, see Fig. 4.                                              100–111.
+   In the second example, consider the LTI system                   [5] P. K. Agarwal, E. Flato, and D. Halperin, “Polygon decomposition for
+                                                                        efficient construction of minkowski sums,” Computational Geometry,
+                                                                      vol. 21, no. 1-2, pp. 39–61, 2002.
+                                  0.67     0.35 −0.12               [6] E. Fogel and D. Halperin, “Exact and efficient construction of minkowski
+    xk+1 = F xk + νk , F = −0.66 −0.55            0.41 ,              sums of convex polyhedra with applications,” Computer-Aided Design,
+                                  2.12     1.83    0.47                 vol. 39, no. 11, pp. 929–940, 2007.
+                                                                    [7] P. Hachenberger, “Exact minkowksi sums of polyhedra and exact and
+                                                                        efficient decomposition of polyhedra into convex pieces,” Algorithmica,
+where the noise νk ∈ E(I3 ), is spherically bounded.                    vol. 55, no. 2, pp. 329–345, 2009.
+   Here we compute the exact boundary of the reachable set,         [8] E. E. Hartquist, J. Menon, K. Suresh, H. B. Voelcker, and J. Zagajac,
+                                                                        “A computing strategy for applications involving offsets, sweeps, and
+the minimum trace ellipsoidal bound, and, as before, compare            minkowski operations,” Computer-Aided Design, vol. 31, no. 3, pp. 175–
+them with 3 different tangent ellipsoids from Corollary 3,              183, 1999.
+E(Q`1 ), E(Q`2 ) and E(Q`3 ) constructed by the standard unit       [9] C. L. Bajaj and M.-S. Kim, “Generation of configuration space obstacles:
+                                                                        The case of moving algebraic curves,” Algorithmica, vol. 4, no. 1, pp.
+vectors. The settling time for this system is k ∗ = 120,                157–172, 1989.
+therefore, the reachable set can be closely approximated by the    [10] A. Kaul and R. T. Farouki, “Computing minkowski sums of plane
+geometric sum of 120 ellipsoids E(F i F iT ), i ∈ 1, 120. The           curves,” International Journal of Computational Geometry & Applica-
+                                                                        tions, vol. 5, no. 04, pp. 413–432, 1995.
+projections of the reachable set exact boundary and ellipsoidal    [11] I.-K. Lee, M.-S. Kim, and G. Elber, “Polynomial/rational approximation
+bounds are shown in Fig. 5.                                             of minkowski sum boundary curves,” Graphical Models and Image
+                                                                        Processing, vol. 60, no. 2, pp. 136–165, 1998.
+                                                                   [12] J.-R. Sack and J. Urrutia, Handbook of computational geometry. Else-
+                                                                        vier, 1999.
+                      V. C ONCLUSION                               [13] A. A. Kurzhanskiy and Varaiya, Ellipsoidal calculus for estimation and
+                                                                        control. Nelson Thornes, 1997.
+   In this paper we have generalized several results on char-      [14] A. A. Kurzhanskiy and P. Varaiya, “Ellipsoidal toolbox (et),” in Decision
+                                                                        and Control, 2006 45th IEEE Conference on. IEEE, 2006, pp. 1498–
+acterizing the outer ellipsoidal bound on the geometric sum             1503.
+of a finite number of ellipsoids. Specifically, we introduce a
+symmetric matrix, Q0 , that can modify the existing formulas
+for these ellipsoidal outer bounds. The presence of this term
+exposes that the current formula for the minimum trace ellip-
+soid may not actually touch the reachable set and, therefore,
+cannot be the true minimum trace. Future work along these
+lines will hopefully reveal the relationship between the choice
+of this Q0 term and the input ellipsoids (Qi ) and the choice of
+the coefficients (pij ) that combine the shape matrices of the
+input ellipsoids to produce the outer ellipsoidal bounds.
+

@@ -1,0 +1,504 @@
+                   MultiFC: A Real-World Multi-Domain Dataset for
+                       Evidence-Based Fact Checking of Claims
+
+    Isabelle Augenstein   Christina Lioma      Dongsheng Wang    Lucas Chaves Lima
+               Casper Hansen    Christian Hansen     Jakob Grue Simonsen
+                             Department of Computer Science
+                                University of Copenhagen
+    {augenstein,c.lioma,wang,lcl,c.hansen,chrh,simonsen}@di.ku.dk
+
+
+                       Abstract                                Feature            Value
+     We contribute the largest publicly available              ClaimID            farg-00004
+     dataset of naturally occurring factual claims             Claim              Mexico and Canada assemble
+                                                                                  cars with foreign parts and send
+     for the purpose of automatic claim verification.                             them to the U.S. with no tax.
+     It is collected from 26 fact checking websites            Label              distorts
+     in English, paired with textual sources and               Claim URL          https://www.factcheck.org/2018/
+                                                                                  10/factchecking-trump-on-trade/
+     rich metadata, and labelled for veracity by hu-
+                                                               Reason             None
+     man expert journalists. We present an in-depth            Category           the-factcheck-wire
+     analysis of the dataset, highlighting character-          Speaker            Donald Trump
+     istics and challenges. Further, we present re-            Checker            Eugene Kiely
+     sults for automatic veracity prediction, both             Tags               North American Free Trade
+     with established baselines and with a novel                                  Agreement
+                                                               Claim Entities     United States, Canada, Mexico
+     method for joint ranking of evidence pages and            Article Title      FactChecking Trump on Trade
+     predicting veracity that outperforms all base-            Publish Date       October 3, 2018
+     lines. Significant performance increases are              Claim Date         Monday, October 1, 2018
+     achieved by encoding evidence, and by mod-
+     elling metadata. Our best-performing model               Table 1: An example of a claim instance. Entities are
+     achieves a Macro F1 of 49.2%, showing that               obtained via entity linking. Article and outlink texts,
+     this is a challenging testbed for claim veracity         evidence search snippets and pages are not shown.
+     prediction.
+1    Introduction                                             Contributions. We introduce the currently
+Misinformation and disinformation are two of the              largest claim verification dataset of naturally
+most pertinent and difficult challenges of the in-            occurring claims.1 It consists of 34,918 claims,
+formation age, exacerbated by the popularity of               collected from 26 fact checking websites in
+social media. In an effort to counter this, a signif-         English; evidence pages to verify the claims; the
+icant amount of manual labour has been invested               context in which they occurred; and rich metadata
+in fact checking claims, often collecting the results         (see Table 1 for an example). We perform a
+of these manual checks on fact checking portals or            thorough analysis to identify characteristics of the
+websites such as politifact.com or snopes.com. In             dataset such as entities mentioned in claims. We
+a parallel development, researchers have recently             demonstrate the utility of the dataset by training
+started to view fact checking as a task that can              state of the art veracity prediction models, and
+be partially automated, using machine learning                find that evidence pages as well as metadata
+and NLP to automatically predict the veracity of              significantly contribute to model performance. Fi-
+claims. However, existing efforts either use small            nally, we propose a novel model that jointly ranks
+datasets consisting of naturally occurring claims             evidence pages and performs veracity prediction.
+(e.g. Mihalcea and Strapparava (2009); Zubiaga                The best-performing model achieves a Macro F1
+et al. (2016)), or datasets consisting of artificially        of 49.2%, showing that this is a non-trivial dataset
+constructed claims such as FEVER (Thorne et al.,              with remaining challenges for future work.
+2018). While the latter offer valuable contribu-                 1
+                                                                 The dataset is found here: https://copenlu.
+tions to further automatic claim verification work,           github.io/publication/2019_emnlp_
+they cannot replace real-world datasets.                      augenstein/
+
+                                                        4685
+               Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing
+              and the 9th International Joint Conference on Natural Language Processing, pages 4685–4697,
+               Hong Kong, China, November 3–7, 2019. c 2019 Association for Computational Linguistics
+2       Related Work                                             about claims into account.
+                                                                    Contributions: We provide a dataset that,
+2.1      Datasets
+                                                                 uniquely among extant datasets, contains a large
+Over the past few years, a variety of mostly small               number of naturally occurring claims and rich ad-
+datasets related to fact checking have been re-                  ditional meta-information.
+leased. An overview over core datasets is given in
+Table 2. The datasets can be grouped into four cat-              2.2    Methods
+egories (I–IV). Category I contains datasets aimed               Fact checking methods partly depend on the type
+at testing how well the veracity3 of a claim can be              of dataset used. Methods only taking into account
+predicted using the claim alone, without context or              claims typically encode those with CNNs or RNNs
+evidence documents. Category II contains datasets                (Wang, 2017; Pérez-Rosas et al., 2018), and poten-
+bundled with documents related to each claim – ei-               tially encode metadata (Wang, 2017) in a similar
+ther topically related to provide context, or serving            way. Methods for small datasets often use hand-
+as evidence. Those documents are, however, not                   crafted features that are a mix of bag of word and
+annotated. Category III is for predicting veracity;              other lexical features, e.g. LIWC, and then use
+they encourage retrieving evidence documents as                  those as input to a SVM or MLP (Mihalcea and
+part of their task description, but do not distribute            Strapparava, 2009; Pérez-Rosas et al., 2018; Baly
+them. Finally, category IV comprises datasets an-                et al., 2018). Some use additional Twitter-specific
+notated for both veracity and stance. Thus, ev-                  features (Enayet and El-Beltagy, 2017). More in-
+ery document is annotated with a label indicat-                  volved methods taking into account evidence doc-
+ing whether the document supports or denies the                  uments, often trained on larger datasets, consist
+claim, or is unrelated to it. Additional labels can              of evidence identification and ranking following a
+then be added to the datasets to better predict ve-              neural model that measures the compatibility be-
+racity, for instance by jointly training stance and              tween claim and evidence (Thorne et al., 2018;
+veracity prediction models.                                      Mihaylova et al., 2018; Yin and Roth, 2018).
+   Methods not shown in the table, but related                      Contributions: The latter category above is
+to fact checking, are stance detection for claims                the most related to our paper as we consider ev-
+(Ferreira and Vlachos, 2016; Pomerleau and Rao,                  idence documents. However, existing models are
+2017; Augenstein et al., 2016a; Kochkina et al.,                 not trained jointly for evidence identification, or
+2017; Augenstein et al., 2016b; Zubiaga et al.,                  for stance and veracity prediction, but rather em-
+2018; Riedel et al., 2017), satire detection (Ru-                ploy a pipeline approach. Here, we show that a
+bin et al., 2016), clickbait detection (Karadzhov                joint approach that learns to weigh evidence pages
+et al., 2017), conspiracy news detection (Tacchini               by their importance for veracity prediction can
+et al., 2017), rumour cascade detection (Vosoughi                improve downstream veracity prediction perfor-
+et al., 2018) and claim perspectives detection                   mance.
+(Chen et al., 2019).
+   Claims are obtained from a variety of sources,                3     Dataset Construction
+including Wikipedia, Twitter, criminal reports and               We crawled a total of 43,837 claims with their
+fact checking websites such as politifact.com and                metadata (see details in Table 11). We present
+snopes.com. The same goes for documents – these                  the data collection in terms of selecting sources,
+are often websites obtained through Web search                   crawling claims and associated metadata (Section
+queries, or Wikipedia documents, tweets or Face-                 3.1); retrieving evidence pages; and linking enti-
+book posts. Most datasets contain a fairly small                 ties in the crawled claims (Section 3.3).
+number of claims, and those that do not, often lack
+evidence documents. An exception is Thorne et al.                3.1    Selection of sources
+(2018), who create a Wikipedia-based fact check-                 We crawled all active fact checking websites in
+ing dataset. While a good testbed for develop-                   English listed by Duke Reporters’ Lab4 and on the
+ing deep neural architectures, their dataset is arti-            Fact Checking Wikipedia page.5 This resulted in
+ficially constructed and can thus not take metadata                4
+                                                                     https://reporterslab.org/
+    3                                                            fact-checking/
+     We use veracity, claim credibility, and fake news predic-
+                                                                   5
+tion interchangeably here – these terms are often conflated in       https://en.wikipedia.org/wiki/Fact_
+the literature and meant to have the same meaning.               checking
+
+                                                             4686
+   Dataset                              # Claims     Labels       metadata           Claim Sources
+   I: Veracity prediction w/o evidence
+   Wang (2017)                         12,836           6            Yes               Politifact
+   Pérez-Rosas et al. (2018)           980             2            No              News Websites
+   II: Veracity
+   Bachenko et al. (2008)                  275           2           No              Criminal Reports
+   Mihalcea and Strapparava (2009)         600           2           No               Crowd Authors
+   Mitra and Gilbert (2015)†              1,049          5           No                    Twitter
+   Ciampaglia et al. (2015)†             10,000          2           No             Google, Wikipedia
+   Popat et al. (2016)                    5,013          2           Yes            Wikipedia, Snopes
+   Shu et al. (2018)†                    23,921          2           Yes         Politifact, gossipcop.com
+   Datacommons Fact Check2               10,564         2-6          Yes         Fact Checking Websites
+   III: Veracity (evidence encouraged, but not provided)
+   Barrn-Cedeo et al. (2018)            150         3                No           factcheck.org, Snopes
+   IV: Veracity + stance
+   Vlachos and Riedel (2014)               106          5            Yes        Politifact, Channel 4 News
+   Zubiaga et al. (2016)                   330          3            Yes                   Twitter
+   Derczynski et al. (2017)                325          3            Yes                   Twitter
+   Baly et al. (2018)                      422          2            No       ara.reuters.com, verify-sy.com
+   Thorne et al. (2018)†                 185,445        3            No                  Wikipedia
+   V: Veracity + evidence relevancy
+   MultiFC                               36,534       2-40           Yes         Fact Checking Websites
+
+Table 2: Comparison of fact checking datasets. † indicates claims are not ‘naturally occuring’: Mitra and Gilbert
+(2015) use events as claims; Ciampaglia et al. (2015) use DBPedia tiples as claims; Shu et al. (2018) use tweets as
+claims; and Thorne et al. (2018) rewrite sentences in Wikipedia as claims.
+
+
+38 websites in total (shown in Table 11). Out of              dataset as follows. First, we double-checked that
+these, ten websites could not be crawled, as fur-             the veracity labels would not appear in claims.
+ther detailed in Table 9. In the later experimen-             For some domains, the first or last sentence of the
+tal descriptions, we refer to the part of the dataset         claim would sometimes contain the veracity label,
+crawled from a specific fact checking website as a            in which case we would discard either the full sen-
+domain, and we refer to each website as source.               tence or part of the sentence. Next, we checked
+   From each source, we crawled the ID, claim,                the dataset for duplicate claims. We found 202
+label, URL, reason for label, categories, person              such instances, 69 of them with different labels.
+making the claim (speaker), person fact checking              Upon manual inspection, this was mainly due to
+the claim (checker), tags, article title, publication         them appearing on different websites, with labels
+date, claim date, as well as the full text that ap-           not differing much in practice (e.g. ‘Not true’, vs.
+pears when the claim is clicked. Lastly, the above            ‘Mostly False’). We made sure that all such du-
+full text contains hyperlinks, so we further crawled          plicate claims would be in the training split of the
+the full text that appears when each of those hyper-          dataset, so that the models would not have an un-
+links are clicked (outlinks).                                 fair advantage. Finally, we performed some minor
+   There were a number of crawling issues, e.g. se-           manual merging of label types for the same do-
+curity protection of websites with SSL/TLS pro-               main where it was clear that they were supposed to
+tocols, time out, URLs that pointed to pdf files              denote the same level of veracity (e.g. ‘distorts’,
+instead of HTML content, or unresolvable encod-               ‘distorts the facts’).
+ing. In all of these cases, the content could not be             This resulted in a total of 36,534 claims with
+retrieved. For some websites, no veracity labels              their metadata. For the purposes of fact verifica-
+were available, in which case, they were not se-              tion, we discarded instances with labels that occur
+lected as domains for training a veracity prediction          fewer than 5 times, resulting in 34,918 claims. The
+model. Moreover, not all types of metadata (cat-              number of instances, as well as labels per domain,
+egory, speaker, checker, tags, claim date, publish            are shown in Table 6 and label names in Table 10
+date) were available for all websites; and availabil-         in the appendix. The dataset is split into a train-
+ity of articles and full texts differs as well.               ing part (80%) and a development and testing part
+   We performed semi-automatic cleansing of the               (10% each) in a label-stratified manner. Note that
+
+                                                      4687
+the domains vary in the number of labels, ranging        Domain                               %
+from 2 to 27. Labels include both straight-forward       https://en.wikipedia.org/            4.425
+ratings of veracity (‘correct’, ‘incorrect’), but also   https://www.snopes.com/              3.992
+                                                         https://www.washingtonpost.com/      3.025
+labels that would be more difficult to map onto a        https://www.nytimes.com/             2.478
+veracity scale (e.g. ‘grass roots movement!’, ‘mis-      https://www.theguardian.com/         1.807
+attributed’, ‘not the whole story’). We therefore        https://www.youtube.com/             1.712
+                                                         https://www.dailymail.co.uk/         1.558
+do not postprocess label types across domains to         https://www.usatoday.com/            1.279
+map them onto the same scale, and rather treat           https://www.politico.com/            1.241
+them as is. In the methodology section (Section          http://www.politifact.com/           1.231
+                                                         https://www.pinterest.com/           1.169
+4), we show how a model can be trained on this           https://www.factcheck.org/           1.09
+dataset regardless by framing this multi-domain          https://www.gossipcop.com/           1.073
+veracity prediction task as a multi-task learning        https://www.cnn.com/                 1.065
+                                                         https://www.npr.org/                 0.957
+(MTL) one.                                               https://www.forbes.com/              0.911
+                                                         https://www.vox.com/                 0.89
+3.2   Retrieving Evidence Pages                          https://www.theatlantic.com/         0.88
+                                                         https://twitter.com/                 0.767
+The text of each claim is submitted verbatim as a        https://www.hoax-slayer.net/         0.655
+query to the Google Search API (without quotes).         http://time.com/                     0.554
+The 10 most highly ranked search results are re-         https://www.bbc.com/                 0.551
+                                                         https://www.nbcnews.com/             0.515
+trieved, for each of which we save the title; Google     https://www.cnbc.com/                0.514
+search rank; URL; time stamp of last update;             https://www.cbsnews.com/             0.503
+                                                         https://www.facebook.com/            0.5
+search snippet; as well as the full Web page. We         https://www.newyorker.com/           0.495
+acknowledge that search results change over time,        https://www.foxnews.com/             0.468
+which might have an effect on veracity prediction.       https://people.com/                  0.439
+                                                         http://www.cnn.com/                  0.419
+However, studying such temporal effects is outside
+the scope of this paper. Similar to Web crawl-           Table 3: The top 30 most frequently occurring URL
+ing claims, as described in Section 3.1, the cor-        domains.
+responding Web pages can in some cases not be
+retrieved, in which case fewer than 10 evidence
+pages are available. The resulting evidence pages
+are from a wide variety of URL domains, though
+with a predictable skew towards popular websites,
+such as Wikipedia or The Guardian (see Table 3
+for detailed statistics).
+
+3.3   Entity Detection and Linking
+To better understand what claims are about, we
+conduct entity linking for all claims. Specifically,
+mentions of people, places, organisations, and                Figure 1: Distribution of entities in claims.
+other named entities within a claim are recognised
+and linked to their respective Wikipedia pages, if       one to four entities, and the maximum number of
+available. Where there are different entities with       35 entities occurs in one claim only. Out of the
+the same name, they are disambiguated. For this,         25,763 entities, 2,767 are unique entities. The top
+we apply the state-of-the-art neural entity linking      30 most frequent entities are listed in Table 4. This
+model by Kolitsas et al. (2018). This results in         clearly shows that most of the claims involve enti-
+a total of 25,763 entities detected and linked to        ties related to the United States, which is to be ex-
+Wikipedia, with a total of 15,351 claims involved,       pected, as most of the fact checking websites are
+meaning that 42% of all claims contain entities          US-based.
+that can be linked to Wikipedia. Later on, we use
+entities as additional metadata (see Section 4.3).       4   Claim Veracity Prediction
+The distribution of claim numbers according to the
+number of entities they contain is shown in Figure       We train several models to predict the veracity of
+1. We observe that the majority of claims have           claims. Those fall into two categories: those that
+
+                                                     4688
+ Entity                               Frequency          the multi-task learning (MTL) approach inspired
+ United States                              2810         by collaborative filtering presented in Augenstein
+ Barack Obama                               1598         et al. (2018) (MTL with LEL–multitask learning
+ Republican Party (United States)            783
+ Texas                                       665         with label embedding layer) that excels on pair-
+ Democratic Party (United States)            560         wise sequence classification tasks with disparate
+ Donald Trump                                556         label spaces. More concretely, each domain is
+ Wisconsin                                   471
+ United States Congress                      354         modelled as its own task in a MTL architecture,
+ Hillary Rodham Clinton                      306         and labels are projected into a fixed-length label
+ Bill Clinton                                292         embedding space. Predictions are then made by
+ California                                  285
+ Russia                                      275         taking the dot product between the claim-evidence
+ Ohio                                        239         embeddings and the label embeddings. By doing
+ China                                       229         so, the model implicitly learns how semantically
+ George W. Bush                              208
+ Medicare (United States)                    206         close the labels are to one another, and can benefit
+ Australia                                   186         from this knowledge when making predictions for
+ Iran                                        183         individual tasks, which on their own might only
+ Brad Pitt                                   180
+ Islam                                       178         have a small number of instances. When making
+ Iraq                                        176         predictions for individual domains/tasks, both at
+ Canada                                      174
+ White House                                 166         training and at test time, as well as when calculat-
+ New York City                               164         ing the loss, a mask is applied such that the valid
+ Washington, D.C.                            164         and invalid labels for that task are restricted to the
+ Jennifer Aniston                            163
+ Mexico                                      158         set of known task labels.
+ Ted Cruz                                    152            Note that the setting here slightly differs from
+ Federal Bureau of Investigation             146         Augenstein et al. (2018). There, tasks are less
+ Syria                                       130
+                                                         strongly related to one another; for example, they
+Table 4: Top 30 most frequent entities listed by their   consider stance detection, aspect-based sentiment
+Wikipedia URL with prefix omitted                        analysis and natural language inference. Here, we
+                                                         have different domains, as opposed to conceptu-
+                                                         ally different tasks, but use their framework, as we
+only consider the claims themselves, and those           have the same underlying problem of disparate la-
+that encode evidence pages as well. In addition,         bel spaces. A more formal problem definition fol-
+claim metadata (speaker, checker, linked entities)       lows next, as our evidence ranking and veracity
+is optionally encoded for both categories of mod-        prediction model in Section 4.2 then builds on it.
+els, and ablation studies with and without that
+metadata are shown. We first describe the base           4.1.1   Problem Definition
+model used in Section 4.1, followed by introduc-         We frame our problem as a multi-task learning
+ing our novel evidence ranking and veracity pre-         one, where access to labelled datasets for T tasks
+diction model in Section 4.2, and lastly the meta-       T1 , . . . , TT is given at training time with a target
+data encoding model in Section 4.3.                      task TT that is of particular interest. The train-
+                                                         ing dataset for task Ti consists of N examples
+4.1   Multi-Domain Claim Veracity Prediction             XTi = {xT1 i , . . . , xTNi } and their labels YTi =
+      with Disparate Label Spaces
+                                                         {y1Ti , . . . , yN
+                                                                          Ti
+                                                                             }. The base model is a classic deep
+Since not all fact checking websites use the same        neural network MTL model (Caruana, 1993) that
+claim labels (see Table 6, and Table 10 in the ap-       shares its parameters across tasks and has task-
+pendix), training a claim veracity prediction model      specific softmax output layers that output a proba-
+is not entirely straight-forward. One option would       bility distribution pTi for task Ti :
+be to manually map those labels onto one another.
+However, since the sheer number of labels is rather                pTi = softmax(WTi h + bTi )         (1)
+large (165), and it is not always clear from the                                       Pkxk
+guidelines on fact checking websites how they can        where softmax(x) = ex / i=1 exi , WTi ∈
+be mapped onto one another, we opt to learn how          RLi ×h , bTi ∈ RLi is the weight matrix and
+these labels relate to one another as part of the        bias term of the output layer of task Ti respec-
+veracity prediction model. To do so, we employ           tively, h ∈ Rh is the jointly learned hidden rep-
+
+                                                     4689
+resentation, Li is the number of labels for task
+Ti , and h is the dimensionality of h. The MTL
+model is trained to minimise the sum of individual
+task losses L1 + . . . + LT using a negative log-
+likelihood objective.
+Label Embedding Layer. To learn the relation-
+ships between labels, a Label Embedding Layer
+(LEL) embeds labels of all tasks in a joint Eu-
+clidian space. Instead of training separate softmax
+output layers as above, a label compatibility func-
+tion c(·, ·) measures how similar a label with em-
+bedding l is to the hidden representation h:
+
+                   c(l, h) = l · h               (2)
+where · is the dot product. Padding is applied such
+that l and h have the same dimensionality. Ma-
+trix multiplication and softmax are used for mak-
+ing predictions:
+                p = softmax(Lh)                  (3)
+            P
+where L ∈ R( i Li )×l is the label embedding ma-
+trix for all tasks and l is the dimensionality of the
+label embeddings. We apply a task-specific mask
+to L in order to obtain a task-specific probabil-       Figure 2: The Joint Veracity Prediction and Evidence
+ity distribution pTi . The LEL is shared across all     Ranking model, shown for one task.
+tasks, which allows the model to learn the relation-
+ships between labels in the joint embedding space.      4.2.1 Problem Definition
+4.2   Joint Evidence Ranking and Claim                  Our problem is to obtain encodings for N exam-
+      Veracity Prediction                               ples XTi = {xT1 i , . . . , xTNi }. For simplicity, we
+                                                        will henceforth drop the task superscript and re-
+So far, we have ignored the issue of how to obtain
+                                                        fer to instances as X = {x1 , . . . , xN }, as instance
+claim representation, as the base model described
+                                                        encodings are learned in a task-agnostic fashion.
+in the previous section is agnostic to how instances
+                                                        Each example further consists of a claim ai and
+are encoded. A very simple approach, which we
+                                                        k = 10 evidence pages Ek = {e10 , . . . , eN10 }.
+report as a baseline, is to encode claim texts only.
+                                                           Each claim and evidence page is encoded with
+Such a model ignores evidence for and against a
+                                                        a BiLSTM to obtain a sentence embedding, which
+claim, and ends up guessing the veracity based on
+                                                        is the concatenation of the last state of the forward
+surface patterns observed in the claim texts.
+                                                        and backward reading of the sentence, i.e. h =
+   We next introduce two variants of evidence-
+                                                        BiLST M (·), where h is the sentence embedding.
+based veracity prediction models that encode 10
+                                                           Next, we want to combine claims and evidence
+pieces of evidence in addition to the claim. Here,
+                                                        sentence embeddings into joint instance represen-
+we opt to encode search snippets as opposed to
+                                                        tations. In the simplest case, referred to as model
+whole retrieved pages. While the latter would
+                                                        variant crawled avg, we mean average the BiL-
+also be possible, it comes with a number of ad-
+                                                        STM sentence embeddings of all evidence pages
+ditional challenges, such as encoding large doc-
+                                                        (signified by the overline) and concatenate those
+uments, parsing tables or PDF files, and encod-
+                                                        with the claim embeddings, i.e.
+ing images or videos on these pages, which we
+leave to future work. Search snippets also have
+                                                                          sgi = [hai ; hEi ]               (4)
+the benefit that they already contain summaries of
+the part of the page content that is most related to    where sgi is the resulting encoding for training
+the claim.                                              example i and [·; ·] denotes vector concatenation.
+
+                                                    4690
+However, this has the disadvantage that all evi-           Model                        Micro F1    Macro F1
+dence pages are considered equal.                          claim-only                     0.469       0.253
+                                                           claim-only embavg              0.384       0.302
+Evidence Ranking The here proposed alterna-                crawled-docavg                 0.438       0.248
+tive instance encoding model, crawled ranked,              crawled ranked                 0.613       0.441
+which achieves the highest overall performance as          claim-only + meta              0.494       0.324
+                                                           claim-only embavg + meta       0.418       0.333
+discussed in Section 5, learns the compatibility be-       crawled-docavg + meta          0.483       0.286
+tween an instance’s claim and each evidence page.          crawled ranked + meta          0.625       0.492
+It ranks evidence pages by their utility for the ve-
+racity prediction task, and then uses the resulting        Table 5: Results with different model variants on the
+ranking to obtain a weighted combination of all            test set, ‘meta’ means all metadata is used.
+claim-evidence pairs. No direct labels are avail-
+able to learn the ranking of individual documents,         4.3    Metadata
+only for the veracity of the associated claim, so the
+                                                           We experiment with how useful claim metadata
+model has to learn evidence ranks implicitly.
+                                                           is, and encode the following as one-hot vectors:
+   To combine claim and evidence representations,
+                                                           speaker, category, tags and linked entities. We do
+we use the matching model proposed for the task
+                                                           not encode ‘Reason’ as it gives away the label, and
+of natural language inference by Mou et al. (2016)
+                                                           do not include ‘Checker’ as there are too many
+and adapt it to combine an instance’s claim repre-
+                                                           unique checkers for this information to be rele-
+sentation with each evidence representation, i.e.
+                                                           vant. The claim publication date is potentially rel-
+                                                           evant, but it does not make sense to merely model
+    srij = [hai ; heij ; hai − heij ; hai · heij ]   (5)   this as a one-hot feature, so we leave incorporat-
+                                                           ing temporal information to future work. Since all
+where srij is the resulting encoding for training          metadata consists of individual words and phrases,
+example i and evidence page j , [·; ·] denotes vec-        a sequence encoder is not necessary, and we opt
+tor concatenation, and · denotes the dot product.          for a CNN followed by a max pooling operation as
+   All joint claim-evidence representations                used in Wang (2017) to encode metadata for fact
+sri0 , . . . , sri10 are then projected into the binary    checking. The max-pooled metadata representa-
+space via a fully connected layer FC, followed             tions, denoted hm , are then concatenated with the
+by a non-linear activation function f , to obtain a        instance representations, e.g. for the most elabo-
+soft ranking of claim-evidence pairs, in practice a        rate model, crawled ranked, these would be con-
+10-dimensional vector,                                     catenated with scrij .
+
+                                                           5     Experiments
+    oi = [f (FC(sri0 )); . . . ; f (FC(sri10 ))]     (6)   5.1    Experimental Setup
+
+where [·; ·] denotes concatenation.                        The base sentence embedding model is a BiLSTM
+   Scores for all labels are obtained as per (6)           over all words in the respective sequences with
+above, with the same input instance embeddings             randomly initialised word embeddings, following
+as for the evidence ranker, i.e. srij . Final predic-      Augenstein et al. (2018). We opt for this strong
+tions for all claim-evidence pairs are then obtained       baseline sentence encoding model, as opposed to
+by taking the dot product between the label scores         engineering sentence embeddings that work par-
+and binary evidence ranking scores, i.e.                   ticularly well for this dataset, to showcase the
+                                                           dataset. We would expect pre-trained contextual
+                                                           encoding models, e.g. ELMO (Peters et al., 2018),
+            pi = softmax(c(l, sri ) · oi )           (7)
+                                                           ULMFit (Howard and Ruder, 2018), BERT (De-
+Note that the novelty here is that, unlike for the         vlin et al., 2018), to offer complementary perfor-
+model described in Mou et al. (2016), we have no           mance gains, as has been shown for a few recent
+direct labels for learning weights for this matching       papers (Wang et al., 2018; Rajpurkar et al., 2018).
+model. Rather, our model has to implicitly learn              For claim veracity prediction without evidence
+these weights for each claim-evidence pair in an           documents with the MTL with LEL model, we use
+end-to-end fashion given the veracity labels.              the following sentence encoding variants: claim-
+
+                                                       4691
+only, which uses a BiLSTM-based sentence em-            Domain      # Insts    # Labs    Micro F1   Macro F1
+bedding as input, and claim-only embavg, which          ranz           21          2       1.000     1.000
+uses a sentence embedding based on mean aver-           bove          295          2       1.000     1.000
+                                                        abbc          436          3       0.463     0.453
+aged word embeddings as input.                          huca           34          3       1.000     1.000
+   We train one multi-task model per task (i.e., one    mpws           47          3       0.667     0.583
+model per domain). We perform a grid search over        peck           65          3       0.667     0.472
+                                                        faan          111          3       0.682     0.679
+the following hyperparameters, tuned on the re-         clck           38          3       0.833     0.619
+spective dev set, and evaluate on the correspod-        fani           20          3       1.000     1.000
+ing test set (final settings are underlined): word      chct          355          4       0.550     0.513
+                                                        obry           59          4       0.417     0.268
+embedding size [64, 128, 256], BiLSTM hidden            vees          504          4       0.721     0.425
+layer size [64, 128, 256], number of BiLSTM hid-        faly          111          5       0.278       0.5
+den layers [1, 2, 3], BiLSTM dropout on input and       goop         2943         6        0.822     0.387
+                                                        pose         1361         6        0.438     0.328
+output layers [0.0, 0.1, 0.2, 0.5], word-by-word-       thet           79          6        0.55      0.37
+attention for BiLSTM with window size 10 (Bah-          thal          163          7       1.000     1.000
+                                                        afck          433          7       0.357     0.259
+danau et al., 2014) [True, False], skip-connections     hoer         1310          7       0.694     0.549
+for the BiLSTM [True, False], batch size [32, 64,       para          222          7       0.375     0.311
+128], label embedding size [16, 32, 64]. We use         wast          201          7       0.344     0.214
+                                                        vogo          654         8        0.594     0.297
+ReLU as an activation function for both the BiL-        pomt        15390         9        0.321     0.276
+STM and the CNN. For the CNN, the follow-               snes         6455         12       0.551     0.097
+ing hyperparameters are used: number filters [32],      farg          485         11       0.500     0.140
+                                                        tron         3423         27       0.429     0.046
+kernel size [32]. We train using cross-entropy loss
+                                                        avg                     7.17       0.625     0.492
+and the RMSProp optimiser with initial learning
+rate of 0.001 and perform early stopping on the         Table 6: Total number of instances and unique labels
+dev set with a patience of 3.                           per domain, as well as per-domain results with model
+                                                        crawled ranked + meta, sorted by label size
+5.2   Results
+For each domain, we compute the Micro as well           Metadata     Micro F1      Macro F1
+as Macro F1, then mean average results over all         None           0.627           0.441
+domains. Core results with all vs. no metadata
+                                                        Speaker        0.602           0.435
+are shown in Table 5. We first experiment with          + Tags         0.608           0.460
+different base model variants and find that label       Tags           0.585           0.461
+embeddings improve results, and that the best pro-
+                                                        Entity         0.569           0.427
+posed models utilising multiple domains outper-         + Speaker      0.607           0.477
+form single-task models (see Table 8). This cor-        + Tags         0.625           0.492
+roborates the findings of Augenstein et al. (2018).
+Per-domain results with the best model are shown        Table 7:      Ablation results with base model
+                                                        crawled ranked for different types of metadata
+in Table 6. Domain names are from hereon af-
+ter abbreviated for brevity, see Table 11 in the ap-
+pendix for correspondences to full website names.       Model           Micro F1       Macro F1
+Unsurprisingly, it is hard to achieve a high Macro      STL               0.527         0.388
+                                                        MTL               0.556         0.448
+F1 for domains with many labels, e.g. tron and          MTL + LEL         0.625         0.492
+snes. Further, some domains, surprisingly mostly
+with small numbers of instances, seem to be very        Table 8: Ablation results with crawled ranked + meta
+easy – a perfect Micro and Macro F1 score of 1.0        encoding for STL vs. MTL vs. MTL + LEL training
+is achieved on ranz, bove, buca, fani and thal. We
+find that for those domains, the verdict is often al-
+ready revealed as part of the claim using explicit      prediction models by a large margin. Unsur-
+wording.                                                prisingly, claim-only embavg is outperformed by
+                                                        claim-only. Further, crawled ranked is our best-
+Claim-Only vs. Evidence-Based Veracity Pre-             performing model in terms of Micro F1 and Macro
+diction. Our evidence-based claim veracity pre-         F1, meaning that our model captures that not ev-
+diction models outperform claim-only veracity           ery piece of evidence is equally important, and can
+
+                                                    4692
+

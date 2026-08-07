@@ -1,0 +1,766 @@
+2.1 Dataset                                               sification; (2) an average of more than 2 QA pairs
+Similarly to the shared task of previous years, we        per claim; (3) over 50% accuracy of verdict predic-
+ask participants to train and validate their system       tion. Finally, 8 out of 9 annotators are selected for
+on the public AV ERI T E C dataset and evaluate           the formal annotation for the 2025 test set.
+their performance on our new test set (2025). The         Comparison between the Previous Datasets and
+2025 test set consists of 1,000 instances, which          2025 Test Set We present the data statistics of the
+temporally succeed the previous data (original            2025 test set in Table 1. For comparison, we also
+AV ERI T E C and 2024 test set).                          show the results of the 2023 AV ERI T E C dataset
+Annotation of 2025 New Test Set Following                 and the 2024 test set.
+AV ERI T E C (Schlichtkrull et al., 2023a), we first         The 2025 test set (from Jan 2024 to Dec 2024)
+collect fact-checking articles from ClaimReview           is more temporally removed from the training set
+and conduct a five-phase annotation. Please note          compared with the 2023 dataset and the 2024 test
+that each instance is annotated by different annota-      set, indicating a greater domain shift. The average
+tors at each phase.                                       number of questions per claim in the 2025 test set is
+                                                          comparable to the 2024 test set while being higher
+   In particular, in phase 1 (P1), annotators are
+                                                          than in the 2023 dataset (e.g., 2025: 2.79; 2024:
+asked to identify the main claims from a fact-
+                                                          2.89; 2023: 2.60/2.57/2.57). Moreover, the 2025
+checking article, extract corresponding meta-data
+                                                          test set includes more numerical claims (38.8%),
+such as the claim speaker and claim date, and
+                                                          which are more straightforward to verify, but fewer
+decontextualise the claim to make it context-
+                                                          causal claims (8.1%), which are typically more
+independent. In P2, given a decontextualised claim,
+                                                          challenging. These distributions also reflect on
+annotators propose questions that help to fact-check
+                                                          the fact-checking strategies, where there are more
+the claim, answer the question by finding relevant
+                                                          numerical comparisons (30.8%) in the 2025 test
+information from the fact-checking article and on-
+                                                          set.
+line source, and finally make a verdict for the claim
+based on the QA pairs. In P3, presented with only            In addition to the above observations, we find
+the QA pairs and the decontextualised claim, anno-        that the distributions across different sets show sim-
+tators assign a verdict label and make a justification    ilar trends. In terms of label distribution, the Re-
+for their choice. For each instance, if the verdict       futed label consistently accounts for the largest
+labels given by P2 and P3 annotators are identi-          proportion, while Conflicting and Not Enough Evi-
+cal, we regard the QA annotation and the claim as         dence remain greatly fewer. Regarding claim type
+disambiguated, informative and sufficient for the         distribution, the Event/Property Claim is the most
+verdict predication, and include it in our resulting      common, while the Position Statement is the least.
+test set. Otherwise, this instance proceeds to the P4     For fact-checking strategies, the Written Evidence
+and P5 annotation, which consist of a second round        consistently dominates across all sets.
+of P2 and P3 annotation, respectively. Similarly,         2.2      Knowledge Store
+we examine the verdicts of each claim given by P4
+                                                          To ensure fair comparison, support reproducibility,
+and P5 annotators: if the verdict labels are identi-
+                                                          and reduce engineering and computational costs,
+cal, we include the instance in our resulting test set;
+                                                          we provide a corresponding knowledge store for the
+otherwise, we discard it. In this way, we collect
+                                                          2025 test set. For each claim, the knowledge store
+1,000 instances for our 2025 test set, where each is
+                                                          includes a set of potentially relevant documents for
+annotated with a normalised claim, meta-data, QA
+                                                          fact-checking each claim.
+pairs, a verdict label, and a justification.
+                                                             For each data store, we include gold documents,
+   We conduct a training and evaluation procedure
+                                                          which are used for our annotation, and additional
+to select qualified annotators. Before the formal
+                                                          documents retrieved by Google search. In partic-
+annotation, all annotators are required to complete
+                                                          ular, to generate queries for Google search, we
+training on 10 instances for each of the P1, P2, and
+                                                          use ChatGPT1 to generate a set of queries based
+P3 tasks, respectively. Those training instances are
+                                                          on the claim, gold annotated questions, and gold
+randomly selected from the 2024 test set. All anno-
+                                                          annotated answers. We also include a variety of
+tators are required to meet the basic performance
+                                                          distractor queries by changing the named entities,
+criteria: (1) over 70% F -1 score for both claim
+type classification and fact-checking strategy clas-         1
+                                                                 We use gpt-3.5-turbo.
+
+                                                      203
+      Split                                    Train (2023)                   Dev (2023)                 Test (2023)
+      Claims                                            3,068                       500                      1,000
+      Question / Claim                                   2.60                      2.57                       2.57
+      End date                                   25-08-2020                 31-10-2020                22-12-2021
+      Labels (S/R/C/N)                      27.6/56.8/6.4/9.2         24.4/61.0/7.6/7.0          25.5/62.0/6.3/6.2
+      Types (PS/NC/EPC/QV/CC)          7.8/33.7/57.8/9.6/11.5   5.8/23.8/61.4/13.8/10.8     7.0/21.9/69.8/7.7/11.9
+      Strategies (WE/NCP/FR/EC/SS)     78.8/30.6/6.6/29.9/3.6    88.6/19.0/7.4/27.4/2.0     88.0/19.2/7.7/29.6/1.8
+
+                  Split                                         Test (2024)                Test (2025)
+                  Claims                                              1,215                     1,000
+                  Question / Claim                                     2.89                       2.79
+                  End date                                     13-08-2023                 19-12-2024
+                  Labels (S/R/C/N)                       17.3/66.5/4.1/12.1          22.2/71.9/1.7/4.2
+                  Types (PS/NC/EPC/QV/CC)            3.5/24.3/71.9/5.2/16.1      2.6/38.8/68/9/4.3/8.1
+                  Strategies (WE/NCP/FR/EC/SS)      82.4/22.6/10.0/37.6/4.0     88.8/30.8/7.8/30.0/5.6
+
+Table 1: Statistics for the 2023 dataset, and 2024 and 2025 test sets. The Labels (%) are Supported (S), Refuted
+(R), Conflicting Evidence/Cherry-picking (C), and Not Enough Evidence (N). The Claim Types (%) are Position
+Statement (PS), Numerical Claim (NC), Event/Property Claim (EPC), Quote Verification (QV), and Causal Claim
+(CC). The Fact-checker Strategies (%) are Written Evidence (WE), Numerical Comparison (NCP), Fact-checker
+Reference (FR), Expert Consultation (EC) and Satirical Source (SS). For simplicity, we exclude strategies with very
+low frequencies, such as Geo-location (0.3%). Please note that a single claim can correspond to multiple claim
+types and fact-checking strategies; therefore, the proportions do not necessarily sum to 100%.
+
+
+dates, and events in the claim. We present our de-          fying questions conditioned on each piece of the
+tailed query information in Appendix A. We collect          evidence; and (iii) veracity prediction by using a
+the URLs returned by the first page of the Google           fine-tuned LLM to jointly generate explanations
+search, and only include those URLs which are               and the final verdict labels.
+temporarily available before the claim is made. Fi-            Our baseline modifies the original HerO imple-
+nally, the deduplicated and shuffled URLs result            mentation with a focus on computational efficiency
+in the data store for each claim. We further scrape         to ensure that the system runs within this shared
+the text from each URL using trafilatura (Bar-              task’s time constraints. Instead of using Llama-3.1-
+baresi, 2021).                                              70B (Grattafiori et al., 2024) across components,
+   For the 2025 test data store, we have 1,018,800          the baseline uses the Llama-3.1-8B variant (a fine-
+URLs and 2,506,398,451 tokens in total. In particu-         tuned Llama-3.1-8B veracity prediction model was
+lar, for each claim, there are 1019 URLs on average,        also provided by Yoon et al. (2024)). Since evi-
+where 593 are associated with valid scraped texts.          dence retrieval is the most expensive step of HerO’s
+The average tokens are 2,506,398 for each claim             inference pipeline, the baseline additionally incor-
+and 4,227 for each document, respectively. The              porates retrieval cutoffs and heuristics, limiting the
+most common domains include National Library of             number of sentences for BM25 retrieval to 5000,
+Medicine, Reddit, ScienceDirect, Wikipedia, BBC,            and for reranking to 500. Finally, the runtime was
+the New York Times and CNN.                                 further improved by adding typical efficiency op-
+                                                            timizations, such as batch processing and multi-
+2.3 Baseline                                                threading.
+The baseline closely follows the HerO system
+(Yoon et al., 2024). HerO achieved the second               2.4    Measuring Reproducibility & Efficiency
+place in the AVeriTeC shared task (Schlichtkrull            To ensure the reproducibility of shared task sys-
+et al., 2024), demonstrating that open LLMs can             tems, all systems were executed on a standardized
+effectively verify real-world claims without relying        virtual machine during inference on the test set by
+on proprietary models. HerO uses publicly avail-            the organizers. To this end, all shared task teams
+able LLMs in a three-step verification pipeline: (i)        were required to provide reproducible code with
+evidence retrieval by combining hypothetical docu-          clear installation and execution instructions.
+ment generation via an LLM, BM25 retrieval, and                A system is considered reproducible if it runs
+a cross-attention re-ranker (Meng et al., 2024); (ii)       during inference on the VM without making any
+question generation where an LLM creates veri-              external API calls, whether to large language mod-
+                                                        204
+els (LLMs) or to retrieval engines such as Google                      task is retrieved from a knowledge store compiled
+Search. Consequently, closed-weight LLMs cannot                        from a range of internet sources (see Sec. 2.2),
+be used during inference. In contrast, open-weight                     The AVeriTeC metrics used in the previous year’s
+and open-data language models are allowed as long                      shared task (Schlichtkrull et al., 2024) relied on ap-
+as they run locally on the VM. Note that partici-                      proximate matching using the annotated evidence
+pants were allowed to use larger or closed-weight                      and the token-matching metrics METEOR (Baner-
+LLMs during training.                                                  jee and Lavie, 2005). However, this approach was
+   The virtual machine was an AWS g5.2xlarge                           highly sensitive to surface forms and resulted in
+EC2 instance with an Nvidia A10G GPU with                              penalising alternative, but valid evidence paths. For
+23GB memory, 8 vCPUs, 32GB RAM, and 450GB                              example, both “Where did South Africa rank in al-
+of storage. To ensure compatibility with the VM,                       cohol consumption? In 2016, South Africa ranked
+participants could test their systems using either a                   ninth out of 53 African countries.” and “What’s the
+provided Docker image that matched the evaluation                      average alcohol consumption per person in South
+environment or by configuring an identical AWS                         Africa? 7.1 litres.” may both be valid ways of estab-
+instance via the specified AMI.                                        lishing the relative levels of alcohol consumption
+   The efficiency of shared task systems was mea-                      between South Africa and other countries. How-
+sured by setting an upper limit to the inference                       ever, the token-level overlap between both evidence
+runtime on the 1000 claims of the test set. A sys-                     is low and may result in a higher METEOR score
+tem was expected to process the entire test set on                     for one evidence alternative compared to the other.
+the virtual machine in 16 hours and 40 minutes,                           Thus we decided to use Ev2 R (Akhtar et al.,
+averaging 1 minute per claim. This runtime limit                       2024) for evaluation. Ev2 R (Akhtar et al., 2024)
+does not include the downloading of data, mod-                         is a prompt-based LLM-as-judge approach that as-
+els, or retrieval indices. Outputs produced by a                       sesses the quality of retrieved evidence by decom-
+system beyond that time constraint are not consid-                     posing both the retrieved and reference evidence
+ered. Moreover, systems were allowed to process                        into atomic facts before comparing them to eval-
+all claims for a given component of the verification                   uate factual consistency and coverage. It outper-
+pipeline before proceeding to the next component.                      forms traditional metrics in alignment with human
+This approach reduces the impact of loading and                        judgments and robustness to adversarial perturba-
+unloading models from memory that would occur                          tions. Ev2 R is inspired by FactScore (Min et al.,
+if each claim were processed individually.2                            2023), but adapts its approach to better reflect ev-
+   Reproducibility and efficiency are a binary                         idence evaluation, providing both a precision and
+pass/fail requirement for successful shared task                       a recall score. Precision measures the accuracy of
+submissions. We do not use them as a metric for                        the retrieved evidence, while recall assesses the
+ranking successful shared task systems.                                completeness of the retrieved evidence in relation
+                                                                       to the gold standard. The scorer first splits the re-
+2.5 Evaluation                                                         trieved evidence Ê and reference evidence E into
+Following established practise in previous                             atomic facts, AÊ and AE respectively. To calcu-
+work (Thorne et al., 2018; Schlichtkrull et al.,                       late the precision score it evaluates whether each
+2023a), including the first AVeriTeC shared                            individual fact aÊ ∈ AÊ of the retrieved evidence
+task (Schlichtkrull et al., 2024), we evaluate                         is supported by the reference evidence E. The pre-
+verdict accuracy conditional on sufficient evidence                    cision score sprec is defined as the ratio of facts
+having been retrieved. We report three metrics:                        supported by the reference evidence:
+Q score, representing question quality regardless                                           X
+of found evidence; Q+A score, representing the                                         1
+                                                                           sprec =            I[aÊ supported byE]
+quality of evidence as questions and answers; and                                    |AÊ |
+                                                                                          aÊ ∈AÊ
+AV ERI T E C, on which systems are scored with
+verdict accuracy for claims where Q+A score is                            The scorer iterates over each fact
+above a certainly threshold t, and 0 otherwise.                        (aÊ ∈ AÊ ) for which the indicator function
+   The evidence in this year’s AVeriTeC shared                         (I[aÊ supported by E]) returns 1 if the fact aÊ
+    2
+                                                                       is supported by the reference evidence E and 0
+      This relaxation creates an admittedly artificial setting, as
+it would require all users to wait for all claims to be processed      otherwise. For calculating the recall score, the
+before receiving a response.                                           scorer evaluates whether each atomic fact of the
+                                                                     205
+reference evidence (aE ∈ AE ) is supported by the       llama.cpp), GPU memory crashes, and miscon-
+retrieved evidence, i.e., measuring the extend to       figured shell scripts. Only memory crashes oc-
+which the retrieved evidence covers the content of      curred during runtime; all other errors were re-
+the reference evidence:                                 solved within 4 hours before system execution.
+                      X                                 Overall, the encountered issues are expected for
+                  1
+    srecall =           I[aE supported by Ê]           early-stage open-source codebases.
+                |AE |
+                    aE ∈AE                                 We added several diagnostic measures to assess a
+                                                        system’s reproducibility. First, we monitored traffic
+   Akhtar et al. (2024) assess the validity of the      and non-local API calls. Second, we tested each
+scorer by evaluating its alignment with human rat-      system on a subset of 99 claims not included in the
+ings and testing its robustness through a set of per-   test set (but included in the knowledge store, in case
+turbation experiments that systematically assess        of pre-computed indices) to verify that systems
+the scorer on various dimensions, such as its sen-      were not hardcoded to specific test examples and
+sitiveness to variant changes in the evidence text,     could handle arbitrary claims.
+fluency, noise, etc.
+   Following the first AV ERI T E C shared              Efficiency The average runtime per claim for
+task (Schlichtkrull et al., 2024), we evaluate          each system is shown in Table 2. All systems suc-
+evidence using only the recall component of the         cessfully stayed below the established limit of 1
+metric. By doing so we avoid penalising systems         minute per claim on average. Teams achieved this
+for adding additional evidence which annotators         through model selection and efficiency implementa-
+did not find necessary, such as background context.     tion improvements. The components used by each
+We only consider the first 10 questions generated       team, along with inference engines and efficiency-
+by each system, so as to avoid rewarding sheer          focused designs, are summarized in Table 3. Five
+volume. We then calculate total AV ERI T E C score      out of seven systems use for LLM inference vLLM
+as verdict accuracy given that srecall > t, where       (Kwon et al., 2023), following the baseline. Team
+we choose t = 0.5 so as to ensure high agree-           EFC uses llama.cpp3 and Team CTU AIC uses
+ment on the 100 double-annotated AV ERI T E C           Ollama4 , a wrapper around llama.cpp.
+claims following the methodology discussed in              To improve retrieval efficiency beyond the base-
+Schlichtkrull et al. (2023a).                           line’s improvements, systems CTU AIC, HU-
+                                                        MANE, FZIGOT, and OldJoe used pre-computed
+3    Results                                            indices of dense vector representations. Teams
+                                                        Yellow Flash, EFC, and Checkmate chunked evi-
+The results for the shared task are shown in Table 2.   dence sentences into larger segments before apply-
+We received seven fully reproducible systems. This      ing a sparse BM25 retriever, reducing the number
+section discusses our findings on reproducibility,      of chunks considered by the BM25 module in Team
+efficiency, and general observations on the tech-       EFC’s case from 5000 to 1500.
+niques used by the participating teams. We provide         Due to VM resource constraints, most teams
+a high-level overview of the model components           used smaller models for both retrieval and verac-
+used by systems in Table 3. For detailed descrip-       ity prediction than in the first AVeriTeC Shared
+tions of any particular system, we refer to each        Task (Schlichtkrull et al., 2024). For instance,
+team’s system description paper. In line with the       Team HUMANE used an 8B model for their re-
+theme of this shared task, every team has made          trieval pipeline instead of the 70B model from the
+their codebase publicly available.                      first shared task to fit within the 23GB RAM of
+Reproducibility We received a total of eight            the A10G GPU. Subsequently, most teams used
+system submissions. One system failed to run            quantization to either fit larger models onto the
+on the VM due to syntax errors, missing instal-         GPU and to reduce inference runtime. Teams
+lation instructions, and hardcoded file paths. Of       HUMANE, FZIGOT, and OldJoe used Activation-
+the seven reproducible systems, two were submit-        aware Weight Quantization (Lin et al., 2024),
+ted as Docker images and five as ZIP files. All         Teams Yellow Flash and Checkmate used OPTQ
+systems needed manual intervention to run on the        (Frantar et al., 2023), and Team EFC used GGUF
+virtual server. Common issues were Docker permis-          3
+                                                               https://github.com/ggml-org/llama.cpp
+sion errors, dependency installation failures (e.g.,       4
+                                                               https://github.com/ollama/ollama
+
+                                                     206
+  #    Team Name                                         Time             Ev2R Recall              AV ERI T E C
+                                                         per                                       Score
+                                                         Claim
+                                                         (s)
+                                                                     Q only          Q+A
+  1    CTU AIC (Ullrich and Drchal, 2025)                53.67     0.20030.007     0.47740.004     0.33170.002
+  2    HUMANE (Yoon et al., 2025)                        29.19     0.19330.005     0.42990.001     0.27070.004
+  3    Yellow Flash (Dharamvaram and Hakak, 2025)        31.71     0.15610.006     0.40980.008     0.25270.005
+  4    FZIGOT (Rolinger and Liu, 2025)                   18.50     0.36220.007     0.39980.003     0.24400.002
+  5    EFC (Upravitelev et al., 2025)                    7.01      0.12540.001     0.35200.006     0.20470.003
+  6    Checkmate (Rashid and Hakak, 2025)                22.73     0.18480.007     0.33680.005     0.20430.005
+  7    Baseline                                          33.88     0.27230.001     0.33620.004     0.20230.007
+  8    OldJoe (Ftouhi et al., 2025)                      48.57     0.18230.005     0.38780.001     0.15170.003
+  –    CTU AIC (4o)                                      –         0.50350.003     0.43730.004     0.26900.004
+  –    CTU AIC (4o-mini)                                 –         0.57180.005     0.48090.003     0.31760.001
+
+Table 2: Overall results for the AV ERI T E C shared task. Performance is evaluated on the total of 1000 hidden test
+set examples. Scores are given in Ev2R Recall for question-only, question-answer performance, and the total score.
+
+
+quantization (Gerganov, 2023). With these effi-             winning system (CTU AIC) to use OpenAI’s
+ciency modifications, five out of seven teams (HU-          GPT-4o (gpt-4o-2024-08-06) and GPT-4o-mini
+MANE, Yellow Flash, FZIGOT, EFC, and Check-                 (gpt-4o-mini-2024-07-18) instead of Qwen3-
+mate) achieved faster runtimes than the baseline’s          14B. While question-only (Q only) scores increased
+average of 33.88s per claim.                                substantially with closed models, both Q+A and
+   The only non-baseline system that does not use           AVeriTeC scores were lower than the original open-
+model quantization is CTU AIC. Instead, Team                source CTU AIC system. Since we did not op-
+CTU AIC uses the largest model with the max-                timize the proprietary models for use in CTU’s
+imum possible context size that fits on the VM’s            system, these results provide only a preliminary
+GPU while satisfying the efficiency constraint, rely-       assessment of their performance, as evidenced by
+ing on the inherent processing abilities of the latest      GPT-4o-mini outperforming GPT-4o.
+language models. While this results in the slowest
+                                                            Question Generation Several teams (OldJoe,
+runtime of all systems (53.67s average per claim),
+                                                            EFC, Yellow Flash, Checkmate, FZIGOT) begin
+their system ranks highest in the shared task.
+                                                            claim verification by generating questions to guide
+    Particularly noteworthy is Team EFC’s runtime           evidence retrieval, following findings from the first
+performance with an average of 7.01s per claim              shared task that question generation, rather than
+during inference, which is almost five times faster         searching evidence for the claim directly, improves
+than the baseline. In addition to the aforementioned        retrieval performance (Schlichtkrull et al., 2024).
+efficiency improvements, they proposed a semantic           To generate the questions all teams rely on lan-
+filtering step that reduces LLM calls by predicting         guage models without further fine-tuning, specifi-
+the NEI or conflicting evidence/cherry-picking la-          cally Qwen2.5, Qwen3, and Phi-4.
+bel using exclusively cosine similarity on retrieved
+                                                               FZIGOT adopts an iterative question generation
+evidence.
+                                                            approach using a Graph-of-Thoughts framework
+   Despite the training cost not being considered in        (Besta et al., 2024). At each iteration, their sys-
+this shared task’s efficiency constraint, most teams        tem produces multiple questions, prunes similar
+did not train or fine-tune language models for any          ones, and verifies the claim using answers col-
+parts of their pipeline. The only exceptions are the        lected from these questions. If the label is "Not
+systems of Team HUMANE and Team FZIGOT,                     Enough Evidence" (NEE), the algorithm returns
+discussed later in the report.                              to question generation for a fixed number of itera-
+  We further compare shared task systems to                 tions. FZIGOT uses LoRA (Hu et al., 2022) to fine-
+solutions using proprietary closed-source lan-              tune Qwen2.5-14B model for this step. Since the
+guage models in Table 2. We modified the                    AVeriTeC training data is not structured in such iter-
+                                                        207
+  Team Name      QG             Retrieval          QA            Veracity          Inference    Efficiency
+                                                                                   Engine
+  CTU AIC        Qwen3-14B      mxbai-embed-       Qwen3-14B     Qwen3-14B         Ollama       Dense Index
+                                large-v1
+  HUMANE         Qwen3-8B       gte-base-en-       Qwen3-8B      Qwen3-32B         vLLM         Dense Index,
+                                v1.5, Llama-3.1-                                                AWQ
+                                8B, Qwen3-8B
+  Yellow Flash   Qwen2.5-7B     BM25,              –             Phi-4-14B         vLLM         BM25
+                                bilingual-                                                      Chunking,
+                                embedding-                                                      GPTQ-int4
+                                small,
+                                snowflake-
+                                arctic-embed-
+                                m-v2.0
+  FZIGOT         Qwen2.5-       BM25,              Qwen2.5-      Qwen2.5-14B       vLLM         Dense Index,
+                 14B            stella_en_400M     14B                                          LoRA, AWQ
+  EFC            Phi-4-14B      BM25,              –             Phi-4-14B         llama.cpp    BM25
+                                thenlper/gte-                                                   Chunking,
+                                base                                                            Semantic
+                                                                                                Filtering,
+                                                                                                GGUF
+  Checkmate      Qwen2.5-7B     BM25,             –              Phi-4-14B         vLLM         BM25
+                                snowflake-                                                      Chunking,
+                                arctic-embed-                                                   GPTQ-int4
+                                m-v2.0
+  OldJoe         Qwen3-14B      BM25,       jina- Qwen3-14B      Qwen3-14B         vLLM         Dense Index,
+                                embeddings-v3                                                   AWQ
+  Baseline       Llama-3.1-     BM25,      SFR- –                Llama-3.1-8B      vLLM         Retrieval cut-
+                 8B             embedding-2,                                                    off
+                                Llama-3.1-8B
+
+Table 3: Components used by shared task systems, ordered based on AVeriTeC-score (see Table 2). - indicates that
+the answer used was the entire retrieved passage.
+
+
+ative fashion, FZIGOT creates a weakly supervised         AVeriTeC paper (Schlichtkrull et al., 2023a), search
+training dataset by generating a training instance        with generated questions yields complete evidence
+for each question in the dataset, conditioning subse-     in 9/20 cases, compared to 16/20 with annotator-
+quent questions on previous questions accordingly.        written questions. Using the same claims, we find
+Their system achieves the highest Question-only           that searching for only the claim yields complete
+EV2R Recall across teams with a score of 0.3622.          evidence in 6/20 cases, whereas the full process of
+                                                          knowledge store construction (i.e., including the
+   In contrast, CTU AIC and HUMANE produce                full list of queries described in Appendix A), com-
+questions by conditioning the generation on al-           plete evidence is found via search for 19/20 (for the
+ready retrieved evidence, following the baseline’s        shared task, the knowledge store is also extended
+design. Team CTU AIC generates questions jointly          with gold evidence, ensuring completeness also for
+with answers and the veracity prediction condi-           the final claim). Since all systems use this provided
+tioned on retrieved evidence using Qwen3-14B.             knowledge store, question generation remains an
+Since Team CTU AIC and HUMANE achieved the                integral part of every system. Additionally, all
+highest AVeriTeC scores, this suggests that rele-         systems use generated questions and answers for
+vant evidence can be retrieved from the provided          veracity prediction, as discussed further below.
+knowledge store without explicit question gener-
+ation. However, as described in Section 2.1, the          Evidence Retrieval Team EFC and Team
+knowledge store construction itself relies heavily        FZIGOT retrieve evidence directly based on the
+on both annotators and models generating ques-            generated questions. Team Yellow Flash and
+tions to find suitable evidence. As reported in the       Checkmate additionally generate synthetic answers,
+                                                        208
+     Team name         QV       N     E/P      C       PS          S     R    NEE    CE/C     Avg. # Docs
+     CTU AIC          0.49   0.17    0.40    0.41   0.46      0.18      0.4    0.1    0.06             9.0
+     HUMANE           0.30   0.19    0.37    0.33   0.35      0.27     0.35    0.0     0.0            10.0
+     Yellow Flash     0.19   0.16    0.27    0.33   0.35      0.23     0.26   0.02    0.06            7.27
+     FZIGOT           0.28   0.15    0.31    0.33   0.42      0.22     0.29   0.07     0.0            15.2
+     EFC              0.28   0.16    0.26    0.23   0.42      0.19     0.27    0.0     0.0            10.0
+     Checkmate        0.19   0.16    0.26    0.28   0.35      0.23     0.24    0.0     0.0            5.21
+     OldJoe           0.02   0.13     0.2    0.22   0.15      0.23     0.18    0.0     0.0            3.96
+     Average          0.25   0.16     0.3     0.3   0.36      0.22     0.28   0.03    0.02            8.66
+
+Table 4: We compute separate results based on claim type (QV = Quote Verification, N = Numerical, E/P =
+Event/Property, C = Causal, PS = Position Statement). We also compute results separated by gold verdict (S =
+Supported, R = Refuted, NEE = Not Enough Evidence, CE/C = Conflicting Evidence / Cherrypicking). Finally, we
+report the average number of evidence documents submitted per claim. We note that if a team submitted more than
+10 documents for a claim, only the first 10 were used to compute retrieval scores for evaluation.
+
+
+which are used to expand search queries for evi-            (GTE) family (Li et al., 2023; Zhang et al., 2024)
+dence retrieval. Team OldJoe formulates four dis-           were widely adopted. These include Stella5 and
+tinct search queries for each question and retrieves        the newer snowflake-artic-embed-m-v2.0, a GTE
+evidence for each query individually. Team HU-              model fine-tuned using Matryoshka representation
+MANE applies a query expansion strategy that gen-           learning (Kusupati et al., 2022) to reduce quality
+erates hypothetical fact-checking articles for each         degradation during model compression. Team CTU
+claim. This approach is also used by the baseline           AIC used mcbai-embed-large-v1 (Li and Li, 2024),
+and their system from last year’s shared task. Team         the same retrieval model their team used in the
+CTU AIC retrieves evidence by using the claim               previous shared task.
+itself as the search query.
+   Similar to the first AVeriTeC shared task,               Question Answering & Veracity Prediction All
+teams explored vector-based dense retrieval sys-            teams used large language models for question an-
+tems (Karpukhin et al., 2020) and hybrid systems            swering and veracity prediction, relying on three
+that combine dense retrieval with BM25 (Robert-             models: Qwen3, Qwen2.5, and Phi-4. Three
+son and Zaragoza, 2009). Three systems (Team                teams (Yellow Flash, EFC, and Checkmate) used
+CTU AIC, FZIGOT, and HUMANE) relied solely                  retrieved evidence directly as answers, while Team
+on dense retrieval. Team HUMANE further sum-                HUMANE and OldJoe, who produce answers
+marizes the collected evidence into a single para-          explicitly as a separate step in their verification
+graph using Qwen3-8B. The remaining teams                   pipeline, conditioned on claim, question, and ev-
+adopted hybrid retrieval approaches, following the          idence. Similarly to their question generation ap-
+baseline. Team Yellow Flash further groups to-              proach, Team FZIGOT uses LoRA to train distinct
+gether semantically similar sentences before em-            adapters for question answering and veracity pre-
+bedding these coherent chunks and querying for              diction using weakly-supervised data. Apart from
+dense retrieval.                                            the increased efficiency during training, using three
+   Compared to fully dense retrieval, hybrid sys-           distinct adapters for each component of the pipeline
+tems allow faster evidence retrieval by restricting         can also improve inference runtime, as the loading
+neural search to a smaller subset of the knowledge          and unloading of adapters into memory is substan-
+store. This is reflected in the inference time re-          tially faster than for entire models. However, due
+ported by Team EFC. While Team OldJoe also                  to the experimental setting that allows systems to
+employs a hybrid system, they create an index for           run one component of the pipeline at a time to ac-
+both BM25 and dense embeddings over the entire              count for restrictions of the VM, the effect of this
+knowledge store, and then combine retrieval scores          design choice was less impactful in the context of
+using reciprocal rank fusion (Cormack et al., 2009).        the shared task.
+   Consistent with trends from the first shared                5
+                                                                https://huggingface.co/dunzhang/stella_en_
+task, models from the General Text Embeddings               400M_v5
+
+                                                     209
+   Team HUMANE submitted the only system                 ment study of Schlichtkrull et al. (2023a). Second,
+with a fully fine-tuned model for veracity predic-       the inaccuracies of automatic evaluation metrics of
+tion. They trained a Qwen3-32B model and ap-             textual evaluation, require assessing and comparing
+plied AWQ quantization to fit onto VM GPU mem-           the computed AVeriTeC scores with human anno-
+ory. While Team CTU AIC did not fine-tune their          tations. Thus we can gain a deeper understanding
+model, they augmented the input with few-shot ex-        of the quality of the retrieved evidence, and assess
+amples retrieved from the AVeriTeC training data,        how well the AV ERI T E C scores assigned to the
+selected via BM25, conditioned on the claim. This        retrieved evidence aligns with human judgements.
+shared task again highlights the importance of ac-
+curate veracity prediction components: top-ranking       Evaluation Process We conducted human evalu-
+CTU AIC uses Qwen3-14B without quantization,             ation in collaboration with the participating teams.
+while second-place HUMANE uses the largest lan-          All seven teams were invited to participate in the
+guage model (32B) with full-model fine-tuning.           evaluation. All teams but the team HUMANE took
+                                                         part in the evaluation. Each of the remaining six
+Types & Verdicts Table 4 provides a detailed             participating teams and two volunteers from with
+breakdown of results by claim type (quote veri-          experience in automated fact-checking annotation
+fication, numerical claims, event/property claims,       manually evaluated 35 evidence samples from other
+causal claims, and position statements) and verdict      participants. Out of these, five were gold-labeled,
+(supported, refuted, conflicting evidence/cherry-        which were included to assist in the post-processing
+picking, and not enough evidence). We observe            of the collected annotations and to assess their qual-
+that all systems perform substantially worse on          ity. The evidence samples were randomly selected
+numerical claims compared to other claim types.          from and evenly distributed across all submitted
+While systems also underperformed on numerical           systems, representing both high- and low-scoring
+claims in the first shared task, the performance gap     systems, as shown in Table 4.
+is considerably larger this edition, which is likely        The figures in Appendix B show the evaluation
+contributed by the change in evaluation metric from      form and the instructions provided to human anno-
+Hungarian Meteor to EV2R.                                tators during evaluation. As a first step, we asked
+   Regarding performance across different verac-         annotators to assess whether “at least some part
+ity labels, no system achieves scores higher than        of the evidence” was “non-empty, understandable,
+0.1 on Not Enough Evidence and Conflicting               and related to the claim.” If so, it was considered
+Evidence/Cherry-picking claims. This observation         eligible for further rating. In addition to assigning a
+is expected and matches findings from the first          verdict label, we asked annotators to rate retrieved
+shared task. These labels are highly challenging         evidence in comparison to provided reference evi-
+to correctly identify, subsequently causing some         dence6 . Annotators rated the evidence on a scale
+teams to omitting these labels from their predic-        from 1 to 5 in two dimensions:
+tions altogether. Moreover, systems that calibrate       (1) Coverage: Measures how much of the refer-
+their veracity predictions to favor refuted claims       ence evidence is covered by the predicted evidence,
+gain an advantage (as long as they returned ade-         ensuring that the content, meaning, entities, and
+quate evidence), as refuted claims dominate the          other key elements of the reference are fully repre-
+dataset, comprising approximately two-thirds of all      sented in the retrieved evidence.
+instances.                                               (2) Relevance: Measures how relevant the re-
+                                                         trieved evidence is to the content of the claim.
+4   Human Evaluation of Evidence
+Following the approach taken in last year’s              Insights Gained The annotation process resulted
+AVeriTeC shared task (Schlichtkrull et al., 2024),       in a total of 245 annotations. After filtering out
+we conducted human evaluation of the evidence            evidence samples that were labeled by evaluators
+retrieved by the systems participating in the shared     as not understandable (5 samples) or completely
+task, motivated by two concerns. First, the incom-       irrelevant to the given claim (11 samples), we were
+pleteness of the gold evidence annotation, since it is   left with 229 valid annotations. Among these, 31
+often the case that adequate evidence to determine       annotations corresponded to gold-labeled samples.
+the verdict for a claim can be found in multiple            6
+                                                              We provide the exact instruction for rating each criteria
+webpages, as shown in the inter-annotation agree-        in the appendix.
+
+                                                     210
+  Label/Pred   CE/C    NEE     Refuted   Supported              Rating     COV      COV %         REL      REL %
+    CE/C       5.88     5.88    64.71      23.53                   1        35       17.68         2        1.01
+    NEE        5.41    24.32    40.54      29.73                   2        47       23.74         9        4.55
+   Refuted     3.96     5.94    77.23      12.87                   3        40       20.20        30       15.15
+  Supported    5.88     1.96    11.76      80.39                   4        45       22.73        84       42.42
+                                                                   5        31       15.66        73       36.87
+Table 5: Overview of verdict labelled by human eval-
+uators (rows) versus system predictions (columns) in    Table 6: Overview of ratings for Semantic Coverage and
+percentages.                                            Relevance scores obtained through human evaluation.
+                                                        Each score from 1 to 5 shows the absolute count and
+                                                        corresponding percentage.
+Excluding the gold-labeled samples, resulted in a
+final set of 198 evidence annotations.                                   Dimension            ρ        r
+    Before labeling the system-retrieved evidence,
+                                                                         Coverage         .404     .406
+participants were first asked to label the verdict
+                                                                         Relevance        .244     .242
+given the retrieved evidence. Table 5 provides
+an overview of the matching between system-             Table 7: Correlation between Q + A scores (AVeriTeC
+predicted labels (columns) and human-labeled ver-       score) and human-rated subset of evidence. We calcu-
+dicts (rows). While human annotators generally          late correlation using the Spearman (ρ) and Pearson (r)
+agreed with evidence labeled as refuted or sup-         correlation coefficients.
+ported, there was less overlap for evidence labeled
+as NEE and CE/C by the submitted systems.
+                                                        dimension is higher than with relevance. Com-
+    Analyzing human judgments across the two eval-
+                                                        pared to last year’s shared task evaluation, where
+uated dimensions (see Table 8), we find that the
+                                                        the correlation between manually assessed samples
+majority of predicted evidence was labeled as rel-
+                                                        and the AVeriTeC score was close to zero for both
+evant (almost 80% evidence samples labelled as
+                                                        coverage and relevance, this year’s score shows a
+very relevant or mostly relevant to the claim), but
+                                                        much stronger alignment with human judgments
+in the dimension of semantic coverage, approxi-
+                                                        (around 0.41 for coverage and 0.24 for relevance)
+mately 18% of the evidence received a rating of 1,
+                                                        when assessing the semantic coverage and rele-
+indicating that “the predicted evidence covers none
+                                                        vance of predicted evidence. The human evalua-
+of the reference evidence.” Additionally, around
+                                                        tion on the subset (see Table 8) shows a similar
+20% received a rating of 2, meaning that “very
+                                                        ranking of participating systems compared to auto-
+little of the reference evidence is covered.” This
+                                                        matic evaluations . The top-ranked teams (based
+does not necessarily mean that the evidence is false
+                                                        on AV ERI T E C score) also perform well on human
+– low coverage can also occur if the retrieved ev-
+                                                        evaluation, while the lower-ranked teams remain
+idence uses different information, arguments, or
+                                                        similarly positioned, with only minor shifts in their
+sources than the reference evidence. Ideally, we
+                                                        order.7 It is important to note that this evaluation
+aim for an evidence evaluation that can fairly assess
+                                                        was solely based on a small sample of system pre-
+evidence even when it differs from the reference
+                                                        dictions, and that the results should therefore be
+and has low coverage. Compared to the previous
+                                                        taken with a grain of salt.
+year’s AVeriTeC shared task, the relevance scores
+                                                           Human evaluation of evidence predictions of-
+increased while the scores for semantic coverage
+                                                        fers valuable insights into the limitations of the
+remained roughly equal.
+                                                        AV ERI T E C score, and suggests directions for
+    To assess the relationship between human scor-      future research. A notable observation is the
+ing and the Ev2 R score (see Sec 2.5), we com-          discrepancy between human evaluation and the
+puted both the Spearman correlation coefficient         AV ERI T E C score for some of the highest-ranked
+(ρ (Spearman, 1987)) and the Pearson correlation        samples, such as the examples provided in Table 10
+coefficient (r (Pearson, 1896)) as shown in Table 7.    in the appendix. For instance, in row three, the pre-
+Correlations were calculated using both the entire      dicted evidence directly contradicts the reference
+evidence text and the question text only. In both       evidence by providing different numbers, yet it re-
+cases, we observed a positive correlation between       ceives a high AV ERI T E C score due to similar word-
+the AVeriTeC scores and the human evaluation (see
+Table 7) while the correlation with the coverage           7
+                                                               See Table 8 in the appendix.
+
+                                                     211
+    Team           Avg. Coverage   Leaderboard #           Limitations & Ethics
+    CTU AIC             3.6              1.
+    yellow flash        2.9              3.
+                                                           The datasets and models described in this paper
+    HUMANE              2.9              2.                are not intended for truth-telling, e.g. for the de-
+    FZIGOT              2.9              4.                sign of fully automated content moderation sys-
+    checkmate           2.1              6.
+    EFC                 2.7              5.                tems. The evidence selection and veracity labels
+    OldJoe              2.4              7.                provided in the AV ERI T E C dataset relate only to
+                                                           the evidence recovered by annotators, and as such
+Table 8: Average semantic coverage scores assigned to      are subject to the biases of annotators and journal-
+evidence samples from selected teams based on human        ists. Participating systems, which sought to max-
+evaluation, next to AVeriTeC rank the team obtained in
+                                                           imize performance on AV ERI T E C, may replicate
+the 2025 shared task.
+                                                           those biases. While we constrained participants
+                                                           of using open-weights LLMs of a certain size, we
+ing. Similarly, for the first two rows in Table 10, the    did not enforce the use of open-data LLMs only,
+semantic coverage score is rated with the second           which would have been better in order to assess the
+lowest score 1, whereas the average score across           biases in the participating systems. Open-weights
+all examples is 3, indicating misalignment between         models would also help to measure temporal leak-
+the predicted and reference evidence.                      age, as Qwen3, the most-used model in this shared
+                                                           task, has likely seen data that extended into the test
+   Certain low-ranked examples highlight differ-
+                                                           set timeframe (January-December 2024), as it has
+ent challenges (see Table 11). For example, the
+                                                           an estimated training cutoff of March 2025. We
+predicted evidence in the first row received a low
+                                                           furthermore note that shared task leaderboards are
+AV ERI T E C score despite receiving the highest
+                                                           a limited representation of real-world task needs,
+score of 5 across all categories in human evaluation.
+                                                           not the least because the test set is static. Act-
+Despite both sets of evidence reaching the same
+                                                           ing on veracity estimates arrived at through biased
+conclusion, the large disparity in answer length
+                                                           means, including automatically produced ranking
+and wording leads to a much lower AV ERI T E C
+                                                           decisions for evidence retrieval, risks causing epis-
+score. The example in the second row, also ranks
+                                                           temic harm (Schlichtkrull et al., 2023b).
+low according to AV ERI T E C score, even though
+it scores high in all categories except for cover-
+age, where it scores 3. Here, both the reference           References
+and predicted evidence reach the same verdict, but
+                                                           Mubashara Akhtar, Michael Sejr Schlichtkrull, and
+the predicted evidence supports the claim with dif-         Andreas Vlachos. 2024. Ev2r: Evaluating evi-
+ferent information and wording, resulting in low            dence retrieval in automated fact-checking. CoRR,
+semantic coverage and a low AV ERI T E C score.             abs/2411.05375.
+                                                           Isabelle Augenstein, Christina Lioma, Dongsheng
+Acknowledgements                                              Wang, Lucas Chaves Lima, Casper Hansen, Chris-
+                                                              tian Hansen, and Jakob Grue Simonsen. 2019. Mul-
+Michael, Yulong, Chenxi, Zhenyun, and Andreas                 tiFC: A real-world multi-domain dataset for evidence-
+                                                              based fact checking of claims. In Proceedings of
+received funding from the European Research
+                                                              the 2019 Conference on Empirical Methods in Natu-
+Council (ERC) under the European Union’s Hori-                ral Language Processing and the 9th International
+zon 2020 Research and Innovation programme                    Joint Conference on Natural Language Processing
+grant AVeriTeC (Grant agreement No. 865958).                  (EMNLP-IJCNLP), pages 4685–4697, Hong Kong,
+Rui is funded by a grant from the Alan Turing                 China. Association for Computational Linguistics.
+Institute and DSO National Laboratories (Singa-            Satanjeev Banerjee and Alon Lavie. 2005. METEOR:
+pore). Rami Aly was supported by the Engineer-               An automatic metric for MT evaluation with im-
+ing and Physical Sciences Research Council Doc-              proved correlation with human judgments. In Pro-
+                                                             ceedings of the ACL Workshop on Intrinsic and Ex-
+toral Training Partnership (EPSRC). Michael is               trinsic Evaluation Measures for Machine Transla-
+further supported by the Engineering and Phys-               tion and/or Summarization, pages 65–72, Ann Arbor,
+ical Sciences Research Council (grant number                 Michigan. Association for Computational Linguis-
+EP/Y009800/1), through funding from Responsi-                tics.
+ble AI UK (KP0016). The annotation of the new              Adrien Barbaresi. 2021. Trafilatura: A web scraping
+test set was conducted by a donation from Google.            library and command-line tool for text discovery and
+                                                         212
+  extraction. In Proceedings of the 59th Annual Meet-       Dhabi, United Arab Emirates. Association for Com-
+  ing of the Association for Computational Linguistics      putational Linguistics.
+  and the 11th International Joint Conference on Nat-
+  ural Language Processing: System Demonstrations,        Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri,
+  pages 122–131, Online. Association for Computa-           Abhinav Pandey, Abhishek Kadian, Ahmad Al-
+  tional Linguistics.                                       Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten,
+                                                            Alex Vaughan, et al. 2024. The llama 3 herd of mod-
+Maciej Besta, Nils Blach, Ales Kubicek, Robert Ger-         els. arXiv preprint arXiv:2407.21783.
+ stenberger, Michał Podstawski, Lukas Gianinazzi,
+ Joanna Gajda, Tomasz Lehmann, Hubert Niewiadom-          Edward J Hu, yelong shen, Phillip Wallis, Zeyuan Allen-
+ ski, Piotr Nyczyk, and Torsten Hoefler. 2024. Graph        Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu
+ of thoughts: solving elaborate problems with large         Chen. 2022. LoRA: Low-rank adaptation of large
+ language models. In Proceedings of the Thirty-             language models. In International Conference on
+ Eighth AAAI Conference on Artificial Intelligence          Learning Representations.
+ and Thirty-Sixth Conference on Innovative Applica-
+ tions of Artificial Intelligence and Fourteenth Sym-     Vladimir Karpukhin, Barlas Oguz, Sewon Min, Patrick
+ posium on Educational Advances in Artificial Intelli-      Lewis, Ledell Wu, Sergey Edunov, Danqi Chen, and
+ gence, AAAI’24/IAAI’24/EAAI’24. AAAI Press.                Wen-tau Yih. 2020. Dense passage retrieval for open-
+                                                            domain question answering. In Proceedings of the
+Sarah Cohen, Chengkai Li, Jun Yang, and Cong Yu.            2020 Conference on Empirical Methods in Natural
+  2011. Computational journalism: A call to arms to         Language Processing (EMNLP), pages 6769–6781,
+  database researchers. In 5th Biennial Conference on       Online. Association for Computational Linguistics.
+  Innovative Data Systems Research (CIDR).
+                                                          Aditya Kusupati, Gantavya Bhatt, Aniket Rege,
+Gordon V. Cormack, Charles L A Clarke, and Stefan           Matthew Wallingford, Aditya Sinha, Vivek Ramanu-
+  Buettcher. 2009. Reciprocal rank fusion outperforms       jan, William Howard-Snyder, Kaifeng Chen, Sham
+  condorcet and individual rank learning methods. In        Kakade, Prateek Jain, et al. 2022. Matryoshka repre-
+  Proceedings of the 32nd International ACM SIGIR           sentation learning. In Advances in Neural Informa-
+  Conference on Research and Development in Infor-          tion Processing Systems.
+  mation Retrieval, SIGIR ’09, page 758–759, New
+  York, NY, USA. Association for Computing Machin-        Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying
+  ery.                                                     Sheng, Lianmin Zheng, Cody Hao Yu, Joseph Gon-
+                                                           zalez, Hao Zhang, and Ion Stoica. 2023. Efficient
+Arbaaz Dharamvaram and Saqib Hakak. 2025. SANC-            memory management for large language model serv-
+  TUARY: An efficient evidence-based automated fact        ing with pagedattention. In Proceedings of the 29th
+  checking system. In Proceedings of the Eighth Work-      Symposium on Operating Systems Principles, SOSP
+  shop on Fact Extraction and VERification (FEVER).        ’23, page 611–626, New York, NY, USA. Association
+  Association for Computational Linguistics.               for Computing Machinery.
+Andy Dudfield. 2020. How we’re using AI to scale          Stephan Lewandowsky, John Cook, Ullrich Ecker,
+  up global fact checking. https://fullfact.org/             Dolores Albarracin, Michelle Amazeen, Panayiota
+  blog/2020/jul/afc-global/. Accessed: 2023-                 Kendeou, Doug Lombardi, Eryn Newman, Gor-
+  01-17.                                                     don Pennycook, Ethan Porter, David G. Rand,
+Elias Frantar, Saleh Ashkboos, Torsten Hoefler, and Dan      David N. Rapp, Jason Reifler, Jon Roozenbeek,
+   Alistarh. 2023. OPTQ: Accurate quantization for           Philipp Schmid, Colleen M. Seifert, Gale M. Sina-
+   generative pre-trained transformers. In The Eleventh      tra, Briony Swire-Thompson, Sander van der Lin-
+   International Conference on Learning Representa-          den, Emily K. Vraga, Thomas J. Wood, and Maria S.
+   tions.                                                    Zaragoza. 2020. Debunking Handbook 2020. https:
+                                                            //sks.to/db2020.
+Farah Ftouhi, Russel Dsouza, Lance Gamboa, Jinlong
+  Liu, Asim Abbas, Yue Feng, Mubashir Ali, Mark Lee,      Xianming Li and Jing Li. 2024. AoE: Angle-optimized
+  and Venelin Kovatchev. 2025. OldJoe at AVeriTeC:          embeddings for semantic textual similarity. In Pro-
+  In-context learning for fact-checking. In Proceedings     ceedings of the 62nd Annual Meeting of the Associa-
+  of the Eighth Workshop on Fact Extraction and VER-        tion for Computational Linguistics (Volume 1: Long
+  ification (FEVER). Association for Computational          Papers), pages 1825–1839, Bangkok, Thailand. As-
+  Linguistics.                                              sociation for Computational Linguistics.
+
+Georgi Gerganov. 2023. ggml: Tensor library for ma-       Zehan Li, Xin Zhang, Yanzhao Zhang, Dingkun Long,
+  chine learning.                                           Pengjun Xie, and Meishan Zhang. 2023. Towards
+                                                            general text embeddings with multi-stage contrastive
+Max Glockner, Yufang Hou, and Iryna Gurevych. 2022.         learning. Preprint, arXiv:2308.03281.
+ Missing counter-evidence renders NLP fact-checking
+ unrealistic for misinformation. In Proceedings of        Ji Lin, Jiaming Tang, Haotian Tang, Shang Yang, Wei-
+ the 2022 Conference on Empirical Methods in Nat-            Ming Chen, Wei-Chen Wang, Guangxuan Xiao,
+ ural Language Processing, pages 5916–5936, Abu              Xingyu Dang, Chuang Gan, and Song Han. 2024.
+                                                      213
+  Awq: Activation-aware weight quantization for on-         Mark Rothermel, Tobias Braun, Marcus Rohrbach, and
+  device llm compression and acceleration. In Proceed-       Anna Rohrbach. 2024. InFact: A strong baseline for
+  ings of Machine Learning and Systems, volume 6,            automated fact-checking. In Proceedings of the Sev-
+  pages 87–100.                                              enth Workshop on Fact Extraction and VERification
+                                                             (FEVER). Association for Computational Linguistics.
+Rui Meng, Ye Liu, Shafiq Rayhan Joty, Caiming
+  Xiong, Yingbo Zhou, and Semih Yavuz. 2024. Sfr-           Michael Schlichtkrull, Yulong Chen, Chenxi White-
+  embedding-2: Advanced text embedding with multi-            house, Zhenyun Deng, Mubashara Akhtar, Rami Aly,
+  stage training.                                             Zhijiang Guo, Christos Christodoulopoulos, Oana
+                                                              Cocarascu, Arpit Mittal, James Thorne, and Andreas
+Sewon Min, Kalpesh Krishna, Xinxi Lyu, Mike Lewis,            Vlachos. 2024. The automated verification of textual
+  Wen-tau Yih, Pang Koh, Mohit Iyyer, Luke Zettle-            claims (AVeriTeC) shared task. In Proceedings of
+  moyer, and Hannaneh Hajishirzi. 2023. FActScore:            the Seventh Fact Extraction and VERification Work-
+  Fine-grained atomic evaluation of factual precision         shop (FEVER), pages 1–26, Miami, Florida, USA.
+  in long form text generation. In Proceedings of the         Association for Computational Linguistics.
+  2023 Conference on Empirical Methods in Natural
+  Language Processing, pages 12076–12100, Singa-            Michael Schlichtkrull, Zhijiang Guo, and Andreas Vla-
+  pore. Association for Computational Linguistics.            chos. 2023a. Averitec: A dataset for real-world claim
+                                                              verification with evidence from the web. In Ad-
+Sebastião Miranda, Andreas Vlachos, David Nogueira,
+                                                              vances in Neural Information Processing Systems,
+  Andrew Secker, Afonso Mendes, Rebecca Garrett,
+                                                              volume 36, pages 65128–65167. Curran Associates,
+  Jeffrey J Mitchell, and Zita Marinho. 2019. Auto-
+                                                              Inc.
+  mated fact checking in the news room. In The Web
+  Conference 2019, pages 3579–3583, United States.          Michael Schlichtkrull, Nedjma Ousidhoum, and An-
+  Association for Computing Machinery (ACM). 2019             dreas Vlachos. 2023b. The intended uses of auto-
+  World Wide Web Conference, WWW 2019 ; Confer-               mated fact-checking artefacts: Why, how and who.
+  ence date: 13-05-2019 Through 17-05-2019.                   In Findings of the Association for Computational Lin-
+Preslav Nakov, David Corney, Maram Hasanain, Firoj            guistics: EMNLP 2023, pages 8618–8642, Singapore.
+  Alam, Tamer Elsayed, Alberto Barrón-Cedeño, Paolo           Association for Computational Linguistics.
+  Papotti, Shaden Shaar, and Giovanni Da San Martino.       C. Spearman. 1987. The proof and measurement of as-
+  2021. Automated fact-checking for assisting human            sociation between two things. The American Journal
+  fact-checkers. In Proceedings of the Thirtieth Inter-        of Psychology, 100(3/4):441–471.
+  national Joint Conference on Artificial Intelligence,
+  IJCAI-21, pages 4551–4558. International Joint Con-       James Thorne,       Andreas Vlachos,         Christos
+  ferences on Artificial Intelligence Organization. Sur-      Christodoulopoulos, and Arpit Mittal. 2018.
+  vey Track.                                                  FEVER: a large-scale dataset for fact extraction
+                                                              and VERification. In Proceedings of the 2018
+Nedjma Ousidhoum, Zhangdie Yuan, and Andreas Vla-             Conference of the North American Chapter of
+  chos. 2022. Varifocal question generation for fact-         the Association for Computational Linguistics:
+  checking. In Proceedings of the 2022 Conference on          Human Language Technologies, Volume 1 (Long
+  Empirical Methods in Natural Language Processing,           Papers), pages 809–819, New Orleans, Louisiana.
+  pages 2532–2544, Abu Dhabi, United Arab Emirates.           Association for Computational Linguistics.
+  Association for Computational Linguistics.
+                                                            Herbert Ullrich and Jan Drchal. 2025.       AIC
+Karl Pearson. 1896. Vii. mathematical contributions to
+                                                              CTU@FEVER 8: On-premise fact checking through
+  the theory of evolution.—iii. regression, heredity, and
+                                                              long context RAG. In Proceedings of the Eighth
+  panmixia. Philosophical Transactions of the Royal
+                                                              Workshop on Fact Extraction and VERification
+  Society of London. Series A, containing papers of a
+                                                              (FEVER). Association for Computational Linguis-
+  mathematical or physical character, (187):253–318.
+                                                              tics.
+Farrukh Bin Rashid and Saqib Hakak. 2025. Fathom:
+  A fast and modular RAG pipeline for fact-checking.        Max Upravitelev, Premtim Sahitaj, Arthur Hilbert,
+  In Proceedings of the Eighth Workshop on Fact Ex-          Veronika Solopova, Jing Yang, Nils Feldhus, Ta-
+  traction and VERification (FEVER). Association for         tiana Anikina, Simon Ostermann, and Vera Schmitt.
+  Computational Linguistics.                                 2025. Exploring semantic filtering heuristics for
+                                                             efficient claim verification. In Proceedings of the
+Stephen Robertson and Hugo Zaragoza. 2009. The prob-         Eighth Workshop on Fact Extraction and VERifica-
+   abilistic relevance framework: Bm25 and beyond.           tion (FEVER). Association for Computational Lin-
+  Foundations and Trends® in Information Retrieval,          guistics.
+   3(4):333–389.
+                                                            Andreas Vlachos and Sebastian Riedel. 2014. Fact
+Sascha Rolinger and Jin Liu. 2025. Graph-of-thoughts          checking: Task definition and dataset construction.
+  for fact-checking with large language models. In Pro-       In Proceedings of the ACL 2014 Workshop on Lan-
+  ceedings of the Eighth Workshop on Fact Extraction          guage Technologies and Computational Social Sci-
+  and VERification (FEVER). Association for Compu-            ence, pages 18–22, Baltimore, MD, USA. Associa-
+  tational Linguistics.                                       tion for Computational Linguistics.
+                                                        214
+

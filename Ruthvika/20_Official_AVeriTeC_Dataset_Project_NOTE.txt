@@ -1,0 +1,3 @@
+This entry is a project/benchmark webpage, not a research paper PDF.
+Source: https://fever.ai/dataset/averitec.html
+Saved HTML snapshot: 20_Official_AVeriTeC_Dataset_Project.html

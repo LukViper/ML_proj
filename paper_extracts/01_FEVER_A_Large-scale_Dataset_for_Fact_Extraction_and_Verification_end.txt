@@ -1,0 +1,92 @@
+References                                                      Edward Loper and Steven Bird. 2002. Nltk: The
+                                                                  natural language toolkit. In Proceedings of the
+Gabor Angeli and Christopher D. Manning. 2014. Nat-               ACL-02 Workshop on Effective Tools and Method-
+  uralLI: Natural logic inference for common sense                ologies for Teaching Natural Language Process-
+  reasoning. In Proceedings of the 2014 Conference                ing and Computational Linguistics - Volume 1. As-
+  on Empirical Methods in Natural Language Pro-                   sociation for Computational Linguistics, Strouds-
+  cessing. pages 534–545.                                         burg, PA, USA, ETMTNLP ’02, pages 63–70.
+Samuel R. Bowman, Gabor Angeli, Christopher Potts,                https://doi.org/10.3115/1118108.1118117.
+  and Christopher D. Manning. 2015. A large anno-               Christopher D Manning, Mihai Surdeanu, John Bauer,
+  tated corpus for learning natural language inference.           Jenny Rose Finkel, Steven Bethard, and David Mc-
+  In Proceedings of the 2015 Conference on Empirical              Closky. 2014. The Stanford CoreNLP natural lan-
+  Methods in Natural Language Processing.                         guage processing toolkit. In ACL (System Demon-
+                                                                  strations). pages 55–60.
+Danqi Chen, Adam Fisch, Jason Weston, and Antoine
+  Bordes. 2017. Reading wikipedia to answer open-               Mausam, Michael Schmitz, Robert Bart, Stephen
+  domain questions. In Proceedings of the 55th An-               Soderland, and Oren Etzioni. 2012. Open language
+  nual Meeting of the Association for Computational              learning for information extraction. In Proceedings
+  Linguistics (Volume 1: Long Papers). Association               of the 2012 Joint Conference on Empirical Methods
+  for Computational Linguistics, pages 1870–1879.                in Natural Language Processing and Computational
+  https://doi.org/10.18653/v1/P17-1171.                          Natural Language Learning. pages 523–534.
+Ido Dagan, Bill Dolan, Bernardo Magnini, and                    Ankur Parikh, Oscar Täckström, Dipanjan Das, and
+   Dan Roth. 2009.        Recognizing textual entail-             Jakob Uszkoreit. 2016. A decomposable attention
+   ment:      Rational, evaluation and approaches.                model for natural language inference. In Proceed-
+   Natural Language Engineering 15(4):i–xvii.                     ings of the 2016 Conference on Empirical Meth-
+   https://doi.org/10.1017/S1351324909990209.                     ods in Natural Language Processing. Association
+                                                                  for Computational Linguistics, Austin, Texas, pages
+Joe Ellis, Jeremy Getman, Dana Fore, Neil Kuster,                 2249–2255.       https://aclweb.org/anthology/D16-
+  Zhiyi Song, Ann Bies, and Stephanie Strassel. 2016.             1244.
+  Overview of Linguistic Resources for the TAC KBP
+  2016 Evaluations : Methodologies and Results. Pro-            Dean Pomerleau and Delip Rao. 2017. Fake news chal-
+  ceedings of TAC KBP 2016 Workshop, National In-                 lenge. http://fakenewschallenge.org/.
+  stitute of Standards and Technology, Maryland, USA            P. Rajpurkar, J. Zhang, K. Lopyrev, and P. Liang. 2016.
+  (Ldc).                                                           SQuAD: 100,000+ questions for machine compre-
+William Ferreira and Andreas Vlachos. 2016. Emer-                  hension of text. In Empirical Methods in Natural
+  gent: a novel data-set for stance classification. In             Language Processing (EMNLP).
+  Proceedings of the 2016 Conference of the North               Benjamin Riedel, Isabelle Augenstein, George Sp-
+  American Chapter of the Association for Computa-                ithourakis, and Sebastian Riedel. 2017. A simple
+  tional Linguistics: Human Language Technologies.                but tough-to-beat baseline for the Fake News Chal-
+  San Diego, California, pages 1163–1168.                         lenge stance detection task. CoRR abs/1707.03264.
+                                                                  http://arxiv.org/abs/1707.03264.
+Joseph L Fleiss. 1971. Measuring nominal scale agree-
+   ment among many raters. Psychological bulletin               Tim Rocktäschel and Sebastian Riedel. 2017. End-
+   76(5):378.                                                     to-end differentiable proving. In Advances in Neu-
+                                                                  ral Information Processing Systems 31: Annual
+Matt Gardner, Joel Grus, Mark Neumann, Oyvind                     Conference on Neural Information Processing Sys-
+ Tafjord, Pradeep Dasigi, Nelson Liu, Matthew Pe-                 tems 2017, December 4-9, 2017, Long Beach,
+ ters, Michael Schmitz, and Luke Zettlemoyer. 2017.               California, United States. volume abs/1705.11040.
+ AllenNLP: A Deep Semantic Natural Language Pro-                  http://arxiv.org/abs/1705.11040.
+ cessing Platform .
+                                                                Álvaro Rodrigo, Anselmo Peñas, and Felisa Verdejo.
+Michael Heilman and Noah A. Smith. 2010. Good                      2009. Overview of the answer validation exercise
+  Question! statistical ranking for question genera-               2008. In Carol Peters, Thomas Deselaers, Nicola
+  tion. In Proceedings of the 2010 Annual Conference               Ferro, Julio Gonzalo, Gareth J. F. Jones, Mikko Ku-
+  of the North American Chapter of the Association                 rimo, Thomas Mandl, Anselmo Peñas, and Vivien
+  for Computational Linguistics. pages 609–617.                    Petras, editors, Evaluating Systems for Multilingual
+                                                                   and Multimodal Information Access: 9th Workshop
+Mio Kobayashi, Ai Ishii, Chikara Hoshino, Hiroshi                  of the Cross-Language Evaluation Forum. pages
+  Miyashita, and Takuya Matsuzaki. 2017. Auto-                     296–313.
+  mated historical fact-checking by passage retrieval,
+  word statistics, and virtual question-answering. In           Min Joon Seo, Aniruddha Kembhavi, Ali Farhadi,
+  Proceedings of the Eighth International Joint Con-              and Hannaneh Hajishirzi. 2016. Bidirectional at-
+  ference on Natural Language Processing (Volume 1:               tention flow for machine comprehension. CoRR
+  Long Papers). volume 1, pages 967–975.                          abs/1611.01603. http://arxiv.org/abs/1611.01603.
+
+                                                          818
+Craig Silverman. 2015.       Lies,  Damn
+  Lies  and   Viral Content.       http:
+  //towcenter.org/research/
+  lies-damn-lies-and-viral-content/.
+Niket Tandon, Gerard de Melo, and Gerhard Weikum.
+  2011. Deriving a Web-scale common sense fact
+  database. In Proceedings of the 25th AAAI Confer-
+  ence on Artificial Intelligence (AAAI 2011). AAAI
+  Press, Palo Alto, CA, USA, pages 152–157.
+Andreas Vlachos and Sebastian Riedel. 2014. Fact
+  checking: Task definition and dataset construction.
+  In Proceedings of the ACL 2014 Workshop on Lan-
+  guage Technologies and Computational Social Sci-
+  ence. ACL. http://www.aclweb.org/anthology/W14-
+  2508.
+William Yang Wang. 2017. “Liar, Liar Pants on Fire”:
+  A new benchmark dataset for fake news detection.
+  In Proceedings of the 55th Annual Meeting of the
+  Association for Computational Linguistics (Volume
+  2: Short Papers). http://aclweb.org/anthology/P17-
+  2067.
+
+
+
+
+                                                        819
+

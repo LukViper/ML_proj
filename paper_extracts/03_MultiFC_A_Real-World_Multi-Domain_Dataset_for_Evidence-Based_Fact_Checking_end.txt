@@ -1,0 +1,107 @@
+Websites (Sources)                               Reason
+Mediabiasfactcheck                          Website that checks other news websites
+CBC                                         No pattern to crawl
+apnews.com/APFactCheck                      No categorical label and no structured claim
+weeklystandard.com/tag/fact-check           Mostly no label, and they are placed anywhere
+ballotpedia.org                             No categorical label and no structured claim
+channel3000.com/news/politics/reality-check No categorical label, lack of structure, and no clear claim
+npr.org/sections/politics-fact-check        No label and no clear claim (only some titles are claims)
+dailycaller.com/buzz/check-your-fact        Is a subset of checkyourfact which has already been crawled
+sacbee.com6                                 Contains very few labelled articles, and without clear claims
+TheGuardian                                 Only a few websites have a pattern for labels.
+
+              Table 9: The list of websites that we did not crawl and reasons for not crawling them.
+
+
+
+
+Domain # Insts # Labels Labels
+abbc    436      3          in-between, in-the-red, in-the-green
+afck    433      7          correct, incorrect, mostly-correct, unproven, misleading, understated, exagger-
+                            ated
+bove    295      2          none, rating: false
+chct    355      4          verdict: true, verdict: false, verdict: unsubstantiated, none
+clck    38       3          incorrect, unsupported, misleading
+faan    111      3          factscan score: false, factscan score: true, factscan score: misleading
+faly    71       5          true, none, partly true, unverified, false
+fani    20       3          conclusion: accurate, conclusion: false, conclusion: unclear
+farg    485      11         false, none, distorts the facts, misleading, spins the facts, no evidence, not the
+                            whole story, unsupported, cherry picks, exaggerates, out of context
+goop    2943     6          0, 1, 2, 3, 4, 10
+hoer    1310     7          facebook scams, true messages, bogus warning, statirical reports, fake news,
+                            unsubstantiated messages, misleading recommendations
+huca    34       3          a lot of baloney, a little baloney, some baloney
+mpws    47       3          accurate, false, misleading
+obry    59       4          mostly true, verified, unobservable, mostly false
+para    222      7          mostly false, mostly true, half-true, false, true, pants on fire!, half flip
+peck    65       3          false, true, partially true
+pomt    15390    9          half-true, false, mostly true, mostly false, true, pants on fire!, full flop, half flip,
+                            no flip
+pose    1361     6          promise kept, promise broken, compromise, in the works, not yet rated, stalled
+ranz    21       2          fact, fiction
+snes    6455     12         false, true, mixture, unproven, mostly false, mostly true, miscaptioned, legend,
+                            outdated, misattributed, scam, correct attribution
+thet    79       6          none, mostly false, mostly true, half true, false, true
+thal    74       2          none, we rate this claim false
+tron    3423     27         fiction!, truth!, unproven!, truth! & fiction!, mostly fiction!, none, disputed!,
+                            truth! & misleading!, authorship confirmed!, mostly truth!, incorrect attribu-
+                            tion!, scam!, investigation pending!, confirmed authorship!, commentary!, pre-
+                            viously truth! now resolved!, outdated!, truth! & outdated!, virus!, fiction! &
+                            satire!, truth! & unproven!, misleading!, grass roots movement!, opinion!, cor-
+                            rect attribution!, truth! & disputed!, inaccurate attribution!
+vees    504      4          none, fake, misleading, false
+vogo    653      8          none, determination: false, determination: true, determination: mostly true,
+                            determination: misleading, determination: barely true, determination: huckster
+                            propaganda, determination: false, determination: a stretch
+wast    201      7          4 pinnochios, 3 pinnochios, 2 pinnochios, false, not the whole story, needs
+                            context, none
+
+           Table 10: Number of instances, and labels per domain sorted by number of occurrences
+
+
+
+                                                         4696
+       Website          Domain Claims Labels Category Speaker Checker Tags         Article Claim date Publish date Full text Outlinks
+       abc                abbc   436     436     436      -        -        436    436     -          436          436      7676
+       africacheck        afck   436     436     -        -        -        -      436     -          436          436      2325
+       altnews            -      496     -       -        -        496      -      496     -          496          496      6389
+       boomlive           -      302     302     -        -        -        -      302     -          302          302      6054
+       checkyourfact      chht   358     358     -        -        358      -      -       -          358          358      5271
+       climatefeedback clck      45      45      -        -        -        -      45      -          45           45       489
+       crikey             -      18      18      18       -        18       18     18      -          18           18       212
+       factcheckni        -      36      36      36       -        -        -      36      -          -            36       151
+       factcheckorg       farg   512     512     512      512      512      512    512     512        512          512      8282
+       factly             -      77      77      -        -        -        -      77      -          -            77       658
+       factscan           -      115     115     -        115      -        -      -       115        115          115      1138
+       fullfact           -      336     336     336      -        336      -      336     -          336          336      3838
+       gossipcop          goop   2947    2947    -        -        2947     -      2947    -          2947         2947     12583
+       hoaxslayer         hoer   1310    1310    -        -        1310     -      1310    -          1310         1310     14499
+       huffingtonpostca huca     38      38      -        38       38       -      38      38         38           38       78
+       leadstories        -      1547    1547    -        -        1547     -      1547    -          1547         1547     12015
+       mprnews            mpws   49      49      -        -        49       -      49      -          49           49       319
+       nytimes            -      17      17      -        -        17       -      17      -          17           17       271
+       observatory        obry   60      60      -        -        60       -      60      -          60           60       592
+       pandora            para   225     225     225      225      225      -      225     -          225          225      114
+       pesacheck          peck   67      67      -        -        67       -      67      -          67           67       521
+4697   politico           -      102     102     -        -        102      -      102     -          102          102      150
+       politifact promise pose   1361    1361    1361     1361     -        -      1361    -          1361         1361     6279
+       politifact stmt    pomt   15390   15390   -        15390    -        -      -       15390      15390        15390    78543
+       politifact story   -      5460    -       -        -        5460     -      -       -          5460         5460     24836
+       radionz            ranz   32      32      32       32       -        -      32      32         32           32       44
+       snopes             snes   6457    6457    6457     -        6457     -      6457    -          6457         6457     46735
+       swissinfo          -      20      20      20       20       20       -      20      -          20           20       40
+       theconversation -         62      62      62       62       62       62     62      -          62           62       723
+       theferret          thet   81      81      81       81)      -        -      81      -          81(81)       81       885
+       theguardian        -      155     155     155      -        155      -      155     -          155          155      2600
+       thejournal         thal   179     179     -        -        -        -      179     -          179          179      2375
+       truthorfiction     tron   3674    3674    3674     -        -        3674   3674    -          3674         3674     8268
+       verafiles          vees   509     509     -        -        -        509    509     -          509          509      23
+       voiceofsandiego vogo      660     660     -        -        -        -      660     -          660          660      2352
+       washingtonpost wast       227     227     -        227      227      -      227     -          227          227      2470
+       wral               -      20      20      -        -        20       20     20      -          20           20       355
+       zimfact            -      21      21      21       21       21       -      21      -          21           21       179
+       Total                     43837 43837 43837        43837    43837    43837 43837 43837         43837        43837    260330
+
+       Table 11: Summary statistics for claim collection. ‘Domain’ indicates the domain name used for the veracity prediction experiments, ‘–’ indicates that the website was not used
+       due to missing or insufficient claim labels, see Section 3.2.
+

@@ -1,0 +1,109 @@
+      Example
+      Claim: A report indicates that Acetaminophen (Tylenol) may be preferred over Ibuprofen (Advil) for coronavirus (fever).
+(1)   Evidence: Preliminary evidence suggests potential benefit with chloroquine or hydroxychloroquine.
+      Gold label: N EUTRAL Predicted label: S UPPORTS
+      Claim: Evidence is currently lacking and it is too early to make robust conclusions on any link between use of
+      angiotensin-converting enzyme (ACE) inhibitors and angiotensin II type-I receptor blockers with risk or severity of novel
+      coronavirus disease 2019 (COVID-19) infection.
+(2)
+      Evidence: Patients who take ACEIs and ARBS may be at increased risk of severe disease outcomes due to SARS-CoV-2
+      infections.
+      Gold label: R EFUTES Predicted label: S UPPORTS
+      Claim: coronavirus is man-made.
+      Evidence: This provides evidences strongly supporting scientific hypotheses that bats and pangolins are probable hosts
+(3)   for the COVID-19 virus. At the whole genome analysis level, our findings also indicate that bats are more likely the
+      hosts for the COVID-19 virus than pangolins.
+      Gold label: R EFUTES Predicted label: N EUTRAL
+      Claim: Surgical Masks Stop Transmission Of COVID-19 From Symptomatic People.
+      Evidence: Surgical mask partition for challenged index or nave hamsters significantly reduced transmission to 25%
+(4)   (6/24, P=0.018). Surgical mask partition for challenged index hamsters significantly reduced transmission to only 16.7%
+      (2/12, P=0.019) of exposed nave hamsters.
+      Gold label: R EFUTES Predicted label: S UPPORTS
+      Claim: Ferrets can catch the coronavirus and might give it to other ferrets. But poultry and pigs don’t appear to be at
+      risk.
+(5)   Evidence: Experimental data showed ferrets and cats are highly susceptible to SARS-CoV-2 as infected by virus
+      inoculation and can transmit the virus directly or indirectly by droplets or airborne route.
+      Gold label: S UPPORTS Predicted label: R EFUTES
+      Claim: No experts are remotely advocating for people to take up smoking to prevent COVID-19, but some researchers
+      have theorized nicotine may be playing some role in keeping the virus at bay.
+      Evidence: Cannabis smoking is linked with poor respiratory health, immunosuppression and multiple contaminants.
+(6)
+      Potential synergism between the two epidemics would represent a major public health convergence. Cigarettes were
+      implicated with disease severity in Wuhan, China.
+      Gold label: R EFUTES Predicted label: S UPPORTS
+      Claim: People with Diabetes May Have Higher Risk for COVID-19.
+      Evidence: Type 2 diabetic patients were more susceptible to COVID-19 than overall population, which might be
+(7)
+      associated with hyperglycemia and dyslipidemia.
+      Gold label: S UPPORTS Predicted label: N EUTRAL
+
+      Table 7: Examples of H EALTH V ER claims that were incorrectly classified by the BERT-based system.
+
+
+34. Which organs are most affected by COVID-                      43. Can vitamin C treat COVID-19?
+    19?
+                                                                  44. Can taking medication to lower fever, such
+35. Do COVID-19 and SARS-CoV-2 mean the                               as paracetamol (tylenol) and ibuprofen (advil)
+    same thing?                                                       worsen COVID-19?
+36. What are the possible symptoms of COVID-                      45. Can wearing masks help in preventing the
+    19 in children?                                                   spread of the coronavirus disease?
+37. are patients taking Angiotensin-converting en-                46. Are there natural remedies that will prevent
+    zyme inhibitors (ACE) inhibitors at increased                     me from getting infected with COVID-19?
+    risk for COVID-19?
+                                                                  47. What are some of the more severe symptoms
+38. what hand sanitizers kill COVID-19?
+                                                                      of COVID-19?
+39. are heart complications likely in patients with
+    COVID-19?                                                     48. what evidence is there for dexamethasone as
+                                                                      a treatment for COVID-19?
+40. Do antibodies make you immune to COVID-
+    19?                                                           49. what is a cytokine storm and how is it related
+                                                                      to COVID-19?
+41. Does UV light help in preventing covid-19?
+                                                     50. How dangerous is COVID-19?
+42. How does the coronavirus differ from seasonal
+    flu?                                             51. how do people die from the coronavirus?
+                                                 3511
+52. how does the coronavirus respond to changes        67. Is a headache sign of the coronavirus disease?
+    in the weather
+                                                       68. How has the COVID-19 pandemic impacted
+53. Can drinking hot green tea help in preventing          mental health?
+    COVID-19?
+                                                       69. How to stay mentally healthy during COVID-
+54. Can coronaviruses spread from people to ani-           19 crisis?
+    mals?
+                                                       70. what types of rapid testing for Covid-19 have
+55. Can animals spread COVID-19 to people?                 been developed?
+56. Can smoking help in preventing COVID-19?
+                                                       71. Does drinking lots of water help flush out
+57. What psychological effects could the COVID-            COVID-19?
+    19 pandemic cause?
+                                                       72. Does Vitamin D impact COVID-19 prevention
+58. How has the COVID-19 pandemic impacted                 and treatment?
+    violence in society, including violent crimes?
+                                                       73. How much impact do masks have on prevent-
+59. Are you immune to COVID-19 after recover-              ing the spread of the COVID-19?
+    ing from it?                                       74. When was the COVID-19 pandemic declared?
+
+60. is remdesivir an effective treatment for           75. Can people recover from COVID-19?
+    COVID-19?
+                                                       76. what kinds of complications related to
+61. Is it safe to go outside during COVID-19 pan-          COVID-19 are associated with hypertension?
+    demic?
+                                                       77. what are the health outcomes for children who
+62. Are there any antiviral drugs to treat the coro-       contract COVID-19?
+    navirus disease?
+                                                       78. Can face masks protect me from the coron-
+63. what are the early symptoms of COVID-19?
+                                                           avirus disease?
+64. Can children get COVID-19?
+                                                       79. Does Vitamin C impact COVID-19 prevention
+65. can bcg vaccine cure covid-19                          and treatment?
+
+66. Can COVID-19 spread through food?                  80. Can vinegar help in preventing COVID-19?
+
+
+
+
+                                                   3512
+

@@ -1,0 +1,109 @@
+                         Appendix                               Details for ChatGPT
+Implementation Details                                          We used the GPT-3.5 Turbo and the GPT-4 Turbo models15
+                                                                with the following versions for the experiments in Table 4:
+For our baseline, we retrieved the top ten documents for each
+claim using BM25 in document retrieval; we retrieved the         • GPT-3.5: gpt-3.5-turbo
+top five sentences as evidence for each claim in sentence re-    • GPT-4: gpt-4-1106-preview
+trieval. For the former, we mainly chose the setting with the   The prompts we used for GPT-3.5 and GPT-4 are shown in
+highest recall score, which we provide a comparison in Ta-      Table 10 and Table 11. Note that we asked GPT-4 to use
+ble 8. For the latter, we followed the statistics of CFEVER     Chinese Wikipedia for verification in the prompt, since we
+(Table 7) to include potential evidence for all claims with     found that GPT-4 performed better with the requirement (un-
+the top five sentences. To implement our baseline in the sen-   derlined in Table 11). Also note that though we provide the
+tence retrieval and RTE stages, we use HuggingFace Trans-       translation of the prompts in Table 10 and Table 11, the En-
+formers9 and PyTorch10 (version: 1.13.1+cu117) to build the     glish part was not included in the experiments.
+models. The hyperparameter sets are present in Table 9 for
+our baseline. The final scores were determined based on the
+performance of the development set using grid searches.          System Prompt:
+                                                                 你是個很棒的助手，你的回答對我非常重要，請幫
+           Top-k    Recall    Precision     F1 Score             我完成任務並輸出回答為 JSON 格式。
+             1       69.05      75.25         72.02              (You are a great assistant. Your response is very
+             3       80.10      29.67         43.30              important to me. Please help me complete the task
+             5       83.85      18.73         30.62              and output the response in the JSON format.)
+             7       86.00      13.74         23.69              Task Prompt:
+            10       87.65       9.79         17.62              你現在要執行一個事實查核任務，我將給你一個陳
+                                                                 述句，請幫我驗證事實，如果是事實就回答「真」，
+Table 8: Document retrieval performance on the test set us-
+                                                                 如果不是事實就回答「假」，如果這句話沒辦法讓
+ing BM25 with different top-k values.
+                                                                 你分辨真假，就回答「不確定」。陳述句：{claim}。
+                                                                 你的回答：
+                                                                 (You are going to perform fact verification. I will
+  Stage              Hyperparameter             Value            provide you with a claim. Please help me verify the
+                     learning rate        {2e-5, 3e-5, 5e-5}     factualness of the claim. If the claim is factual, please
+                     num of epochs              {1, 2}           answer ‘Supports’. If the claim is fake, please an-
+  Sent Retrieval     batch size                   64             swer ‘Refutes’. If you cannot verify the claim, please
+                     negative samples            50%             answer ‘Not enough information’. Claim：{claim}。
+                     warmup ratio         10% training steps     Your answer：)
+                     learning rate        {3e-5, 5e-5, 7e-5}
+                     num of epochs              {2, 3}          Table 10: Prompt for the zero-shot and few-shot settings
+  RTE
+                     batch size                   32            with GPT-3.5 (gpt-3.5-turbo). Note that the English part was
+                     warmup ratio         10% training steps    not included in the experiments.
+
+       Table 9: Hyperparameters we used for our baseline.
+                                                                Additional Metrics for the Retrieval Tasks
+  For implementing BEVERS, we followed the instructions         In the main content, we provide the recall scores for the doc-
+and ran their code available on GitHub11 . To make fair com-    ument and sentence retrieval results in Table 4 and Table 5.
+parisons between the two baseline systems, we used the          The corresponding precision and F1 scores are shown in Ta-
+same pre-trained BERT model12 in the sentence retrieval and     ble 12. We find that BEVERS has lower precision and F1
+RTE stages for BEVERS and our baseline. For Stammbach           scores than our baseline in document retrieval. The reason is
+(Stammbach 2021), we used the official code13 with the Chi-     that BEVERS combines the retrieved documents from TF-
+nese BigBird14 for the sentence retrieval stage.                IDF and the fuzzy string search system (DeHaven and Scott
+   9
+                                                                2023). The average number of the predicted pages for the
+     https://huggingface.co/docs/transformers/                  claims in the test set is 67.8 in BEVERS’s document re-
+  10
+     https://pytorch.org                                        trieval results, while we only use the top ten documents for
+  11
+     https://github.com/mitchelldehaven/bevers                  our baseline. Thus, BEVERS’ precision and F1 scores are
+  12
+     https://huggingface.co/hfl/chinese-bert-wwm-ext            lower than our baseline scores in document retrieval.
+  13
+     https://github.com/dominiksinsaarland/document-level-
+FEVER
+  14                                                              15
+     https://huggingface.co/Lowin/chinese-bigbird-base-4096            https://platform.openai.com/docs/models/
+ System Prompt:
+ 你是個很棒的助手，你的回答對我非常重要，請幫
+ 我完成任務並輸出回答為 JSON 格式。
+ (You are a great assistant. Your response is very
+ important to me. Please help me complete the task
+ and output the response in the JSON format.)
+ Task Prompt:
+ 你 現 在 要 執 行 一 個 事 實 查 核 任 務， 我 將 給 你 一
+ 個陳述句，請根據中文維基百科的內容 幫我驗證事
+ 實， 如 果 是 事 實 就 回 答 「真」 ， 如 果 不 是 事 實
+ 就 回 答 「假」 ， 如 果 這 句 話 沒 辦 法 讓 你 分 辨 真
+ 假或是維基百科中沒有提到，就回答「不確定」。陳
+ 述句：{claim}。你的回答：
+ (You are going to perform fact verification. I will
+ provide you with a claim. Please help me verify the
+ factualness of the claim using Chinese Wikipedia.
+ If the claim is factual, please answer ‘Sup-
+ ports’.    If the claim is fake, please answer
+ ‘Refutes’.     If you cannot verify the claim
+ or the claim is not mentioned in Wikipedia, please
+ answer ‘Not enough information’. Claim：{claim}。
+ Your answer：)
+
+Table 11: Prompt for the zero-shot and few-shot settings
+with GPT-4 (gpt-4-1106-preview). Note that the English part
+                            2
+was not included in the experiments.
+
+
+
+
+    Task      System         Recall    Precision    F1
+
+    Doc       Our baseline    87.65      9.79      17.62
+  Retrieval   BEVERSa         92.60      2.29      4.47
+    Sent      Our baseline    76.65     25.36      38.11
+  Retrieval   BEVERSa         86.60     27.00      41.17
+    Sent      Our baseline    95.90     40.26      56.71
+  Retrieval   BEVERSa         95.20     38.98      55.31
+  (Oracle)    Stammbachb      83.55     36.12      50.44
+
+Table 12: Scores for the document and sentence retrieval
+tasks. a: DeHaven and Scott (2023). b: Stammbach (2021).
+

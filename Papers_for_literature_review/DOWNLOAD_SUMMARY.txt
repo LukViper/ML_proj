@@ -1,0 +1,46 @@
+Download summary for Papers_for_literature_review
+============================================================
+PDF papers: 17
+HTML pages: 2
+Notes: 3
+
+[OK] 01 01_FEVER_A_Large-scale_Dataset_for_Fact_Extraction_and_Verification.pdf (460896 bytes)
+     https://aclanthology.org/N18-1074/
+[OK] 02 02_LIAR_A_Benchmark_Dataset_for_Fake_News_Detection.pdf (229209 bytes)
+     https://aclanthology.org/P17-2067/
+[OK] 03 03_MultiFC_A_Real-World_Multi-Domain_Dataset_for_Evidence-Based_Fact_Checking.pdf (513915 bytes)
+     https://aclanthology.org/D19-1475/
+[OK] 04 04_FEVEROUS_Fact_Extraction_and_Verification_over_Structured_and_Unstructured_Information.pdf (3503391 bytes)
+     https://arxiv.org/abs/2106.05707
+[OK] 05 05_CFEVER_Chinese_Fact_Extraction_and_Verification_Dataset.pdf (401353 bytes)
+     https://ojs.aaai.org/index.php/AAAI/article/view/29825 (PDF via arXiv:2402.13025)
+[OK] 06 06_Fake_News_Detection_on_Social_Media_using_Geometric_Deep_Learning.pdf (293153 bytes)
+     https://aclanthology.org/2021.findings-acl.297/
+[OK] 07 07_FANG_Leveraging_Social_Context_for_Fake_News_Detection.pdf (2173805 bytes)
+     https://arxiv.org/abs/2006.08739
+[OK] 08 08_X-FACT_A_Multilingual_Dataset_for_Explainable_Fact_Checking.pdf (582814 bytes)
+     https://aclanthology.org/2021.findings-emnlp.297/
+[OK] 09 09_SciFact_A_Dataset_for_Scientific_Claim_Verification.pdf (4114861 bytes)
+     https://aclanthology.org/2020.emnlp-main.609/
+[OK] 10 10_HoVer_A_Dataset_for_Many-Hop_Fact_Extraction_and_Verification.pdf (3149351 bytes)
+     https://aclanthology.org/2020.findings-emnlp.309/
+[OK] 11 11_AVeriTeC_A_Dataset_for_Real-world_Claim_Verification_with_Evidence_from_the_Web.pdf (2238535 bytes)
+     NeurIPS PDF
+[OK] 12 12_CLIMATE-FEVER_A_Dataset_for_Verification_of_Real-World_Climate_Claims.pdf (458979 bytes)
+     Google page -> arXiv:2012.00614
+[OK] 13 13_The_Automated_Verification_of_Textual_Claims_AVeriTeC_Shared_Task.pdf (1228052 bytes)
+     https://aclanthology.org/2024.fever-1.1/
+[OK] 14 14_The_2nd_Automated_Verification_of_Textual_Claims_AVeriTeC_Shared_Task.pdf (988683 bytes)
+     https://aclanthology.org/2025.fever-1.15/
+[LINK ONLY] 15 15_Misinformation_Detection_with_Automatic_Fact-based_News_Verification_SOURCE_LINK.txt
+     ScienceDirect (OA)
+[OK] 16 16_NoFake_at_CheckThat_2021_Fake_News_Detection_Using_BERT.pdf (217892 bytes)
+     https://arxiv.org/abs/2108.05419
+[OK] 17 17_Dataset_of_Fake_News_Detection_and_Fact_Verification_A_Survey.pdf (589492 bytes)
+     https://arxiv.org/abs/2111.03299
+[OK] 18 18_AVeriTeC_Benchmark_NeurIPS_2023.pdf (2238535 bytes)
+     NeurIPS abstract -> same PDF as #11
+[OK] 19 19_Papers_With_Code_Fact_Checking_Benchmark.html (1573287 bytes)
+     webpage, not a paper
+[OK] 20 20_Official_AVeriTeC_Dataset_Project.html (29495 bytes)
+     webpage, not a paper

@@ -1,0 +1,3 @@
+This entry is a project/benchmark webpage, not a research paper PDF.
+Source: https://paperswithcode.com/task/fact-checking
+Saved HTML snapshot: 19_Papers_With_Code_Fact_Checking_Benchmark.html
