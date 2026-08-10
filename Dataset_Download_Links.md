@@ -11,25 +11,25 @@ This file lists **official and commonly used mirror links** to download the data
 
 | # | Dataset | Primary download | Folder |
 |---|---------|------------------|--------|
-| 1 | FEVER | https://fever.ai/dataset/fever.html | Shasank |
-| 2 | LIAR | https://www.cs.ucsb.edu/~william/data/liar_dataset.zip | Shasank |
-| 3 | MultiFC | https://github.com/casperhansen/fake-news-reasoning | Shasank |
-| 4 | FEVEROUS | https://fever.ai/dataset/feverous.html | Shasank |
-| 5 | CFEVER | https://github.com/IKMLab/CFEVER-data | Shasank |
-| 6 | Monti Twitter propagation | Not publicly released (see note) | Shasank |
-| 7 | FANG | https://github.com/nguyenvanhoang7398/FANG | Shasank |
-| 8 | X-FACT | https://github.com/utahnlp/x-fact | Shasank |
-| 9 | SciFact | https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz | HarshaVardhan |
-| 10 | HoVer | https://github.com/hover-nlp/hover | HarshaVardhan |
-| 11/18 | AVeriTeC | https://fever.ai/dataset/averitec.html | HarshaVardhan / Ruthvika |
-| 12 | CLIMATE-FEVER | https://github.com/tdiggelm/climate-fever-dataset | HarshaVardhan |
-| 13 | AVeriTeC ST 2024 (Knowledge Store) | https://fever.ai/dataset/averitec.html | HarshaVardhan |
-| 14 | AVeriTeC ST 2025 (Knowledge Store) | https://fever.ai/dataset/averitec.html | HarshaVardhan |
-| 15 | Misbar (+ AVeriTeC) | https://doi.org/10.1016/j.ins.2025.122868 | HarshaVardhan |
-| 16 | CheckThat! 2021 (CT-FAN-21) | https://zenodo.org/records/4714517 | Ruthvika |
-| 17 | Murayama survey (118 datasets) | https://arxiv.org/abs/2111.03299 | Ruthvika |
-| 19 | Papers With Code hub | https://paperswithcode.com/task/fact-checking | Ruthvika |
-| 20 | fever.ai AVeriTeC hub | https://fever.ai/dataset/averitec.html | Ruthvika |
+| 1 | FEVER | https://fever.ai/dataset/fever.html 
+| 2 | LIAR | https://www.cs.ucsb.edu/~william/data/liar_dataset.zip 
+| 3 | MultiFC | https://github.com/casperhansen/fake-news-reasoning 
+| 4 | FEVEROUS | https://fever.ai/dataset/feverous.html 
+| 5 | CFEVER | https://github.com/IKMLab/CFEVER-data 
+| 6 | Monti Twitter propagation | Not publicly released (see note) 
+| 7 | FANG | https://github.com/nguyenvanhoang7398/FANG 
+| 8 | X-FACT | https://github.com/utahnlp/x-fact 
+| 9 | SciFact | https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz 
+| 10 | HoVer | https://github.com/hover-nlp/hover 
+| 11/18 | AVeriTeC | https://fever.ai/dataset/averitec.html 
+| 12 | CLIMATE-FEVER | https://github.com/tdiggelm/climate-fever-dataset 
+| 13 | AVeriTeC ST 2024 (Knowledge Store) | https://fever.ai/dataset/averitec.html
+| 14 | AVeriTeC ST 2025 (Knowledge Store) | https://fever.ai/dataset/averitec.html 
+| 15 | Misbar (+ AVeriTeC) | https://doi.org/10.1016/j.ins.2025.122868 
+| 16 | CheckThat! 2021 (CT-FAN-21) | https://zenodo.org/records/4714517
+| 17 | Murayama survey (118 datasets) | https://arxiv.org/abs/2111.03299
+| 19 | Papers With Code hub | https://paperswithcode.com/task/fact-checking 
+| 20 | fever.ai AVeriTeC hub | https://fever.ai/dataset/averitec.html 
 
 ---
 
