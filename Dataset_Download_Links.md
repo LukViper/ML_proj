@@ -2,8 +2,7 @@
 
 This file lists **official and commonly used mirror links** to download the datasets referenced in the 20-paper literature review. Links are grouped by paper number and assignee folder.
 
-**Last updated:** August 2026  
-**Note:** Some datasets require registration, agreement forms, or are not fully public. Check each entry before use.
+
 
 ---
 
