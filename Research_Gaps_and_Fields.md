@@ -67,4 +67,4 @@ The common thread is retrieval / evidence. If a project does not make evidence f
 
 ---
 
-*Based on `Literature_Review_Factual_NonFactual_Information.md` and the paper extracts.*
+
